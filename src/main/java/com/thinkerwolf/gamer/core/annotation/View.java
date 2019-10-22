@@ -1,5 +1,7 @@
 package com.thinkerwolf.gamer.core.annotation;
 
+import com.thinkerwolf.gamer.core.view.ActionView;
+
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -10,4 +12,5 @@ public @interface View {
 
     String name() default "";
 
+    Class<? extends ActionView> type();
 }

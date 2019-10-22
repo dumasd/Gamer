@@ -1,6 +1,6 @@
 package com.thinkerwolf.gamer.core;
 
-public enum Protocal {
+public enum Protocol {
 
     TCP,
     HTTP,

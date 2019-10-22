@@ -1,6 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
-import com.thinkerwolf.gamer.core.Protocal;
+import com.thinkerwolf.gamer.core.Protocol;
 
 import java.util.Map;
 
@@ -16,9 +16,11 @@ public class NettyConfig {
 
     private int port = 8080;
 
-    private Map<String, Object> channelOptions;
+    private Map<String, Object> options;
 
-    Protocal protocal = Protocal.TCP;
+    private Map<String, Object> childOptions;
+
+    Protocol protocol = Protocol.TCP;
 
     public void setBossThreads(int bossThreads) {
         this.bossThreads = bossThreads;
@@ -32,10 +34,6 @@ public class NettyConfig {
         this.port = port;
     }
 
-    public void setChannelOptions(Map<String, Object> channelOptions) {
-        this.channelOptions = channelOptions;
-    }
-
     public int getBossThreads() {
         return bossThreads;
     }
@@ -46,6 +44,30 @@ public class NettyConfig {
 
     public int getPort() {
         return port;
+    }
+
+    public Map<String, Object> getOptions() {
+        return options;
+    }
+
+    public void setOptions(Map<String, Object> options) {
+        this.options = options;
+    }
+
+    public Map<String, Object> getChildOptions() {
+        return childOptions;
+    }
+
+    public void setChildOptions(Map<String, Object> childOptions) {
+        this.childOptions = childOptions;
+    }
+
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
+    }
+
+    public Protocol getProtocol() {
+        return protocol;
     }
 
 }

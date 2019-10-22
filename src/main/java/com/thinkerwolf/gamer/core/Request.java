@@ -2,10 +2,33 @@ package com.thinkerwolf.gamer.core;
 
 import java.util.Map;
 
+/**
+ * request
+ *
+ * @author wukai
+ */
 public interface Request {
 
-    Object getParameter(String key);
+    Object getAttribute(String key);
 
-    Map<String, Object> getParameters();
+    Map<String, Object> getAttributes();
+
+    Object removeAttribute(String key);
+
+    void setAttribute(String key, Object value);
+
+    /**
+     * 获取服务端口
+     *
+     * @return
+     */
+    int getServerPort();
+
+    Session getSession();
+
+    Session getSession(boolean create);
+
+    Protocol getProtocol();
+
 
 }
