@@ -1,6 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
-import com.thinkerwolf.gamer.core.Protocol;
+import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.netty.http.HttpChannelInitializer;
 import com.thinkerwolf.gamer.netty.tcp.TcpChannelInitializer;
 import io.netty.channel.Channel;

@@ -25,7 +25,11 @@
             <artifactId>spring-context</artifactId>
             <version>5.0.7.RELEASE</version>
         </dependency>
-
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.5</version>
+        </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>

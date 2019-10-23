@@ -1,6 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
-import com.thinkerwolf.gamer.core.Servlet;
+import com.thinkerwolf.gamer.core.servlet.Servlet;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;

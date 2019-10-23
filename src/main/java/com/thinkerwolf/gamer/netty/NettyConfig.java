@@ -1,6 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
-import com.thinkerwolf.gamer.core.Protocol;
+import com.thinkerwolf.gamer.core.servlet.Protocol;
 
 import java.util.Map;
 

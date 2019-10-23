@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core;
+package com.thinkerwolf.gamer.core.servlet;
 
 import java.io.IOException;
 

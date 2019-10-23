@@ -1,7 +1,7 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
-import com.thinkerwolf.gamer.core.Protocol;
-import com.thinkerwolf.gamer.core.Response;
+import com.thinkerwolf.gamer.core.servlet.Protocol;
+import com.thinkerwolf.gamer.core.servlet.Response;
 
 import java.io.IOException;
 

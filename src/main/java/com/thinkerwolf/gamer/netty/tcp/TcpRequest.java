@@ -1,8 +1,8 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
-import com.thinkerwolf.gamer.core.Protocol;
-import com.thinkerwolf.gamer.core.Request;
-import com.thinkerwolf.gamer.core.Session;
+import com.thinkerwolf.gamer.core.servlet.Protocol;
+import com.thinkerwolf.gamer.core.servlet.Request;
+import com.thinkerwolf.gamer.core.servlet.Session;
 import io.netty.channel.Channel;
 
 import java.util.HashMap;

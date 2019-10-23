@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core;
+package com.thinkerwolf.gamer.core.servlet;
 
 public enum Protocol {
 
