@@ -5,6 +5,6 @@ package com.thinkerwolf.gamer.core.view;
  *
  * @author wukai
  */
-public interface ActionView {
+public interface View {
 
 }

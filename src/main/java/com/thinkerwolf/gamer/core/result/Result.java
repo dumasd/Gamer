@@ -5,8 +5,6 @@ package com.thinkerwolf.gamer.core.result;
  *
  * @author wukai
  */
-public interface ActionResult {
-
-
+public interface Result {
 
 }
