@@ -4,19 +4,16 @@ import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 
-public class NameInjector implements ParamInjector {
-
-    private String name;
+public class NullBinder implements ParamBinder {
 
     private Class<?> toClass;
 
-    public NameInjector(String name, Class<?> toClass) {
-        this.name = name;
+    public NullBinder(Class<?> toClass) {
         this.toClass = toClass;
     }
 
     @Override
     public Object inject(Request request, Response response) throws Exception {
-        return ClassUtils.castTo(request.getAttribute(name), toClass);
+        return ClassUtils.castTo((Object) null, toClass);
     }
 }

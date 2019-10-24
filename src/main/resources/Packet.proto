@@ -1,0 +1,18 @@
+
+syntax = "proto3";
+option java_outer_classname = "PacketProto";
+option java_package = "com.thinkerwolf.gamer.netty.tcp";
+
+message RequestPacket {
+    int32 requestId = 1; // 请求id
+    string command = 2; // command
+    bytes content = 3; // 内容
+}
+
+
+message ResponsePacket {
+    int32 requestId = 1; // 请求id
+    string command = 2; // command
+    string contentType = 3; // 返回类型
+    bytes content = 4; // 内容
+}

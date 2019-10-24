@@ -1,7 +1,7 @@
 package com.thinkerwolf.gamer;
 
 import com.google.protobuf.ByteString;
-import com.thinkerwolf.gamer.netty.tcp.RequestPacketProto;
+import com.thinkerwolf.gamer.netty.tcp.PacketProto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -28,10 +28,10 @@ public class NettyClientTests {
         cf.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
-                RequestPacketProto.RequestPacket packet = RequestPacketProto.RequestPacket.newBuilder().setRequestId(1).setCommand("player@login").setContent(ByteString.copyFromUtf8("canshu")).build();
+                PacketProto.RequestPacket packet = PacketProto.RequestPacket.newBuilder().setRequestId(1).setCommand("player@login").setContent(ByteString.copyFromUtf8("canshu")).build();
                 cf.channel().write(packet);
                 cf.channel().flush();
             }
         });
-         }
+    }
 }

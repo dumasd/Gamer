@@ -6,4 +6,7 @@ public interface Servlet {
 
     void service(Request request, Response response) throws Exception;
 
+    ServletConfig getServletConfig();
+
+    void destroy() throws Exception;
 }

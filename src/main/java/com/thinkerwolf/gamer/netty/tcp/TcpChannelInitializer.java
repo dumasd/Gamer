@@ -18,7 +18,7 @@ public class TcpChannelInitializer extends ChannelInitializer<Channel> {
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipe = ch.pipeline();
         pipe.addLast(new ProtobufVarint32FrameDecoder());
-        pipe.addLast("decoder", new ProtobufDecoder(RequestPacketProto.RequestPacket.getDefaultInstance()));
+        pipe.addLast("decoder", new ProtobufDecoder(PacketProto.RequestPacket.getDefaultInstance()));
         pipe.addLast(new ProtobufVarint32LengthFieldPrepender());
         pipe.addLast("encoder", new ProtobufEncoder());
         pipe.addLast("handler", new TcpHandler());

@@ -9,6 +9,10 @@ import java.util.Map;
  */
 public interface Request {
 
+    String COMMAND_ATTRIBUTE = "command";
+
+    String DECORATOR_ATTRIBUTE = "decorator";
+
     Object getAttribute(String key);
 
     Map<String, Object> getAttributes();

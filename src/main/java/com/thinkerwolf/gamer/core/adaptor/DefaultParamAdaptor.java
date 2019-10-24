@@ -11,27 +11,27 @@ public class DefaultParamAdaptor implements ParamAdaptor {
 
     private static Object[] EMPTY_PARAMETERS = new Object[]{};
 
-    private ParamInjector[] injectors;
+    private ParamBinder[] injectors;
 
     public DefaultParamAdaptor(Method method) {
         Class<?>[] paramTypes = method.getParameterTypes();
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
-        this.injectors = new ParamInjector[paramTypes.length];
+        this.injectors = new ParamBinder[paramTypes.length];
         for (int i = 0; i < paramTypes.length; i++) {
             Class<?> type = paramTypes[i];
             if (Request.class.isAssignableFrom(type)) {
-                injectors[i] = new RequestParamInjector();
+                injectors[i] = new RequestParamBinder();
             } else if (Response.class.isAssignableFrom(type)) {
-                injectors[i] = new ResponseParamInjector();
+                injectors[i] = new ResponseParamBinder();
             } else {
                 Annotation[] annotations = paramAnnotations.length > 0 ? paramAnnotations[i] : null;
                 RequestParam requestParam = getParameterAnnotation(annotations, RequestParam.class);
                 if (requestParam != null) {
-                    injectors[i] = new NameInjector(requestParam.value(), type);
+                    injectors[i] = new NameBinder(requestParam.value(), type);
                     continue;
                 }
 
-                injectors[i] = new NullInjector(type);
+                injectors[i] = new NullBinder(type);
             }
         }
     }

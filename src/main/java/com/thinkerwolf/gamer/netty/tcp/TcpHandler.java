@@ -11,7 +11,10 @@ public class TcpHandler extends SimpleChannelInboundHandler<Object> {
         System.out.println(msg);
         // 执行业务处理
 
+
+
         Channel channel = ctx.channel();
+
     }
 
 

@@ -93,25 +93,34 @@ public class ClassUtils {
         if (s == null) {
             return getDefaultValue(clazz);
         }
-        Object obj = null;
-        if (clazz == Byte.TYPE || clazz == Byte.class) {
-            obj = Byte.valueOf(s);
-        } else if (clazz == Character.TYPE || clazz == Character.class) {
-            obj = (char) Integer.parseInt(s);
-        } else if (clazz == Short.TYPE || clazz == Short.class) {
-            obj = Short.valueOf(s);
-        } else if (clazz == Integer.TYPE || clazz == Integer.class) {
-            obj = Integer.valueOf(s);
-        } else if (clazz == Long.TYPE || clazz == Long.class) {
-            obj = Long.valueOf(s);
-        } else if (clazz == Float.TYPE || clazz == Float.class) {
-            obj = Float.valueOf(s);
-        } else if (clazz == Double.TYPE || clazz == Double.class) {
-            obj = Double.valueOf(s);
-        } else if (clazz == Boolean.TYPE || clazz == Boolean.class) {
-            obj = Boolean.valueOf(s);
+        try {
+            Object obj = null;
+            if (clazz == Byte.TYPE || clazz == Byte.class) {
+                obj = Byte.parseByte(s);
+            } else if (clazz == Character.TYPE || clazz == Character.class) {
+                obj = (char) Integer.parseInt(s);
+            } else if (clazz == Short.TYPE || clazz == Short.class) {
+                obj = Short.valueOf(s);
+            } else if (clazz == Integer.TYPE || clazz == Integer.class) {
+                obj = Integer.valueOf(s);
+            } else if (clazz == Long.TYPE || clazz == Long.class) {
+                obj = Long.valueOf(s);
+            } else if (clazz == Float.TYPE || clazz == Float.class) {
+                obj = Float.valueOf(s);
+            } else if (clazz == Double.TYPE || clazz == Double.class) {
+                obj = Double.valueOf(s);
+            } else if (clazz == Boolean.TYPE || clazz == Boolean.class) {
+                obj = Boolean.valueOf(s);
+            } else if (CharSequence.class.isAssignableFrom(clazz)) {
+                obj = s;
+            }
+            if (obj != null) {
+                return (T) obj;
+            }
+        } catch (Throwable t) {
+
         }
-        return (T) obj;
+        return getDefaultValue(clazz);
     }
 
     public static <T> T castTo(Object obj, Class<T> toClass) {
