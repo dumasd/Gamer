@@ -7,4 +7,6 @@ package com.thinkerwolf.gamer.core.result;
  */
 public interface Result {
 
+
+    String name();
 }

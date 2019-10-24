@@ -21,7 +21,6 @@ public class TcpRequest implements Request {
 
     private Channel channel;
 
-
     public Object getAttribute(String key) {
         return attributes.get(key);
     }

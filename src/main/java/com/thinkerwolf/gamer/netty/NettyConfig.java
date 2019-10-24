@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
+import com.thinkerwolf.gamer.core.annotation.RequestParam;
 import com.thinkerwolf.gamer.core.servlet.Protocol;
 
 import java.util.Map;

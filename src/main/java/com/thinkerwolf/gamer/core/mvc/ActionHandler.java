@@ -1,5 +1,8 @@
 package com.thinkerwolf.gamer.core.mvc;
 
+import com.thinkerwolf.gamer.core.adaptor.DefaultParamAdaptor;
+import com.thinkerwolf.gamer.core.adaptor.ParamAdaptor;
+import com.thinkerwolf.gamer.core.result.Result;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.view.View;
@@ -17,6 +20,8 @@ public class ActionHandler {
 
     private View view;
 
+    private ParamAdaptor paramAdaptor;
+
     public ActionHandler(Method method, Object obj, ViewManager viewManager, View view) {
         this.method = method;
         this.obj = obj;
@@ -26,11 +31,33 @@ public class ActionHandler {
     }
 
     private void init() {
-        Class<?>[] paramTypes = method.getParameterTypes();
+        this.paramAdaptor = new DefaultParamAdaptor(method);
 
     }
 
-    public void handle(Request request, Response response) {
+    public void handle(Request request, Response response) throws Exception {
+        Object[] params = this.paramAdaptor.convert(request, response);
+        try {
+            Result result = (Result) method.invoke(obj, params);
+            // 执行完成
+            View responseView;
+            if (view != null) {
+                responseView = view;
+            } else {
+                responseView = viewManager.getView(result.name());
+            }
+            if (responseView == null) {
+
+                return;
+            }
+            //
+
+        } catch (Exception e) {
+            // 发生异常，返回NullResult
+
+        }
+
+
     }
 
 }

@@ -7,10 +7,13 @@ import java.util.Map;
 
 public class ClassUtils {
 
-    static Map<Class<?>, Object> PRIMITIVE_DEFAULT_VALUE;
+    private static Map<Class<?>, Object> PRIMITIVE_DEFAULT_VALUE;
+    private static Map<Class<?>, Class<?>> PRIMITIVE_WRAPPER;
 
     static {
         PRIMITIVE_DEFAULT_VALUE = new HashMap<>();
+        PRIMITIVE_WRAPPER = new HashMap<>();
+        PRIMITIVE_DEFAULT_VALUE.put(Boolean.TYPE, Boolean.FALSE);
         PRIMITIVE_DEFAULT_VALUE.put(Byte.TYPE, (byte) 0);
         PRIMITIVE_DEFAULT_VALUE.put(Character.TYPE, (char) 0);
         PRIMITIVE_DEFAULT_VALUE.put(Short.TYPE, (short) 0);
@@ -18,6 +21,15 @@ public class ClassUtils {
         PRIMITIVE_DEFAULT_VALUE.put(Long.TYPE, 0L);
         PRIMITIVE_DEFAULT_VALUE.put(Float.TYPE, 0F);
         PRIMITIVE_DEFAULT_VALUE.put(Double.TYPE, 0D);
+
+        PRIMITIVE_WRAPPER.put(Boolean.TYPE, Boolean.class);
+        PRIMITIVE_WRAPPER.put(Byte.TYPE, Byte.class);
+        PRIMITIVE_WRAPPER.put(Character.TYPE, Character.class);
+        PRIMITIVE_WRAPPER.put(Short.TYPE, Short.class);
+        PRIMITIVE_WRAPPER.put(Integer.TYPE, Integer.class);
+        PRIMITIVE_WRAPPER.put(Long.TYPE, Long.class);
+        PRIMITIVE_WRAPPER.put(Float.TYPE, Float.class);
+        PRIMITIVE_WRAPPER.put(Double.TYPE, Double.class);
     }
 
 
@@ -82,21 +94,21 @@ public class ClassUtils {
             return getDefaultValue(clazz);
         }
         Object obj = null;
-        if (clazz == Byte.TYPE) {
+        if (clazz == Byte.TYPE || clazz == Byte.class) {
             obj = Byte.valueOf(s);
-        } else if (clazz == Character.TYPE) {
+        } else if (clazz == Character.TYPE || clazz == Character.class) {
             obj = (char) Integer.parseInt(s);
-        } else if (clazz == Short.TYPE) {
+        } else if (clazz == Short.TYPE || clazz == Short.class) {
             obj = Short.valueOf(s);
-        } else if (clazz == Integer.TYPE) {
+        } else if (clazz == Integer.TYPE || clazz == Integer.class) {
             obj = Integer.valueOf(s);
-        } else if (clazz == Long.TYPE) {
+        } else if (clazz == Long.TYPE || clazz == Long.class) {
             obj = Long.valueOf(s);
-        } else if (clazz == Float.TYPE) {
+        } else if (clazz == Float.TYPE || clazz == Float.class) {
             obj = Float.valueOf(s);
-        } else if (clazz == Double.TYPE) {
+        } else if (clazz == Double.TYPE || clazz == Double.class) {
             obj = Double.valueOf(s);
-        } else if (clazz == Boolean.TYPE) {
+        } else if (clazz == Boolean.TYPE || clazz == Boolean.class) {
             obj = Boolean.valueOf(s);
         }
         return (T) obj;
@@ -119,8 +131,7 @@ public class ClassUtils {
         }
 
         if (Number.class.isAssignableFrom(fromClass) && (Number.class.isAssignableFrom(toClass) || toClass.isPrimitive())) {
-            Number number =((Number) obj);
-
+            return castTo(obj.toString(), toClass);
         }
 
         if (fromClass.isArray() && toClass.isArray()) {
