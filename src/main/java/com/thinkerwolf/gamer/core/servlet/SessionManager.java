@@ -1,31 +1,23 @@
 package com.thinkerwolf.gamer.core.servlet;
 
+import com.thinkerwolf.gamer.common.SPI;
+
 /**
- * Session 管理器
+ * Session 管理器.可扩展
  *
  * @author wukai
  */
-public class SessionManager {
+@SPI("standard")
+public interface SessionManager {
 
+    void init(ServletConfig servletConfig) throws Exception;
 
-    private class SessionCheckThread extends Thread {
+    void destroy() throws Exception;
 
+    Session getSession();
 
-        @Override
-        public void run() {
-            for (; ; ) {
+    Session getSession(boolean create);
 
-
-                try {
-                    // 1s检查一次session
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-
-                }
-            }
-        }
-
-    }
-
+    void addListener(SessionListener listener);
 
 }

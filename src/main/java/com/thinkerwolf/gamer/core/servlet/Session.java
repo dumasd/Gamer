@@ -17,12 +17,12 @@ public interface Session {
 
     Object removeAttribute(String key);
 
-    void setTimeout(long interval);
-
     /**
      * session超时时间
      *
      * @return
      */
     long getTimeout();
+
+    void setTimeout(long interval);
 }

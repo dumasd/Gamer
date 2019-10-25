@@ -72,14 +72,17 @@ public class TcpHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
+        // channel连接上了
+
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel channel = ctx.channel();
         LOG.info("Channel error. channel:" + channel.id()
-                + ", writable:" + channel.isWritable()
+                + ", isWritable:" + channel.isWritable()
                 + ", isOpen:" + channel.isOpen()
-                + ", isActive:" + channel.isActive(), cause);
+                + ", isActive:" + channel.isActive()
+                + ", isRegistered:" + channel.isRegistered(), cause);
     }
 }

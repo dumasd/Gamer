@@ -8,6 +8,7 @@ public interface ServletContext {
 
     public static final String ROOT_SERVLET_ATTRIBUTE = ServletContext.class.getName() + ".ROOT.SERVLET";
 
+
     Object getAttribute(String key);
 
     Map<String, Object> getAttributes();

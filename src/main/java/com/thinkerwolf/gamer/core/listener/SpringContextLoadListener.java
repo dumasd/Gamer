@@ -24,8 +24,8 @@ public class SpringContextLoadListener implements ServletContextListener {
     }
 
     private ApplicationContext createApplicationContext(ServletConfig config) {
-        String scanPackages = config.getInitParam("componentScanPackage");
-        String classpathLocation = config.getInitParam("classpathLocation");
+        String scanPackages = config.getInitParam(ServletConfig.COMPONENT_SCAN_PACKAGE);
+        String classpathLocation = config.getInitParam(ServletConfig.CLASSPATH_LOCATION);
         ApplicationContext context = null;
         String[] scans = StringUtils.split(scanPackages, ';');
         if (ArrayUtils.isNotEmpty(scans)) {
