@@ -13,6 +13,8 @@ public interface Request {
 
     String DECORATOR_ATTRIBUTE = "decorator";
 
+    long getRequestId();
+
     Object getAttribute(String key);
 
     Map<String, Object> getAttributes();

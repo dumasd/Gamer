@@ -7,12 +7,16 @@ import java.io.IOException;
 
 public class TcpResponse implements Response {
 
+    private String contentType;
+
+    private Object status;
 
     public void setStatus(Object status) {
+        this.status = status;
     }
 
     public Object getStatus() {
-        return null;
+        return status;
     }
 
     public Protocol getProtocol() {
@@ -33,6 +37,11 @@ public class TcpResponse implements Response {
 
     @Override
     public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
 
+    @Override
+    public String getContentType() {
+        return contentType;
     }
 }

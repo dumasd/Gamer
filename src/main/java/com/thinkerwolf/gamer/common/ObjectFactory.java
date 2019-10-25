@@ -1,11 +1,8 @@
 package com.thinkerwolf.gamer.common;
 
-import com.thinkerwolf.gamer.common.util.ClassUtils;
+@SPI("default")
+public interface ObjectFactory {
 
-public class ObjectFactory {
-
-    public Object buildObject(Class<?> clazz) throws IllegalAccessException, InstantiationException {
-        return ClassUtils.newInstance(clazz);
-    }
+    Object buildObject(Class<?> clazz) throws IllegalAccessException, InstantiationException;
 
 }

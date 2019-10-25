@@ -1,11 +1,11 @@
 package com.thinkerwolf.gamer.core.spring;
 
-import com.thinkerwolf.gamer.common.ObjectFactory;
+import com.thinkerwolf.gamer.common.DefaultObjectFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
-public class SpringObjectFactory extends ObjectFactory {
+public class SpringObjectFactory extends DefaultObjectFactory {
 
     private ApplicationContext context;
 
@@ -30,11 +30,12 @@ public class SpringObjectFactory extends ObjectFactory {
             case AutowireCapableBeanFactory.AUTOWIRE_NO:
                 break;
             case AutowireCapableBeanFactory.AUTOWIRE_BY_NAME:
-
                 break;
             case AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE:
                 break;
             case AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR:
+                break;
+            case AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT:
                 break;
             default:
                 throw new RuntimeException("");

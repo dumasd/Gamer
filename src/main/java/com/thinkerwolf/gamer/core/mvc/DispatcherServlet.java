@@ -1,7 +1,10 @@
 package com.thinkerwolf.gamer.core.mvc;
 
 
+import com.thinkerwolf.gamer.common.DefaultObjectFactory;
 import com.thinkerwolf.gamer.common.ObjectFactory;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.annotation.Action;
 import com.thinkerwolf.gamer.core.annotation.Command;
 import com.thinkerwolf.gamer.core.listener.SpringContextLoadListener;
@@ -23,6 +26,7 @@ import java.util.Map;
 
 public class DispatcherServlet implements Servlet {
 
+    private static final Logger LOG = InternalLoggerFactory.getLogger(DispatcherServlet.class);
 
     private ObjectFactory objectFactory;
 
@@ -78,7 +82,7 @@ public class DispatcherServlet implements Servlet {
         if (springContext != null) {
             this.objectFactory = new SpringObjectFactory(springContext);
         } else {
-            this.objectFactory = new ObjectFactory();
+            this.objectFactory = new DefaultObjectFactory();
         }
 
     }
@@ -162,10 +166,10 @@ public class DispatcherServlet implements Servlet {
         String command = (String) request.getAttribute(Request.COMMAND_ATTRIBUTE);
         if (command == null) {
             // FIXME 没有找到响应的command，发送
-
+            LOG.error("Can't find command from the request.");
         } else if (!controllerMap.containsKey(command)) {
             // FIXME 没有找到响应的command，发送
-
+            LOG.error("Can't find controller. command:{}", command);
         } else {
             ActionController controller = controllerMap.get(command);
             FilterChain filterChain = new ApplicationFilterChain(filters);

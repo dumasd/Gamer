@@ -27,5 +27,6 @@ public interface Response {
 
     void setContentType(String contentType);
 
+    String getContentType();
 
 }

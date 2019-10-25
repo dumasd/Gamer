@@ -1,6 +1,9 @@
 package com.thinkerwolf.gamer;
 
+import com.thinkerwolf.gamer.common.ObjectFactory;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.netty.NettyConfig;
 import org.junit.Test;
 
@@ -23,6 +26,21 @@ public class UtilTests {
             System.err.println((int.class == Integer.TYPE));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void serviceLoader() {
+        InternalLoggerFactory.getLogger("ccc").info("start service loader test");
+        for (int i = 0;i < 1000; i++) {
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ServiceLoader.getService("default", ObjectFactory.class);
+                }
+            }).start();
         }
 
     }
