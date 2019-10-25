@@ -53,6 +53,7 @@ public class DispatcherServlet implements Servlet {
         } catch (Exception e) {
             throw new ServletException(e);
         }
+        this.servletConfig.getServletContext().setAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE, this);
     }
 
     @Override
@@ -167,11 +168,27 @@ public class DispatcherServlet implements Servlet {
         if (command == null) {
             // FIXME 没有找到响应的command，发送
             LOG.error("Can't find command from the request.");
-        } else if (!controllerMap.containsKey(command)) {
-            // FIXME 没有找到响应的command，发送
-            LOG.error("Can't find controller. command:{}", command);
+            response.setStatus(ResponseStatus.BAD_REQUEST);
+            ResponseUtil.renderError("Bad request,no command", request, response);
         } else {
             ActionController controller = controllerMap.get(command);
+            if (controller == null) {
+                for (ActionController v : controllerMap.values()) {
+                    if (v.getMatcher().matcher(command).matches()) {
+                        controller = v;
+                        break;
+                    }
+                }
+            }
+
+            if (controller == null) {
+                // FIXME 没有找到响应的command，发送
+                LOG.error("Can't find command in server. command:{}", command);
+                response.setStatus(ResponseStatus.BAD_REQUEST);
+                ResponseUtil.renderError("Can't find command in server.", request, response);
+                return;
+            }
+
             FilterChain filterChain = new ApplicationFilterChain(filters);
             filterChain.doFilter(controller, request, response);
         }

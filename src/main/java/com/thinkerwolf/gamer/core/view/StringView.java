@@ -7,11 +7,7 @@ import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 
-/**
- * @author wukai
- */
-public class JsonView extends AbstractView {
-
+public class StringView extends AbstractView {
     @Override
     protected void prepareRender(Model model, Request request, Response response) {
 
@@ -19,24 +15,16 @@ public class JsonView extends AbstractView {
 
     @Override
     protected void doRender(Model model, Request request, Response response) throws Exception {
-        // json视图
         Protocol protocol = request.getProtocol();
         Decorator decorator = ServiceLoader.getService(request.getAttribute(Request.DECORATOR_ATTRIBUTE).toString(), Decorator.class);
-        switch (protocol) {
-            case TCP:
-                // wrapper
-                response.setContentType("json");
-                response.write(decorator.decorate(model, request, response));
-                break;
-            case HTTP:
-                response.setContentType("application/json");
-                // wrapper json
-                response.write(decorator.decorate(model, request, response));
-                break;
-            case WEBSOCKET:
-                break;
+        if (protocol == Protocol.TCP) {
+            response.setContentType("string");
+            response.write(decorator.decorate(model, request, response));
+        } else if (protocol == Protocol.HTTP) {
+            response.setContentType("test/plain");
+            response.write(decorator.decorate(model, request, response));
+        } else if (protocol == Protocol.WEBSOCKET) {
+
         }
     }
-
-
 }

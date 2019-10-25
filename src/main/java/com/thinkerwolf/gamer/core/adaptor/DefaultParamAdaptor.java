@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.core.adaptor;
 
 import com.thinkerwolf.gamer.core.annotation.RequestParam;
+import com.thinkerwolf.gamer.core.annotation.SessionParam;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 
@@ -20,15 +21,20 @@ public class DefaultParamAdaptor implements ParamAdaptor {
         for (int i = 0; i < paramTypes.length; i++) {
             Class<?> type = paramTypes[i];
             if (Request.class.isAssignableFrom(type)) {
-                injectors[i] = new RequestParamBinder();
+                injectors[i] = new RequestBinder();
             } else if (Response.class.isAssignableFrom(type)) {
-                injectors[i] = new ResponseParamBinder();
+                injectors[i] = new ResponseBinder();
             } else {
                 Annotation[] annotations = paramAnnotations.length > 0 ? paramAnnotations[i] : null;
                 RequestParam requestParam = getParameterAnnotation(annotations, RequestParam.class);
                 if (requestParam != null) {
                     injectors[i] = new NameBinder(requestParam.value(), type);
                     continue;
+                }
+
+                SessionParam sessionParam = getParameterAnnotation(annotations, SessionParam.class);
+                if (sessionParam != null) {
+                    injectors[i] = new SessionNameBinder(sessionParam.value(), type);
                 }
 
                 injectors[i] = new NullBinder(type);
@@ -41,7 +47,7 @@ public class DefaultParamAdaptor implements ParamAdaptor {
             return null;
         }
         for (Annotation annotation : annotations) {
-            if (annotation.getClass().equals(annotationClass)) {
+            if (annotation.annotationType().equals(annotationClass)) {
                 return (A) annotation;
             }
         }

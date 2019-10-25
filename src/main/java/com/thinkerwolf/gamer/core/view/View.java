@@ -15,6 +15,6 @@ public interface View {
      * @param request  请求
      * @param response 响应
      */
-    void render(Model model, Request request, Response response);
+    void render(Model model, Request request, Response response) throws Exception;
 
 }

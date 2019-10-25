@@ -1,16 +1,23 @@
 package com.thinkerwolf.gamer.core.mvc;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.adaptor.DefaultParamAdaptor;
 import com.thinkerwolf.gamer.core.adaptor.ParamAdaptor;
 import com.thinkerwolf.gamer.core.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
+import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
 import com.thinkerwolf.gamer.core.view.View;
 import com.thinkerwolf.gamer.core.view.ViewManager;
+import com.thinkerwolf.gamer.core.servlet.ResponseUtil;
 
 import java.lang.reflect.Method;
+import java.util.regex.Pattern;
 
 public class ActionController {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(ActionController.class);
 
     private String command;
 
@@ -23,6 +30,10 @@ public class ActionController {
     private View view;
 
     private ParamAdaptor paramAdaptor;
+    /**
+     * command 通配符匹配
+     */
+    private Pattern matcher;
 
     public ActionController(String command, Method method, Object obj, ViewManager viewManager, View view) {
         this.command = command;
@@ -37,16 +48,20 @@ public class ActionController {
         return command;
     }
 
+    public Pattern getMatcher() {
+        return matcher;
+    }
+
     private void init() {
         this.paramAdaptor = new DefaultParamAdaptor(method);
-
+        String regex = command.replace("?", "[0-9a-z]").replace("*", "[0-9a-z]{0,}");
+        this.matcher = Pattern.compile(regex);
     }
 
     public void handle(Request request, Response response) throws Exception {
         Object[] params = this.paramAdaptor.convert(request, response);
         try {
             Model model = (Model) method.invoke(obj, params);
-            // 执行完成
             View responseView;
             if (view != null) {
                 responseView = view;
@@ -54,13 +69,14 @@ public class ActionController {
                 responseView = viewManager.getView(model.name());
             }
             if (responseView == null) {
-                return;
+                throw new NullPointerException("Empty view");
             }
-            //
+            response.setStatus(ResponseStatus.OK);
             responseView.render(model, request, response);
         } catch (Exception e) {
-            // 发生异常，返回NullResult
-
+            LOG.error("Internal error", e);
+            response.setStatus(ResponseStatus.INTERNAL_SERVER_ERROR);
+            ResponseUtil.renderError(ResponseUtil.INTERNAL_SERVER_ERROR_MODEL, request, response);
         }
 
 

@@ -1,6 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
-import com.thinkerwolf.gamer.core.servlet.Servlet;
+import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -14,10 +14,15 @@ public class NettyServer {
 
     private NettyConfig config;
 
-    private Servlet servlet;
+    private ServletConfig servletConfig;
 
     public NettyServer(NettyConfig config) {
         this.config = config;
+    }
+
+    public NettyServer(NettyConfig config, ServletConfig servletConfig) {
+        this.config = config;
+        this.servletConfig = servletConfig;
     }
 
     public void startup() {
@@ -25,7 +30,7 @@ public class NettyServer {
         EventLoopGroup bossGroup = new NioEventLoopGroup(config.getBossThreads());
         EventLoopGroup workerGroup = new NioEventLoopGroup(config.getWorkThreads());
         sb.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childHandler(
-                ChannelHandlers.createChannelInitializer(config)
+                ChannelHandlers.createChannelInitializer(config, servletConfig)
         );
 
         if (config.getOptions() != null) {

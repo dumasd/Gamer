@@ -11,6 +11,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class SpringContextLoadListener implements ServletContextListener {
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ServletConfig config = (ServletConfig) sce.getSource();
@@ -31,10 +32,9 @@ public class SpringContextLoadListener implements ServletContextListener {
             context = new AnnotationConfigApplicationContext(scanPackages);
         }
 
-        String[] classpathes = StringUtils.split(classpathLocation, ';');
-        if (ArrayUtils.isNotEmpty(classpathes)) {
-            ClassPathXmlApplicationContext classPathContext = new ClassPathXmlApplicationContext(classpathes, context);
-            context = classPathContext;
+        String[] classpath = StringUtils.split(classpathLocation, ';');
+        if (ArrayUtils.isNotEmpty(classpath)) {
+            context = new ClassPathXmlApplicationContext(classpath, context);
         }
         if (context == null) {
             throw new RuntimeException();

@@ -1,8 +1,8 @@
 package com.thinkerwolf.gamer.netty.concurrent;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Queue;
@@ -17,8 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
 
-    private static AtomicInteger POOL_NUM_ID = new AtomicInteger(1);
-    private static Logger logger = LoggerFactory.getLogger(CountAwareThreadPoolExecutor.class);
+    private static Logger logger = InternalLoggerFactory.getLogger(CountAwareThreadPoolExecutor.class);
     /**
      * 每个Channel的请求数量计数
      */
@@ -32,10 +31,13 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
      */
     private int countPerChannel;
 
-    public CountAwareThreadPoolExecutor(String poolName, int corePoolSize) {
-        super(corePoolSize, corePoolSize, 30000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-                (ThreadFactory) r -> new Thread(r, poolName + "-" + POOL_NUM_ID.getAndIncrement()));
-        this.countPerChannel = 20;
+    public CountAwareThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory, int countPerChannel) {
+        this(corePoolSize, corePoolSize, threadFactory, countPerChannel);
+    }
+
+    public CountAwareThreadPoolExecutor(int corePoolSize, int maxPoolSize, ThreadFactory threadFactory, int countPerChannel) {
+        super(corePoolSize, maxPoolSize, 30000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), threadFactory);
+        this.countPerChannel = countPerChannel;
     }
 
     @Override

@@ -13,6 +13,11 @@ public class StringModel implements Model<String> {
         this.charset = charset;
     }
 
+    public StringModel(String data) {
+        this.data = data;
+        this.charset = Charset.forName("UTF-8");
+    }
+
     @Override
     public String getData() {
         return data;

@@ -23,6 +23,15 @@ public class TcpRequest implements Request {
 
     private long requestId;
 
+    private int serverPort;
+
+    public TcpRequest(Channel channel, long requestId, int serverPort) {
+        this.attributes = new HashMap<>();
+
+        this.channel = channel;
+        this.requestId = requestId;
+        this.serverPort = serverPort;
+    }
 
     @Override
     public long getRequestId() {
@@ -51,7 +60,7 @@ public class TcpRequest implements Request {
 
     @Override
     public int getServerPort() {
-        return 0;
+        return serverPort;
     }
 
     @Override
