@@ -208,7 +208,7 @@ public class DispatcherServlet implements Servlet {
             if (controller == null) {
                 // FIXME 没有找到响应的command，发送
                 LOG.warn("Can't find command in server. command:[" + command + "]");
-                response.setStatus(ResponseStatus.BAD_REQUEST);
+                response.setStatus(ResponseStatus.NOT_FOUND);
                 ResponseUtil.renderError("Can't find command in server.", request, response);
                 return;
             }

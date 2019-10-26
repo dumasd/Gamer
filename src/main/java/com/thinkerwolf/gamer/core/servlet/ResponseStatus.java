@@ -21,6 +21,8 @@ public class ResponseStatus {
      */
     public static final Object UNAUTHORIZED = 401;
 
+    public static final Object NOT_FOUND = 404;
+
 
     /**
      * 服务器错误，发生异常
