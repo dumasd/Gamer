@@ -7,7 +7,11 @@ public interface Session {
 
     String getId();
 
+    void validate();
+
     void invalidate();
+
+    boolean isValidate();
 
     long getCreationTime();
 

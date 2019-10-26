@@ -8,6 +8,7 @@ public interface ServletContext {
 
     public static final String ROOT_SERVLET_ATTRIBUTE = ServletContext.class.getName() + ".ROOT.SERVLET";
 
+    public static final String ROOT_SESSION_MANAGER_ATTRIBUTE = ServletContext.class.getName() + ".ROOT.SESSION.MANAGER";
 
     Object getAttribute(String key);
 

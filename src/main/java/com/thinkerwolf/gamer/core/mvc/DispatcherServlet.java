@@ -26,6 +26,8 @@ import java.util.Map;
 
 public class DispatcherServlet implements Servlet {
 
+    private static final String DEFAULT_SESSION_MANAGER_CLASS = "com.thinkerwolf.gamer.core.servlet.StandardSessionManager";
+
     private static final Logger LOG = InternalLoggerFactory.getLogger(DispatcherServlet.class);
 
     private ObjectFactory objectFactory;
@@ -84,6 +86,28 @@ public class DispatcherServlet implements Servlet {
             this.objectFactory = new SpringObjectFactory(springContext);
         } else {
             this.objectFactory = new DefaultObjectFactory();
+        }
+    }
+
+    private void initSessionManager(ServletConfig config) throws Exception {
+        String useSession = config.getInitParam(ServletConfig.USE_SESSION);
+        boolean use;
+        if (useSession == null) {
+            use = true;
+        } else {
+            use = com.thinkerwolf.gamer.common.util.ClassUtils.castTo(useSession, boolean.class);
+        }
+
+        if (use) {
+            String smclass = config.getInitParam(ServletConfig.SESSION_MANAGER);
+            if (smclass == null || smclass.length() <= 0) {
+                smclass = DEFAULT_SESSION_MANAGER_CLASS;
+            }
+            Class<?> clazz = ClassUtils.getClass(smclass);
+            if (SessionManager.class.isAssignableFrom(clazz)) {
+                throw new IllegalArgumentException(smclass);
+            }
+            config.getServletContext().setAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE, this.objectFactory.buildObject(clazz));
         }
 
     }
@@ -167,7 +191,7 @@ public class DispatcherServlet implements Servlet {
         String command = (String) request.getAttribute(Request.COMMAND_ATTRIBUTE);
         if (command == null) {
             // FIXME 没有找到响应的command，发送
-            LOG.error("Can't find command from the request.");
+            LOG.warn("Can't find command from the request.");
             response.setStatus(ResponseStatus.BAD_REQUEST);
             ResponseUtil.renderError("Bad request,no command", request, response);
         } else {
@@ -183,7 +207,7 @@ public class DispatcherServlet implements Servlet {
 
             if (controller == null) {
                 // FIXME 没有找到响应的command，发送
-                LOG.error("Can't find command in server. command:{}", command);
+                LOG.warn("Can't find command in server. command:[" + command + "]");
                 response.setStatus(ResponseStatus.BAD_REQUEST);
                 ResponseUtil.renderError("Can't find command in server.", request, response);
                 return;

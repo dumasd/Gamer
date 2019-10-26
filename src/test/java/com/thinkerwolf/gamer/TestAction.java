@@ -13,7 +13,7 @@ import com.thinkerwolf.gamer.core.view.JsonView;
 })
 public class TestAction {
 
-    @Command("test@jjj")
+    @Command("test@jjj*")
     public ByteModel getTest(Request request, @RequestParam("num") int num) {
         return new ByteModel(new byte[]{1, 3, 4});
     }

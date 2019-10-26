@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -29,10 +30,8 @@ public class NettyServer {
         ServerBootstrap sb = new ServerBootstrap();
         EventLoopGroup bossGroup = new NioEventLoopGroup(config.getBossThreads());
         EventLoopGroup workerGroup = new NioEventLoopGroup(config.getWorkThreads());
-        sb.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childHandler(
-                ChannelHandlers.createChannelInitializer(config, servletConfig)
-        );
 
+        sb.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
         if (config.getOptions() != null) {
             for (Map.Entry<String, Object> op : config.getOptions().entrySet()) {
                 if (ChannelOption.exists(op.getKey())) {
@@ -48,7 +47,8 @@ public class NettyServer {
                 }
             }
         }
-
+        ChannelInitializer channelInitializer = ChannelHandlers.createChannelInitializer(config, servletConfig);
+        sb.childHandler(channelInitializer);
         sb.bind(new InetSocketAddress(config.getPort()));
     }
 

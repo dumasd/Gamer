@@ -14,10 +14,14 @@ public interface SessionManager {
 
     void destroy() throws Exception;
 
-    Session getSession();
+    Session getSession(String sessionId);
 
-    Session getSession(boolean create);
+    Session getSession(String sessionId, boolean create);
 
-    void addListener(SessionListener listener);
+    void removeSession(String sessionId);
+
+    void addSessionListener(SessionListener listener);
+
+    void addSessionAttributeListener(SessionAttributeListener listener);
 
 }
