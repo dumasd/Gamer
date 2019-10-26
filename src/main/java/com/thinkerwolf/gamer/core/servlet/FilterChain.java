@@ -1,10 +1,10 @@
 package com.thinkerwolf.gamer.core.servlet;
 
-import com.thinkerwolf.gamer.core.mvc.ActionController;
+import com.thinkerwolf.gamer.core.mvc.Controller;
 
 public interface FilterChain {
 
-    void doFilter(ActionController controller, Request request, Response response) throws Exception;
+    void doFilter(Controller controller, Request request, Response response) throws Exception;
 
     Filter next();
 

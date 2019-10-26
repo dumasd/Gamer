@@ -17,7 +17,7 @@ public class ChannelHandlers {
                 initializer = new TcpChannelInitializer(config, servletConfig);
                 break;
             case HTTP:
-                initializer = new HttpChannelInitializer();
+                initializer = new HttpChannelInitializer(config, servletConfig);
                 break;
             case WEBSOCKET:
                 break;

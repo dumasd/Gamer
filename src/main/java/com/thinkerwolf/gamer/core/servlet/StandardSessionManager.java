@@ -34,7 +34,7 @@ public class StandardSessionManager implements SessionManager {
 
     @Override
     public void init(ServletConfig servletConfig) throws Exception {
-        String tick = servletConfig.getInitParam(ServletConfig.SESSION_TICKTIME);
+        String tick = servletConfig.getInitParam(ServletConfig.SESSION_TICK_TIME);
         long tickTime;
         if (tick != null) {
             tickTime = Long.parseLong(tick) * 1000;

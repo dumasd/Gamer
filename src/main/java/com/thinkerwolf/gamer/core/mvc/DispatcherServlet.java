@@ -36,7 +36,7 @@ public class DispatcherServlet implements Servlet {
 
     private ServletConfig servletConfig;
 
-    private Map<String, ActionController> controllerMap;
+    private Map<String, Controller> controllerMap;
 
     /**
      * 初始化servlet
@@ -52,6 +52,8 @@ public class DispatcherServlet implements Servlet {
             initObjectFactory(config);
             initFilters(config);
             initAction(config);
+            initSessionManager(config);
+            FreemarkerHelper.init(config);
         } catch (Exception e) {
             throw new ServletException(e);
         }
@@ -104,12 +106,13 @@ public class DispatcherServlet implements Servlet {
                 smclass = DEFAULT_SESSION_MANAGER_CLASS;
             }
             Class<?> clazz = ClassUtils.getClass(smclass);
-            if (SessionManager.class.isAssignableFrom(clazz)) {
+            if (!SessionManager.class.isAssignableFrom(clazz)) {
                 throw new IllegalArgumentException(smclass);
             }
-            config.getServletContext().setAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE, this.objectFactory.buildObject(clazz));
+            SessionManager sessionManager = (SessionManager) this.objectFactory.buildObject(clazz);
+            sessionManager.init(servletConfig);
+            config.getServletContext().setAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE, sessionManager);
         }
-
     }
 
     private void initFilters(ServletConfig config) {
@@ -188,16 +191,16 @@ public class DispatcherServlet implements Servlet {
 
     @Override
     public void service(Request request, Response response) throws Exception {
-        String command = (String) request.getAttribute(Request.COMMAND_ATTRIBUTE);
+        String command = request.getCommand();
         if (command == null) {
             // FIXME 没有找到响应的command，发送
             LOG.warn("Can't find command from the request.");
             response.setStatus(ResponseStatus.BAD_REQUEST);
             ResponseUtil.renderError("Bad request,no command", request, response);
         } else {
-            ActionController controller = controllerMap.get(command);
+            Controller controller = controllerMap.get(command);
             if (controller == null) {
-                for (ActionController v : controllerMap.values()) {
+                for (Controller v : controllerMap.values()) {
                     if (v.getMatcher().matcher(command).matches()) {
                         controller = v;
                         break;

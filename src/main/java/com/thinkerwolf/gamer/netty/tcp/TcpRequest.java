@@ -1,8 +1,6 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
-import com.thinkerwolf.gamer.core.servlet.Protocol;
-import com.thinkerwolf.gamer.core.servlet.Request;
-import com.thinkerwolf.gamer.core.servlet.Session;
+import com.thinkerwolf.gamer.core.servlet.*;
 import io.netty.channel.Channel;
 
 import java.util.HashMap;
@@ -23,19 +21,29 @@ public class TcpRequest implements Request {
 
     private long requestId;
 
-    private int serverPort;
+    private ServletContext servletContext;
 
-    public TcpRequest(Channel channel, long requestId, int serverPort) {
-        this.attributes = new HashMap<>();
+    private byte[] content;
 
-        this.channel = channel;
+    private String command;
+
+    public TcpRequest(long requestId, String command, Channel channel, ServletContext servletContext, byte[] content) {
         this.requestId = requestId;
-        this.serverPort = serverPort;
+        this.command = command;
+        this.channel = channel;
+        this.servletContext = servletContext;
+        this.content = content;
+        this.attributes = RequestUtil.parseParams(content);
     }
 
     @Override
     public long getRequestId() {
         return requestId;
+    }
+
+    @Override
+    public String getCommand() {
+        return command;
     }
 
     @Override
@@ -59,20 +67,23 @@ public class TcpRequest implements Request {
     }
 
     @Override
-    public int getServerPort() {
-        return serverPort;
+    public byte[] getContent() {
+        return content;
     }
 
     @Override
     public Session getSession() {
-        return session;
+        return getSession(false);
     }
 
     @Override
     public Session getSession(boolean create) {
-        if (session == null && create) {
-            // 创建session
-
+        if (session == null) {
+            SessionManager sessionManager = (SessionManager) servletContext.getAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE);
+            if (sessionManager == null) {
+                return null;
+            }
+            this.session = sessionManager.getSession(channel.id().asLongText(), create);
         }
         return session;
     }

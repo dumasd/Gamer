@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.core.servlet;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * 响应
@@ -24,6 +25,12 @@ public interface Response {
     void addCookie(Object cookie);
 
     Object getCookies();
+
+    String getHeader(String header);
+
+    String setHeader(String header, String value);
+
+    Map<String, String> getHeaders();
 
     void setContentType(String contentType);
 

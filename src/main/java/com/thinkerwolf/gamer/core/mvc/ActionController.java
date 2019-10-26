@@ -15,7 +15,7 @@ import com.thinkerwolf.gamer.core.servlet.ResponseUtil;
 import java.lang.reflect.Method;
 import java.util.regex.Pattern;
 
-public class ActionController {
+public class ActionController implements Controller {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(ActionController.class);
 
@@ -44,10 +44,12 @@ public class ActionController {
         init();
     }
 
+    @Override
     public String getCommand() {
         return command;
     }
 
+    @Override
     public Pattern getMatcher() {
         return matcher;
     }
@@ -58,19 +60,25 @@ public class ActionController {
         this.matcher = Pattern.compile(regex);
     }
 
+    @Override
     public void handle(Request request, Response response) throws Exception {
         Object[] params = this.paramAdaptor.convert(request, response);
         try {
             Model model = (Model) method.invoke(obj, params);
             View responseView;
+
             if (view != null) {
                 responseView = view;
             } else {
                 responseView = viewManager.getView(model.name());
             }
+
             if (responseView == null) {
-                throw new NullPointerException("Empty view");
+                response.setStatus(ResponseStatus.INTERNAL_SERVER_ERROR);
+                ResponseUtil.renderError(ResponseUtil.INTERNAL_SERVER_ERROR_MODEL, request, response);
+                return;
             }
+
             response.setStatus(ResponseStatus.OK);
             responseView.render(model, request, response);
         } catch (Exception e) {

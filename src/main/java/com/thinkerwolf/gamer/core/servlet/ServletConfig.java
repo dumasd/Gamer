@@ -28,8 +28,12 @@ public interface ServletConfig {
     /**
      * tickTime s
      */
-    public static final String SESSION_TICKTIME = "sessionTickTime";
+    public static final String SESSION_TICK_TIME = "sessionTickTime";
 
+    /**
+     * 模板位置
+     */
+    public static final String TEMPLATES_LOCATION = "templatesLocation";
 
     String getServletName();
 

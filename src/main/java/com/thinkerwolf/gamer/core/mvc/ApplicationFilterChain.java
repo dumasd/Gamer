@@ -17,7 +17,7 @@ public class ApplicationFilterChain implements FilterChain {
     }
 
     @Override
-    public void doFilter(ActionController controller, Request request, Response response) throws Exception {
+    public void doFilter(Controller controller, Request request, Response response) throws Exception {
         if (hasNext()) {
             next().doFilter(controller, request, response, this);
         } else {

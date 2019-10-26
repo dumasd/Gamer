@@ -1,22 +1,27 @@
-package com.thinkerwolf.gamer.netty.tcp;
+package com.thinkerwolf.gamer.netty.http;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.netty.NettyConfig;
-import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
+import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.apache.commons.lang.StringUtils;
+import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.cookie.Cookie;
 
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class TcpHandler extends SimpleChannelInboundHandler<Object> {
+public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger LOG = InternalLoggerFactory.getLogger(TcpHandler.class);
+    private static final Logger LOG = InternalLoggerFactory.getLogger(HttpHandler.class);
 
     private Executor executor;
     private AtomicLong requestId;
@@ -36,26 +41,23 @@ public class TcpHandler extends SimpleChannelInboundHandler<Object> {
             @Override
             public void run() {
                 try {
-                    PacketProto.RequestPacket packet = (PacketProto.RequestPacket) msg;
-                    TcpRequest request = new TcpRequest(requestId.incrementAndGet(), packet.getCommand(), channel, servletConfig.getServletContext(), packet.getContent().toByteArray());
-                    request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.TCP_DECORATOR);
-                    TcpResponse response = new TcpResponse(channel);
+                    HttpRequest httpRequest = (HttpRequest) msg;
+                    Map<String, Cookie> cookies = InternalHttpUtil.getCookies(httpRequest);
+
+                    Request request = new com.thinkerwolf.gamer.netty.http.
+                            HttpRequest(requestId.incrementAndGet(), ctx.channel(), servletConfig.getServletContext(), cookies, httpRequest);
+
+                    Response response = new com.thinkerwolf.gamer.netty.http.HttpResponse(ctx.channel());
+
                     Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
                     servlet.service(request, response);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                    response.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN);
+                    channel.write(response).addListener(ChannelFutureListener.CLOSE);
                 }
             }
         });
-    }
-
-    @Override
-    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelRegistered(ctx);
-        SessionManager sessionManager = (SessionManager) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE);
-        if (sessionManager != null) {
-            sessionManager.getSession(ctx.channel().id().asLongText(), true);
-        }
     }
 
     @Override

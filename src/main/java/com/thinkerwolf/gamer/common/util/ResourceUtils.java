@@ -19,7 +19,10 @@ public class ResourceUtils {
 
     public static final Set<URL> classPathURLs = new HashSet<>();
 
+    public static final String CLASS_PATH_LOCATION;
+
     static {
+        CLASS_PATH_LOCATION = ClassUtils.getDefaultClassLoader().getResource("").getPath();
         try {
             Enumeration<URL> classpathUrls = ClassUtils.getDefaultClassLoader().getResources("");
             while (classpathUrls.hasMoreElements()) {

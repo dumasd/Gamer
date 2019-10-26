@@ -1,42 +1,27 @@
-package com.thinkerwolf.gamer.netty.tcp;
+package com.thinkerwolf.gamer.netty.http;
 
 import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.Response;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.cookie.Cookie;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.netty.channel.Channel;
-
-public class TcpResponse implements Response {
+public class HttpResponse implements Response {
 
     private Channel channel;
 
-    private String contentType;
-
-    private Object status;
+    private Map<String, Cookie> cookies;
 
     private Map<String, String> headers;
 
-    public TcpResponse(Channel channel) {
+    private Object status;
+
+    public HttpResponse(Channel channel) {
         this.channel = channel;
-    }
-
-    public Object getStatus() {
-        return status;
-    }
-
-    public void setStatus(Object status) {
-        this.status = status;
-    }
-
-    public Protocol getProtocol() {
-        return Protocol.TCP;
-    }
-
-    public Object write(Object obj) throws IOException {
-        return channel.writeAndFlush(obj);
     }
 
     private Map<String, String> getInternalHeaders() {
@@ -50,17 +35,39 @@ public class TcpResponse implements Response {
         return headers;
     }
 
-    public void addCookie(Object cookie) {
-        throw new UnsupportedOperationException();
+    @Override
+    public Object getStatus() {
+        return status;
     }
 
-    public Object getCookies() {
-        throw new UnsupportedOperationException();
+    @Override
+    public void setStatus(Object status) {
+        this.status = status;
+    }
+
+    @Override
+    public Protocol getProtocol() {
+        return Protocol.HTTP;
+    }
+
+    @Override
+    public Object write(Object obj) throws IOException {
+        return channel.writeAndFlush(obj);
+    }
+
+    @Override
+    public void addCookie(Object cookie) {
+
+    }
+
+    @Override
+    public Map<String, Cookie> getCookies() {
+        return cookies;
     }
 
     @Override
     public String getHeader(String header) {
-        return getInternalHeaders().get(header);
+        return headers.get(header);
     }
 
     @Override
@@ -75,11 +82,11 @@ public class TcpResponse implements Response {
 
     @Override
     public String getContentType() {
-        return contentType;
+        return getHeader(HttpHeaderNames.CONTENT_TYPE.toString());
     }
 
     @Override
     public void setContentType(String contentType) {
-        this.contentType = contentType;
+        getInternalHeaders().put(HttpHeaderNames.CONTENT_TYPE.toString(), contentType);
     }
 }

@@ -9,11 +9,13 @@ import java.util.Map;
  */
 public interface Request {
 
-    String COMMAND_ATTRIBUTE = "command";
+    String COMMAND_ATTRIBUTE = Request.class + ".command";
 
-    String DECORATOR_ATTRIBUTE = "decorator";
+    String DECORATOR_ATTRIBUTE = Request.class + ".decorator";
 
     long getRequestId();
+
+    String getCommand();
 
     Object getAttribute(String key);
 
@@ -23,12 +25,7 @@ public interface Request {
 
     void setAttribute(String key, Object value);
 
-    /**
-     * 获取服务端口
-     *
-     * @return
-     */
-    int getServerPort();
+    byte[] getContent();
 
     Session getSession();
 
