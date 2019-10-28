@@ -19,6 +19,8 @@ public class NettyServerTests {
         Map<String, String> initParams = new HashMap<>();
         initParams.put("componentScanPackage", "com.thinkerwolf");
         initParams.put("compress", "true");
+        initParams.put("sessionTimeout", "10");
+        initParams.put(ServletConfig.SESSION_TICK_TIME, "1");
         final ServletContext servletContext = new DefaultServletContext();
         ServletConfig servletConfig = new ServletConfig() {
             @Override

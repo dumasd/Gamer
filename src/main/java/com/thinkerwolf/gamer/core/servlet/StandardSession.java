@@ -38,8 +38,8 @@ public class StandardSession implements Session {
 
     @Override
     public void touch() {
-        long left = getTimeout() - (System.currentTimeMillis() - getCreationTime());
-        setTimeout(left + sessionTimeout);
+        long passed = System.currentTimeMillis() - getCreationTime();
+        setTimeout(passed + sessionTimeout);
     }
 
     @Override

@@ -17,7 +17,7 @@ public class NettyClientTests {
     }
 
     private static void startupTcp() {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1; i++) {
             Bootstrap b = new Bootstrap();
             b.group(new NioEventLoopGroup(1));
             b.channel(NioSocketChannel.class);
@@ -48,6 +48,13 @@ public class NettyClientTests {
             PacketProto.RequestPacket packet = PacketProto.RequestPacket.newBuilder()
                     .setRequestId(1).setCommand("test@jjjc")
                     .setContent(ByteString.copyFromUtf8("num=2")).build();
+            cf.channel().writeAndFlush(packet);
+
+            try {
+                Thread.sleep(21 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             cf.channel().writeAndFlush(packet);
         }
     }

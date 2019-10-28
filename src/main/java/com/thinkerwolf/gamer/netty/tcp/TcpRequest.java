@@ -1,5 +1,7 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import io.netty.channel.Channel;
@@ -14,6 +16,8 @@ import java.util.Map;
  * @author wukai
  */
 public class TcpRequest implements Request {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(TcpRequest.class);
 
     private static AttributeKey<String> SESSION_KEY = AttributeKey.newInstance(Session.JSESSION);
 
@@ -95,6 +99,9 @@ public class TcpRequest implements Request {
             session.touch();
             this.sessionId = session.getId();
             channel.attr(SESSION_KEY).set(sessionId);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Create new session " + session);
+            }
         }
         return session;
     }
