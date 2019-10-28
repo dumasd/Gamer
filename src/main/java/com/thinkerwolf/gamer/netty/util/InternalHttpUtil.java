@@ -1,18 +1,59 @@
 package com.thinkerwolf.gamer.netty.util;
 
 import com.thinkerwolf.gamer.core.servlet.Response;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponse;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class InternalHttpUtil {
+
+    private static final byte[] EMPTY_BYTE = new byte[]{};
+
+    public static List<byte[]> getRequestContent(HttpRequest request) {
+        List<byte[]> result = new LinkedList<>();
+        HttpMethod method = request.method();
+
+        // GET数据
+        if (method.equals(HttpMethod.GET)) {
+            int i = request.uri().indexOf("?");
+            if (i >= 0) {
+                String getData = request.uri().substring(i + 1);
+                result.add(getData.getBytes());
+            } else {
+                result.add(EMPTY_BYTE);
+            }
+        } else {
+            result.add(EMPTY_BYTE);
+        }
+
+        // POST数据
+        if (method.equals(HttpMethod.POST) && request instanceof FullHttpRequest) {
+            ByteBuf buf = ((FullHttpRequest) request).content();
+            byte[] postData = new byte[buf.readableBytes()];
+            buf.readBytes(postData);
+            result.add(postData);
+        } else {
+            result.add(EMPTY_BYTE);
+        }
+        return result;
+    }
+
+    public static String getCommand(HttpRequest request) {
+        String url = request.uri();
+        if (url.startsWith("/")) {
+            url = url.substring(1);
+        }
+        int i = url.indexOf("?");
+        if (i < 0) {
+            return url;
+        } else {
+            return url.substring(0, i);
+        }
+    }
 
 
     public static Map<String, Cookie> getCookies(HttpRequest request) {
@@ -40,9 +81,9 @@ public class InternalHttpUtil {
             httpResponse.headers().add(HttpHeaderNames.SET_COOKIE, cookies.values().iterator());
         }
 
-        Map<String, String> headers = response.getHeaders();
+        Map<String, Object> headers = response.getHeaders();
         if (headers != null) {
-            for (Map.Entry<String, String> en : headers.entrySet()) {
+            for (Map.Entry<String, Object> en : headers.entrySet()) {
                 httpResponse.headers().add(en.getKey(), en.getValue());
             }
         }

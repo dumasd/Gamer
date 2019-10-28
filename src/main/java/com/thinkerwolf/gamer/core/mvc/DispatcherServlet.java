@@ -11,6 +11,7 @@ import com.thinkerwolf.gamer.core.listener.SpringContextLoadListener;
 import com.thinkerwolf.gamer.core.model.Model;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.spring.SpringObjectFactory;
+import com.thinkerwolf.gamer.core.view.ResourceView;
 import com.thinkerwolf.gamer.core.view.View;
 import com.thinkerwolf.gamer.core.view.ViewManager;
 import org.apache.commons.lang.ArrayUtils;
@@ -37,6 +38,8 @@ public class DispatcherServlet implements Servlet {
     private ServletConfig servletConfig;
 
     private Map<String, Controller> controllerMap;
+
+    private Controller resourceController;
 
     /**
      * 初始化servlet
@@ -136,7 +139,7 @@ public class DispatcherServlet implements Servlet {
         }
     }
 
-    private void initAction(ServletConfig config) {
+    private void initAction(ServletConfig config) throws Exception {
         ApplicationContext context = (ApplicationContext) config.getServletContext().getAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE);
         Map<String, Object> actionBeans = context.getBeansWithAnnotation(Action.class);
         for (Object obj : actionBeans.values()) {
@@ -159,6 +162,11 @@ public class DispatcherServlet implements Servlet {
                 }
             }
         }
+
+        View view = (View) objectFactory.buildObject(ResourceView.class);
+        ResourceManager resourceManager = (ResourceManager) objectFactory.buildObject(ResourceManager.class);
+        resourceManager.init(config);
+        this.resourceController = new ResourceController(resourceManager, view);
     }
 
 
@@ -189,6 +197,7 @@ public class DispatcherServlet implements Servlet {
         }
     }
 
+
     @Override
     public void service(Request request, Response response) throws Exception {
         String command = request.getCommand();
@@ -206,6 +215,10 @@ public class DispatcherServlet implements Servlet {
                         break;
                     }
                 }
+            }
+
+            if (controller == null) {
+                controller = resourceController;
             }
 
             if (controller == null) {

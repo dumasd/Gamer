@@ -1,7 +1,11 @@
 package com.thinkerwolf.gamer.common.util;
 
+import com.thinkerwolf.gamer.common.io.Resource;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
@@ -20,6 +24,14 @@ public class ResourceUtils {
     public static final Set<URL> classPathURLs = new HashSet<>();
 
     public static final String CLASS_PATH_LOCATION;
+
+    private static ThreadLocal<byte[]> threadBuffer = new ThreadLocal<byte[]>() {
+        @Override
+        protected byte[] initialValue() {
+
+            return new byte[1024 * 4];
+        }
+    };
 
     static {
         CLASS_PATH_LOCATION = ClassUtils.getDefaultClassLoader().getResource("").getPath();
@@ -158,6 +170,18 @@ public class ResourceUtils {
                 findFilesByFile(f, files);
             }
         }
+    }
+
+    public static byte[] toByteArray(Resource resource) throws IOException {
+        byte[] buffer = threadBuffer.get();
+        InputStream inputStream = resource.getInputStream();
+        int estimate = inputStream.available();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(estimate);
+        int n;
+        while (-1 != (n = inputStream.read(buffer))) {
+            baos.write(buffer, 0, n);
+        }
+        return baos.toByteArray();
     }
 
 }

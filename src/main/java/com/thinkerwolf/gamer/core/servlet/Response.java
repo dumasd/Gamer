@@ -26,11 +26,11 @@ public interface Response {
 
     Object getCookies();
 
-    String getHeader(String header);
+    Object getHeader(String header);
 
-    String setHeader(String header, String value);
+    Object setHeader(String header, Object value);
 
-    Map<String, String> getHeaders();
+    Map<String, Object> getHeaders();
 
     void setContentType(String contentType);
 

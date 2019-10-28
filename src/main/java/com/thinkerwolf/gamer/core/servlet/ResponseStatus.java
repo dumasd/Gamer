@@ -29,5 +29,6 @@ public class ResponseStatus {
      */
     public static final Object INTERNAL_SERVER_ERROR = 500;
 
+    public static final Object NOT_IMPLEMENTED = 501;
 
 }

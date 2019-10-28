@@ -28,10 +28,10 @@ public class JdkLoggerFactory extends InternalLoggerFactory {
         if (StringUtils.isEmpty(location)) {
             location = DEFAULT_CONFIG_FILE_LOCATION;
         }
-        Resource recource = Resources.getResource(location);
+        Resource resource = Resources.getResource(location);
         try {
-            if (recource.getInputStream() != null) {
-                LogManager.getLogManager().readConfiguration(recource.getInputStream());
+            if (resource.getInputStream() != null) {
+                LogManager.getLogManager().readConfiguration(resource.getInputStream());
                 System.out.println("LOGGING:Load configuration from " + location);
             } else {
                 System.out.println("LOGGING:Can't find file " + location + ", use default configuration.");

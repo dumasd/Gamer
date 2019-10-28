@@ -21,7 +21,7 @@ public class StringView extends AbstractView {
             response.setContentType("string");
             response.write(decorator.decorate(model, request, response));
         } else if (protocol == Protocol.HTTP) {
-            response.setContentType("test/plain");
+            response.setContentType("text/plain");
             response.write(decorator.decorate(model, request, response));
         } else if (protocol == Protocol.WEBSOCKET) {
 

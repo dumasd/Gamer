@@ -13,6 +13,10 @@ import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 
 public class NettyClientTests {
     public static void main(String[] args) {
+        startupTcp();
+    }
+
+    private static void startupTcp() {
         for (int i = 0; i < 100; i++) {
             Bootstrap b = new Bootstrap();
             b.group(new NioEventLoopGroup(1));
@@ -35,7 +39,7 @@ public class NettyClientTests {
                     });
                 }
             });
-            final ChannelFuture cf = b.connect("127.0.0.1", 8080);
+            final ChannelFuture cf = b.connect("127.0.0.1", 8090);
             try {
                 cf.await();
             } catch (InterruptedException e) {
@@ -47,4 +51,5 @@ public class NettyClientTests {
             cf.channel().writeAndFlush(packet);
         }
     }
+
 }

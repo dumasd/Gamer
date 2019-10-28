@@ -26,14 +26,18 @@ public class StandardSessionManager implements SessionManager {
 
     private final List<SessionAttributeListener> sessionAttributeListeners;
 
+    private SessionIdGenerator sessionIdGenerator;
+
     public StandardSessionManager() {
         this.sessionMap = new HashMap<>();
         this.sessionListeners = new LinkedList<>();
         this.sessionAttributeListeners = new LinkedList<>();
+        this.sessionIdGenerator = new StandardSessionIdGenerator();
     }
 
     @Override
     public void init(ServletConfig servletConfig) throws Exception {
+        sessionIdGenerator.generateSessionId();
         String tick = servletConfig.getInitParam(ServletConfig.SESSION_TICK_TIME);
         long tickTime;
         if (tick != null) {
@@ -91,6 +95,13 @@ public class StandardSessionManager implements SessionManager {
 
     @Override
     public Session getSession(String sessionId, boolean create) {
+        if (sessionId == null) {
+            if (!create) {
+                return null;
+            }
+            sessionId = generateSessionId();
+        }
+
         Session session = sessionMap.get(sessionId);
         if (session == null && create) {
             Session createSession = null;
@@ -112,6 +123,34 @@ public class StandardSessionManager implements SessionManager {
             }
         }
         return session;
+    }
+
+    /**
+     * 生成sessionId
+     *
+     * @return
+     */
+    protected String generateSessionId() {
+        //
+        return sessionIdGenerator.generateSessionId();
+    }
+
+    @Override
+    public void touchSession(String sessionId) {
+        if (sessionId == null) {
+            return;
+        }
+        Session session = getSession(sessionId);
+        if (session != null) {
+            if (session.isValidate()) {
+                long left = session.getTimeout() - (System.currentTimeMillis() - session.getCreationTime());
+                session.setTimeout(left + sessionTimeout);
+            }
+        } else {
+            synchronized (sessionMap) {
+                removeSession(sessionId);
+            }
+        }
     }
 
     @Override

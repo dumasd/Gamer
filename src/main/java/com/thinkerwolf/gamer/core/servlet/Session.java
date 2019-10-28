@@ -5,6 +5,8 @@ package com.thinkerwolf.gamer.core.servlet;
  */
 public interface Session {
 
+    public static final String JSESSION = "JSESSION";
+
     String getId();
 
     void validate();

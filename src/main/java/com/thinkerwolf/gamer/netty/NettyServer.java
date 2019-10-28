@@ -1,10 +1,10 @@
 package com.thinkerwolf.gamer.netty;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
@@ -12,6 +12,8 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 
 public class NettyServer {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(NettyServer.class);
 
     private NettyConfig config;
 
@@ -49,7 +51,13 @@ public class NettyServer {
         }
         ChannelInitializer channelInitializer = ChannelHandlers.createChannelInitializer(config, servletConfig);
         sb.childHandler(channelInitializer);
-        sb.bind(new InetSocketAddress(config.getPort()));
+        ChannelFuture future = sb.bind(new InetSocketAddress(config.getPort()));
+        future.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                LOG.info("Listen @" + config.getProtocol().name().toLowerCase() + " on @" + config.getPort() + " success");
+            }
+        });
     }
 
 

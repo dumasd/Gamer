@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
 
@@ -16,7 +17,7 @@ public class HttpResponse implements Response {
 
     private Map<String, Cookie> cookies;
 
-    private Map<String, String> headers;
+    private Map<String, Object> headers;
 
     private Object status;
 
@@ -24,7 +25,7 @@ public class HttpResponse implements Response {
         this.channel = channel;
     }
 
-    private Map<String, String> getInternalHeaders() {
+    private Map<String, Object> getInternalHeaders() {
         if (this.headers == null) {
             synchronized (this) {
                 if (this.headers == null) {
@@ -33,6 +34,17 @@ public class HttpResponse implements Response {
             }
         }
         return headers;
+    }
+
+    private Map<String, Cookie> getInternalCookies() {
+        if (cookies == null) {
+            synchronized (this) {
+                if (this.cookies == null) {
+                    this.cookies = new HashMap<>(5);
+                }
+            }
+        }
+        return this.cookies;
     }
 
     @Override
@@ -52,12 +64,13 @@ public class HttpResponse implements Response {
 
     @Override
     public Object write(Object obj) throws IOException {
-        return channel.writeAndFlush(obj);
+        return channel.writeAndFlush(obj).addListener(ChannelFutureListener.CLOSE);
     }
 
     @Override
     public void addCookie(Object cookie) {
-
+        Cookie c = (Cookie) cookie;
+        getInternalCookies().put(c.name(), c);
     }
 
     @Override
@@ -66,23 +79,23 @@ public class HttpResponse implements Response {
     }
 
     @Override
-    public String getHeader(String header) {
+    public Object getHeader(String header) {
         return headers.get(header);
     }
 
     @Override
-    public String setHeader(String header, String value) {
+    public Object setHeader(String header, Object value) {
         return getInternalHeaders().put(header, value);
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, Object> getHeaders() {
         return headers;
     }
 
     @Override
     public String getContentType() {
-        return getHeader(HttpHeaderNames.CONTENT_TYPE.toString());
+        return getHeader(HttpHeaderNames.CONTENT_TYPE.toString()).toString();
     }
 
     @Override

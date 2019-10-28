@@ -1,7 +1,11 @@
 package com.thinkerwolf.gamer.core.mvc;
 
+import com.thinkerwolf.gamer.core.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
+import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
+import com.thinkerwolf.gamer.core.servlet.ResponseUtil;
+import com.thinkerwolf.gamer.core.view.View;
 
 import java.util.regex.Pattern;
 
@@ -12,12 +16,18 @@ import java.util.regex.Pattern;
  */
 public class ResourceController implements Controller {
 
+    private ResourceManager resourceManager;
 
+    private View resourceView;
 
+    public ResourceController(ResourceManager resourceManager, View resourceView) {
+        this.resourceManager = resourceManager;
+        this.resourceView = resourceView;
+    }
 
     @Override
     public String getCommand() {
-        return null;
+        return "";
     }
 
     @Override
@@ -27,6 +37,19 @@ public class ResourceController implements Controller {
 
     @Override
     public void handle(Request request, Response response) throws Exception {
+        String command = request.getCommand();
+        if (command != null && !command.isEmpty()) {
+            ResourceModel resourceModel = resourceManager.getResource(command);
+            if (resourceModel == null) {
+                response.setStatus(ResponseStatus.NOT_FOUND);
+                ResponseUtil.renderError("Not found", request, response);
+            } else {
+                response.setStatus(ResponseStatus.OK);
+                resourceView.render(resourceModel, request, response);
+            }
+        } else {
+            // 跳转到主页
 
+        }
     }
 }

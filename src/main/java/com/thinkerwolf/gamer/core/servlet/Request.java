@@ -9,8 +9,6 @@ import java.util.Map;
  */
 public interface Request {
 
-    String COMMAND_ATTRIBUTE = Request.class + ".command";
-
     String DECORATOR_ATTRIBUTE = Request.class + ".decorator";
 
     long getRequestId();

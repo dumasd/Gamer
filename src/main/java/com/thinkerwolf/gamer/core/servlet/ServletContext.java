@@ -18,4 +18,8 @@ public interface ServletContext {
 
     void setAttribute(String key, Object value);
 
+    default SessionManager  getSessionManager() {
+        return (SessionManager) getAttribute(ROOT_SESSION_MANAGER_ATTRIBUTE);
+    }
+
 }

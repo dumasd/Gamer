@@ -18,6 +18,8 @@ public interface SessionManager {
 
     Session getSession(String sessionId, boolean create);
 
+    void touchSession(String sessionId);
+
     void removeSession(String sessionId);
 
     void addSessionListener(SessionListener listener);

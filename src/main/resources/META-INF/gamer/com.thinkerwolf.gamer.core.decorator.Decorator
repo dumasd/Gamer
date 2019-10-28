@@ -1,1 +1,2 @@
 nettyTcpDecorator=com.thinkerwolf.gamer.netty.tcp.TcpDecorator
+nettyHttpDecorator=com.thinkerwolf.gamer.netty.http.HttpDecorator

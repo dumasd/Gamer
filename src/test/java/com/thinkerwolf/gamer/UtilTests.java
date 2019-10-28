@@ -1,21 +1,18 @@
 package com.thinkerwolf.gamer;
 
 import com.thinkerwolf.gamer.common.ObjectFactory;
+import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
-import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.core.mvc.FreemarkerHelper;
 import com.thinkerwolf.gamer.core.servlet.Servlet;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import com.thinkerwolf.gamer.core.servlet.ServletContext;
+import com.thinkerwolf.gamer.core.servlet.StandardSessionIdGenerator;
 import com.thinkerwolf.gamer.netty.NettyConfig;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateExceptionHandler;
 import org.apache.commons.lang.time.StopWatch;
 import org.junit.Test;
 
-import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -145,5 +142,22 @@ public class UtilTests {
         System.out.println(stopWatch.getTime());
     }
 
+
+    @Test
+    public void sessionId() {
+        byte b = 0x1e - 10;// = 36 - 10 = 26
+        System.err.println(b >> 4);
+        System.err.println('U' - 'A');
+        System.err.println(((char) ('A' + b)));
+        StandardSessionIdGenerator generator = new StandardSessionIdGenerator();
+        generator.generateSessionId();
+        long t1 = System.currentTimeMillis();
+        for (int i = 0; i < 100; i++) {
+            System.err.println(generator.generateSessionId("yyy"));
+        }
+        System.err.println("Spend time : " + (System.currentTimeMillis() - t1));
+
+
+    }
 
 }

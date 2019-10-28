@@ -17,7 +17,7 @@ public class TcpResponse implements Response {
 
     private Object status;
 
-    private Map<String, String> headers;
+    private Map<String, Object> headers;
 
     public TcpResponse(Channel channel) {
         this.channel = channel;
@@ -39,7 +39,7 @@ public class TcpResponse implements Response {
         return channel.writeAndFlush(obj);
     }
 
-    private Map<String, String> getInternalHeaders() {
+    private Map<String, Object> getInternalHeaders() {
         if (this.headers == null) {
             synchronized (this) {
                 if (this.headers == null) {
@@ -59,17 +59,17 @@ public class TcpResponse implements Response {
     }
 
     @Override
-    public String getHeader(String header) {
+    public Object getHeader(String header) {
         return getInternalHeaders().get(header);
     }
 
     @Override
-    public String setHeader(String header, String value) {
+    public Object setHeader(String header, Object value) {
         return getInternalHeaders().put(header, value);
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, Object> getHeaders() {
         return headers;
     }
 
