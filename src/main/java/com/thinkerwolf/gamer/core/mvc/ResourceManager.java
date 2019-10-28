@@ -7,13 +7,11 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ResourceUtils;
 import com.thinkerwolf.gamer.core.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
+import com.thinkerwolf.gamer.core.util.CompressUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -39,6 +37,21 @@ public class ResourceManager {
     public void init(ServletConfig servletConfig) {
         resourceLocations.add(ResourceUtils.CLASS_PATH_LOCATION + DEFAULT_RESOURCE_PUBLIC);
         resourceLocations.add(ResourceUtils.CLASS_PATH_LOCATION + DEFAULT_RESOURCE_STATIC);
+
+        String location = servletConfig.getInitParam(ServletConfig.RESOURCE_LOCATION);
+        if (location != null && location.length() > 0) {
+            String[] ls = location.split(";");
+            for (String l : ls) {
+                if (l != null && l.length() > 0) {
+                    File file = new File(ResourceUtils.CLASS_PATH_LOCATION + l);
+                    if (file.exists()) {
+                        resourceLocations.add(file.getAbsolutePath());
+                    } else {
+                        LOG.info("Resource location not found : " + l);
+                    }
+                }
+            }
+        }
     }
 
     public ResourceModel getResource(String path) throws IOException {
@@ -47,7 +60,9 @@ public class ResourceManager {
         try {
             ResourceModel resourceModel = modelCache.get(path);
             if (resourceModel != null) {
-                LOG.info("Find resource cache : " + path);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Find resource cache : " + path);
+                }
                 return resourceModel;
             }
         } finally {
@@ -82,9 +97,58 @@ public class ResourceManager {
         } finally {
             readWriteLock.writeLock().unlock();
         }
-
-
     }
 
+
+    public ResourceModel getResource(String path, String encoding) throws IOException {
+        String key = path + "-" + encoding;
+        readWriteLock.readLock().lock();
+        try {
+            ResourceModel resourceModel = modelCache.get(key);
+            if (resourceModel != null) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Find compressed resource cache : " + path);
+                }
+                return resourceModel;
+            }
+        } finally {
+            readWriteLock.readLock().unlock();
+        }
+
+        ResourceModel resourceModel = getResource(path);
+        if (resourceModel == null) {
+            return null;
+        }
+
+        if (resourceModel.compress()) {
+            return resourceModel;
+        }
+
+        readWriteLock.writeLock().lock();
+        try {
+            if (!modelCache.containsKey(key)) {
+                byte[] data = resourceModel.getData();
+                boolean compressed = false;
+                try {
+                    byte[] compressData = CompressUtil.compress(data, encoding);
+                    compressed = !Arrays.equals(compressData, data);
+                    data = compressData;
+                } catch (Exception e) {
+                    LOG.warn("Compress data error, don't use compress", e);
+                }
+
+                ResourceModel compressedModel;
+                if (compressed) {
+                    compressedModel = new ResourceModel(data, resourceModel.file(), resourceModel.getExtension(), encoding);
+                } else {
+                    compressedModel = resourceModel;
+                }
+                modelCache.put(key, compressedModel);
+            }
+            return modelCache.get(key);
+        } finally {
+            readWriteLock.writeLock().unlock();
+        }
+    }
 
 }

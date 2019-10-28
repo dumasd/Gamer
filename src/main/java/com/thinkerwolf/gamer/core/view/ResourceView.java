@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.core.decorator.Decorator;
 import com.thinkerwolf.gamer.core.model.Model;
 import com.thinkerwolf.gamer.core.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.util.ResponseUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,12 +33,15 @@ public class ResourceView extends AbstractView {
         httpMimeMappings.put("css", "text/css");
         httpMimeMappings.put("json", "application/json");
         httpMimeMappings.put("js", "application/x-javascript");
+        httpMimeMappings.put("woff", "application/x-font-woff");
+        httpMimeMappings.put("woff2", "application/font-woff2");
         httpMimeMappings.put("png", "image/png");
         httpMimeMappings.put("gif", "image/gif");
         httpMimeMappings.put("jpg", "image/jpeg");
         httpMimeMappings.put("jpeg", "image/jpeg");
         httpMimeMappings.put("ico", "image/x-icon");
-
+        httpMimeMappings.put("tff", "image/tiff");
+        httpMimeMappings.put("svg", "image/svg");
         mimeMappings.put(Protocol.HTTP, httpMimeMappings);
 
     }

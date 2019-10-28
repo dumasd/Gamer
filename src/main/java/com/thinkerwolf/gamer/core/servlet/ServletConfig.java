@@ -31,9 +31,19 @@ public interface ServletConfig {
     public static final String SESSION_TICK_TIME = "sessionTickTime";
 
     /**
+     * 静态资源位置
+     */
+    public static final String RESOURCE_LOCATION = "resourceLocation";
+
+    /**
      * 模板位置
      */
     public static final String TEMPLATES_LOCATION = "templatesLocation";
+
+    /**
+     * 是否压缩
+     */
+    public static final String COMPRESS = "compress";
 
     String getServletName();
 

@@ -16,6 +16,9 @@ public class HttpDecorator implements Decorator {
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status);
         InternalHttpUtil.addHeadersAndCookies(httpResponse, response);
         httpResponse.headers().add(HttpHeaderNames.CONTENT_LENGTH, bytes.length);
+        if (model.compress()) {
+            httpResponse.headers().add(HttpHeaderNames.CONTENT_ENCODING, model.encoding());
+        }
         httpResponse.content().writeBytes(bytes);
         return httpResponse;
     }

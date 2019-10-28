@@ -3,8 +3,11 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.cookie.Cookie;
 
 import java.io.IOException;
@@ -21,8 +24,11 @@ public class HttpResponse implements Response {
 
     private Object status;
 
-    public HttpResponse(Channel channel) {
+    private HttpRequest httpRequest;
+
+    public HttpResponse(Channel channel, HttpRequest httpRequest) {
         this.channel = channel;
+        this.httpRequest = httpRequest;
     }
 
     private Map<String, Object> getInternalHeaders() {
@@ -64,7 +70,13 @@ public class HttpResponse implements Response {
 
     @Override
     public Object write(Object obj) throws IOException {
-        return channel.writeAndFlush(obj).addListener(ChannelFutureListener.CLOSE);
+        // is keep alive
+        boolean keepAlive = HttpUtil.isKeepAlive(httpRequest);
+        ChannelFuture channelFuture = channel.writeAndFlush(obj);
+        if (keepAlive) {
+            channelFuture.addListener(ChannelFutureListener.CLOSE);
+        }
+        return channelFuture;
     }
 
     @Override

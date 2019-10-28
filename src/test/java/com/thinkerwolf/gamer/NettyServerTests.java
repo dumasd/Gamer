@@ -18,6 +18,7 @@ public class NettyServerTests {
         InternalLoggerFactory.setDefaultLoggerFactory(new JdkLoggerFactory());
         Map<String, String> initParams = new HashMap<>();
         initParams.put("componentScanPackage", "com.thinkerwolf");
+        initParams.put("compress", "true");
         final ServletContext servletContext = new DefaultServletContext();
         ServletConfig servletConfig = new ServletConfig() {
             @Override

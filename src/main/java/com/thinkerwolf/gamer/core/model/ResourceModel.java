@@ -6,8 +6,13 @@ public class ResourceModel extends ByteModel {
 
     private String extension;
 
+
     public ResourceModel(byte[] bytes, String file, String extension) {
-        super(bytes);
+        this(bytes, file, extension, null);
+    }
+
+    public ResourceModel(byte[] bytes, String file, String extension, String encoding) {
+        super(bytes, encoding);
         this.file = file;
         this.extension = extension;
     }
@@ -19,4 +24,5 @@ public class ResourceModel extends ByteModel {
     public String file() {
         return file;
     }
+
 }

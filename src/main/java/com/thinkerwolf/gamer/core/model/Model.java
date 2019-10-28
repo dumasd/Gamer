@@ -12,4 +12,22 @@ public interface Model<T> {
     String name();
 
     byte[] getBytes();
+
+    /**
+     * 数据是否是压缩过的
+     *
+     * @return
+     */
+    default boolean compress() {
+        return encoding() != null && encoding().length() > 0;
+    }
+
+    /**
+     * 压缩算法
+     *
+     * @return
+     */
+    default String encoding() {
+        return null;
+    }
 }

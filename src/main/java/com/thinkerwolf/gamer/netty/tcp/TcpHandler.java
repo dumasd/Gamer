@@ -9,7 +9,6 @@ import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
@@ -39,6 +38,7 @@ public class TcpHandler extends SimpleChannelInboundHandler<Object> {
                     PacketProto.RequestPacket packet = (PacketProto.RequestPacket) msg;
                     TcpRequest request = new TcpRequest(requestId.incrementAndGet(), packet.getCommand(), channel, servletConfig.getServletContext(), packet.getContent().toByteArray());
                     request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.TCP_DECORATOR);
+                    request.getSession(true);
                     TcpResponse response = new TcpResponse(channel);
                     Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
                     servlet.service(request, response);
@@ -52,9 +52,10 @@ public class TcpHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
+        // 注册创建session
         SessionManager sessionManager = (SessionManager) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE);
         if (sessionManager != null) {
-            sessionManager.getSession(ctx.channel().id().asLongText(), true);
+            sessionManager.getSession(null, true);
         }
     }
 

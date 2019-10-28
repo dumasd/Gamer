@@ -1,14 +1,21 @@
 package com.thinkerwolf.gamer.netty.http;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.util.CompressUtil;
+import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 
 import java.util.List;
 import java.util.Map;
 
 public class HttpRequest implements Request {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(HttpRequest.class);
 
     private long requestId;
 
@@ -22,11 +29,16 @@ public class HttpRequest implements Request {
 
     private io.netty.handler.codec.http.HttpRequest request;
 
+    private Response response;
+
     private Map<String, Object> attributes;
 
     private List<byte[]> contents;
 
-    public HttpRequest(long requestId, Channel channel, ServletContext servletContext, io.netty.handler.codec.http.HttpRequest request) {
+    private String encoding;
+
+    public HttpRequest(long requestId, Channel channel, ServletContext servletContext,
+                       io.netty.handler.codec.http.HttpRequest request, Response response, boolean compress) {
         this.requestId = requestId;
         this.request = request;
         this.command = InternalHttpUtil.getCommand(request);
@@ -35,6 +47,10 @@ public class HttpRequest implements Request {
         this.cookies = InternalHttpUtil.getCookies(request);
         this.contents = InternalHttpUtil.getRequestContent(request);
         this.attributes = RequestUtil.parseParams(getContent());
+        this.response = response;
+        if (compress) {
+            this.encoding = CompressUtil.getCompress(InternalHttpUtil.getAcceptEncodings(request));
+        }
     }
 
     @Override
@@ -96,20 +112,36 @@ public class HttpRequest implements Request {
             return null;
         }
         Cookie cookie = cookies.get(Session.JSESSION);
-        Session session = null;
+
+        String sessionId = null;
         if (cookie != null) {
-            session = sessionManager.getSession(cookie.value());
+            sessionId = cookie.value();
         }
+        Session session = sessionManager.getSession(sessionId, create);
 
-        if (session == null && create) {
-            session = sessionManager.getSession(null, true);
+        if (create && (session != null && !session.getId().equals(sessionId))) {
+            // session过期或者不存在，创建新的session
+            if (cookie == null) {
+                cookie = new DefaultCookie(Session.JSESSION, session.getId());
+            } else {
+                cookie.setValue(session.getId());
+            }
+            cookie.setValue(session.getId());
+            cookie.setMaxAge(session.getMaxAge());
+            session.touch();
+            cookies.put(Session.JSESSION, cookie);
+            response.addCookie(cookie);
         }
-
         return session;
     }
 
     @Override
     public Protocol getProtocol() {
         return Protocol.HTTP;
+    }
+
+    @Override
+    public String getEncoding() {
+        return encoding;
     }
 }

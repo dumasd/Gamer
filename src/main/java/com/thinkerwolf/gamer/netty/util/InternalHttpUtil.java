@@ -78,7 +78,7 @@ public class InternalHttpUtil {
     public static void addHeadersAndCookies(HttpResponse httpResponse, Response response) {
         Map<String, Cookie> cookies = (Map<String, Cookie>) response.getCookies();
         if (cookies != null) {
-            httpResponse.headers().add(HttpHeaderNames.SET_COOKIE, cookies.values().iterator());
+            httpResponse.headers().add(HttpHeaderNames.SET_COOKIE, cookies.values());
         }
 
         Map<String, Object> headers = response.getHeaders();
@@ -87,6 +87,24 @@ public class InternalHttpUtil {
                 httpResponse.headers().add(en.getKey(), en.getValue());
             }
         }
+    }
+
+    public static Set<String> getAcceptEncodings(HttpRequest request) {
+        String encoding = request.headers().get(HttpHeaderNames.ACCEPT_ENCODING);
+        if (encoding != null) {
+            encoding = encoding.trim();
+        }
+        if (encoding == null || encoding.length() == 0) {
+            return Collections.emptySet();
+        }
+        String[] encodes = encoding.split(",");
+        Set<String> encodeSet = new LinkedHashSet<>();
+        for (String encode : encodes) {
+            if (encode != null && encode.trim().length() > 0) {
+                encodeSet.add(encode);
+            }
+        }
+        return encodeSet;
     }
 
 

@@ -4,7 +4,7 @@ import com.thinkerwolf.gamer.core.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
-import com.thinkerwolf.gamer.core.servlet.ResponseUtil;
+import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.core.view.View;
 
 import java.util.regex.Pattern;
@@ -39,7 +39,12 @@ public class ResourceController implements Controller {
     public void handle(Request request, Response response) throws Exception {
         String command = request.getCommand();
         if (command != null && !command.isEmpty()) {
-            ResourceModel resourceModel = resourceManager.getResource(command);
+            ResourceModel resourceModel;
+            if (request.getEncoding() != null && request.getEncoding().length() > 0) {
+                resourceModel = resourceManager.getResource(command, request.getEncoding());
+            } else {
+                resourceModel = resourceManager.getResource(command);
+            }
             if (resourceModel == null) {
                 response.setStatus(ResponseStatus.NOT_FOUND);
                 ResponseUtil.renderError("Not found", request, response);

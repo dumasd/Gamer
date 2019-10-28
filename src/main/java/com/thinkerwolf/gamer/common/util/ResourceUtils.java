@@ -152,8 +152,10 @@ public class ResourceUtils {
             paths.add(rootFile.getPath().replace(File.separatorChar, '/'));
         } else if (rootFile.isDirectory()) {
             File[] files = rootFile.listFiles();
-            for (File f : files) {
-                findPathsByFile(f, paths);
+            if (files != null) {
+                for (File f : files) {
+                    findPathsByFile(f, paths);
+                }
             }
         }
     }
@@ -166,22 +168,44 @@ public class ResourceUtils {
             files.add(rootFile);
         } else if (rootFile.isDirectory()) {
             File[] fs = rootFile.listFiles();
-            for (File f : fs) {
-                findFilesByFile(f, files);
+            if (fs != null) {
+                for (File f : fs) {
+                    findFilesByFile(f, files);
+                }
             }
         }
     }
 
     public static byte[] toByteArray(Resource resource) throws IOException {
-        byte[] buffer = threadBuffer.get();
-        InputStream inputStream = resource.getInputStream();
-        int estimate = inputStream.available();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(estimate);
-        int n;
-        while (-1 != (n = inputStream.read(buffer))) {
-            baos.write(buffer, 0, n);
+        ByteArrayOutputStream baos = null;
+        InputStream inputStream = null;
+        try {
+            byte[] buffer = threadBuffer.get();
+            inputStream = resource.getInputStream();
+            int estimate = inputStream.available();
+            baos = new ByteArrayOutputStream(estimate);
+            int n;
+            while (-1 != (n = inputStream.read(buffer))) {
+                baos.write(buffer, 0, n);
+            }
+            byte[] bytes = baos.toByteArray();
+
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (baos != null) {
+                    baos.close();
+                }
+            } catch (IOException e) {
+
+            }
         }
-        return baos.toByteArray();
+
     }
 
 }

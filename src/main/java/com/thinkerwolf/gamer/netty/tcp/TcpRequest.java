@@ -1,7 +1,9 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
 import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.util.RequestUtil;
 import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,9 +15,9 @@ import java.util.Map;
  */
 public class TcpRequest implements Request {
 
-    private Map<String, Object> attributes;
+    private static AttributeKey<String> SESSION_KEY = AttributeKey.newInstance(Session.JSESSION);
 
-    private Session session;
+    private Map<String, Object> attributes;
 
     private Channel channel;
 
@@ -27,6 +29,8 @@ public class TcpRequest implements Request {
 
     private String command;
 
+    private String sessionId;
+
     public TcpRequest(long requestId, String command, Channel channel, ServletContext servletContext, byte[] content) {
         this.requestId = requestId;
         this.command = command;
@@ -34,6 +38,9 @@ public class TcpRequest implements Request {
         this.servletContext = servletContext;
         this.content = content;
         this.attributes = RequestUtil.parseParams(content);
+        if (channel.hasAttr(SESSION_KEY)) {
+            this.sessionId = channel.attr(SESSION_KEY).get();
+        }
     }
 
     @Override
@@ -78,12 +85,16 @@ public class TcpRequest implements Request {
 
     @Override
     public Session getSession(boolean create) {
-        if (session == null) {
-            SessionManager sessionManager = (SessionManager) servletContext.getAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE);
-            if (sessionManager == null) {
-                return null;
-            }
-            this.session = sessionManager.getSession(channel.id().asLongText(), create);
+        SessionManager sessionManager = servletContext.getSessionManager();
+        if (sessionManager == null) {
+            return null;
+        }
+        Session session = sessionManager.getSession(sessionId, true);
+        if (create && session != null && !session.getId().equals(sessionId)) {
+            // session create or update
+            session.touch();
+            this.sessionId = session.getId();
+            channel.attr(SESSION_KEY).set(sessionId);
         }
         return session;
     }
@@ -91,4 +102,5 @@ public class TcpRequest implements Request {
     public Protocol getProtocol() {
         return Protocol.TCP;
     }
+
 }

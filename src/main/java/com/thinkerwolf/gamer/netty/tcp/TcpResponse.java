@@ -21,6 +21,7 @@ public class TcpResponse implements Response {
 
     public TcpResponse(Channel channel) {
         this.channel = channel;
+
     }
 
     public Object getStatus() {

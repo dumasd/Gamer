@@ -4,15 +4,20 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.adaptor.DefaultParamAdaptor;
 import com.thinkerwolf.gamer.core.adaptor.ParamAdaptor;
+import com.thinkerwolf.gamer.core.model.ByteModel;
 import com.thinkerwolf.gamer.core.model.Model;
+import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
+import com.thinkerwolf.gamer.core.util.CompressUtil;
 import com.thinkerwolf.gamer.core.view.View;
 import com.thinkerwolf.gamer.core.view.ViewManager;
-import com.thinkerwolf.gamer.core.servlet.ResponseUtil;
+import com.thinkerwolf.gamer.core.util.ResponseUtil;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class ActionController implements Controller {
@@ -79,8 +84,26 @@ public class ActionController implements Controller {
                 return;
             }
 
+            // 压缩判断
+            Model result = model;
+            if (request.getProtocol() == Protocol.HTTP) {
+                if (request.getEncoding() != null && request.getEncoding().length() > 0) {
+                    byte[] data = model.getBytes();
+                    try {
+                        byte[] compressedData = CompressUtil.compress(data, request.getEncoding());
+                        if (Arrays.equals(compressedData, data)) {
+                            result = new ByteModel(compressedData);
+                        } else {
+                            result = new ByteModel(compressedData, request.getEncoding());
+                        }
+                    } catch (IOException e) {
+                        LOG.info("Error in compress", e);
+                    }
+                }
+            }
+
             response.setStatus(ResponseStatus.OK);
-            responseView.render(model, request, response);
+            responseView.render(result, request, response);
         } catch (Exception e) {
             LOG.error("Internal error", e);
             response.setStatus(ResponseStatus.INTERNAL_SERVER_ERROR);

@@ -1,8 +1,10 @@
-package com.thinkerwolf.gamer.core.servlet;
+package com.thinkerwolf.gamer.core.util;
 
 import com.thinkerwolf.gamer.core.model.ByteModel;
 import com.thinkerwolf.gamer.core.model.Model;
 import com.thinkerwolf.gamer.core.model.StringModel;
+import com.thinkerwolf.gamer.core.servlet.Request;
+import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.view.StringView;
 import com.thinkerwolf.gamer.core.view.View;
 

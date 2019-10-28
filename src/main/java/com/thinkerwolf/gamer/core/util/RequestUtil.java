@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core.servlet;
+package com.thinkerwolf.gamer.core.util;
 
 import org.apache.commons.lang.StringUtils;
 

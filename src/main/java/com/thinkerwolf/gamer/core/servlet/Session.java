@@ -9,10 +9,23 @@ public interface Session {
 
     String getId();
 
+    /**
+     * 验证session
+     */
     void validate();
 
+    void touch();
+
+    /**
+     * 失效session
+     */
     void invalidate();
 
+    /**
+     * session是否有效
+     *
+     * @return
+     */
     boolean isValidate();
 
     long getCreationTime();
@@ -31,4 +44,11 @@ public interface Session {
     long getTimeout();
 
     void setTimeout(long interval);
+
+    /**
+     * session剩余时间 (s)
+     *
+     * @return
+     */
+    long getMaxAge();
 }

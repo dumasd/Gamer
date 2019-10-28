@@ -11,6 +11,8 @@ import com.thinkerwolf.gamer.core.listener.SpringContextLoadListener;
 import com.thinkerwolf.gamer.core.model.Model;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.spring.SpringObjectFactory;
+import com.thinkerwolf.gamer.core.util.ResponseUtil;
+import com.thinkerwolf.gamer.core.util.ServletUtil;
 import com.thinkerwolf.gamer.core.view.ResourceView;
 import com.thinkerwolf.gamer.core.view.View;
 import com.thinkerwolf.gamer.core.view.ViewManager;
@@ -95,14 +97,7 @@ public class DispatcherServlet implements Servlet {
     }
 
     private void initSessionManager(ServletConfig config) throws Exception {
-        String useSession = config.getInitParam(ServletConfig.USE_SESSION);
-        boolean use;
-        if (useSession == null) {
-            use = true;
-        } else {
-            use = com.thinkerwolf.gamer.common.util.ClassUtils.castTo(useSession, boolean.class);
-        }
-
+        boolean use = ServletUtil.isUseSession(config);
         if (use) {
             String smclass = config.getInitParam(ServletConfig.SESSION_MANAGER);
             if (smclass == null || smclass.length() <= 0) {

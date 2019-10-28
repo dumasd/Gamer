@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.util.ServletUtil;
 import com.thinkerwolf.gamer.netty.NettyConfig;
 import com.thinkerwolf.gamer.netty.NettyConstants;
 import io.netty.channel.*;
@@ -35,17 +36,14 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         Channel channel = ctx.channel();
         try {
+            boolean compress = ServletUtil.isCompress(servletConfig);
             HttpRequest httpRequest = (HttpRequest) msg;
 
-            // 每个请求的channelid都不同
-            System.err.println(ctx.channel().id());
+            Response response = new com.thinkerwolf.gamer.netty.http.HttpResponse(ctx.channel(), httpRequest);
 
             Request request = new com.thinkerwolf.gamer.netty.http.
-                    HttpRequest(requestId.incrementAndGet(), ctx.channel(), servletConfig.getServletContext(), httpRequest);
+                    HttpRequest(requestId.incrementAndGet(), ctx.channel(), servletConfig.getServletContext(), httpRequest, response, compress);
             request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.HTTP_DECORATOR);
-
-            Response response = new com.thinkerwolf.gamer.netty.http.HttpResponse(ctx.channel());
-
             Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
             servlet.service(request, response);
         } catch (Exception e) {

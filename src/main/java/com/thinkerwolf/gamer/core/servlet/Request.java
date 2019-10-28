@@ -31,5 +31,8 @@ public interface Request {
 
     Protocol getProtocol();
 
+    default String getEncoding() {
+        return null;
+    }
 
 }

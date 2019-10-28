@@ -5,16 +5,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StandardSession implements Session {
+    private final long sessionTimeout;
     private SessionManager sessionManager;
-
     private String sessionId;
-
     private volatile long createTime;
-
     private Map<String, Object> attributes;
-
     private volatile long timeout;
-
     private List<SessionAttributeListener> sessionAttributeListeners;
 
     public StandardSession(SessionManager sessionManager, List<SessionAttributeListener> sessionAttributeListeners, String sessionId, long timeout) {
@@ -22,6 +18,7 @@ public class StandardSession implements Session {
         this.sessionAttributeListeners = sessionAttributeListeners;
         this.sessionId = sessionId;
         this.timeout = timeout;
+        this.sessionTimeout = timeout;
         this.createTime = System.currentTimeMillis();
         this.attributes = new ConcurrentHashMap<>();
     }
@@ -33,7 +30,16 @@ public class StandardSession implements Session {
 
     @Override
     public void validate() {
-        this.createTime = System.currentTimeMillis();
+        Session session = this;
+        if (!session.isValidate()) {
+            sessionManager.removeSession(sessionId);
+        }
+    }
+
+    @Override
+    public void touch() {
+        long left = getTimeout() - (System.currentTimeMillis() - getCreationTime());
+        setTimeout(left + sessionTimeout);
     }
 
     @Override
@@ -43,7 +49,7 @@ public class StandardSession implements Session {
 
     @Override
     public boolean isValidate() {
-        return System.currentTimeMillis() - createTime < timeout;
+        return getMaxAge() > 0;
     }
 
     @Override
@@ -85,5 +91,17 @@ public class StandardSession implements Session {
     @Override
     public void setTimeout(long interval) {
         this.timeout = interval;
+    }
+
+    @Override
+    public long getMaxAge() {
+        long ageMillis = timeout - (System.currentTimeMillis() - createTime);
+        long age = ageMillis / 1000 + (ageMillis % 1000 > 0 ? 1 : 0);
+        return age;
+    }
+
+    @Override
+    public String toString() {
+        return "ID:" + sessionId + ", MaxAge:" + getMaxAge();
     }
 }

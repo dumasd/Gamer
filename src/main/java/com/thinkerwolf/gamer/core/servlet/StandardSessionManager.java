@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -15,21 +16,15 @@ import java.util.concurrent.TimeUnit;
 public class StandardSessionManager implements SessionManager {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(StandardSessionManager.class);
-
-    private ScheduledExecutorService scheduledService;
-
     private final Map<String, Session> sessionMap;
-
-    private long sessionTimeout;
-
     private final List<SessionListener> sessionListeners;
-
     private final List<SessionAttributeListener> sessionAttributeListeners;
-
+    private ScheduledExecutorService scheduledService;
+    private long sessionTimeout;
     private SessionIdGenerator sessionIdGenerator;
 
     public StandardSessionManager() {
-        this.sessionMap = new HashMap<>();
+        this.sessionMap = new ConcurrentHashMap<>();
         this.sessionListeners = new LinkedList<>();
         this.sessionAttributeListeners = new LinkedList<>();
         this.sessionIdGenerator = new StandardSessionIdGenerator();
@@ -40,13 +35,13 @@ public class StandardSessionManager implements SessionManager {
         sessionIdGenerator.generateSessionId();
         String tick = servletConfig.getInitParam(ServletConfig.SESSION_TICK_TIME);
         long tickTime;
-        if (tick != null) {
+        if (tick != null && tick.length() > 0) {
             tickTime = Long.parseLong(tick) * 1000;
         } else {
             tickTime = 1000;  // 1s tick
         }
         String timeout = servletConfig.getInitParam(ServletConfig.SESSION_TIMEOUT);
-        if (timeout != null) {
+        if (timeout != null && timeout.length() > 0) {
             this.sessionTimeout = Long.parseLong(timeout) * 1000;
         } else {
             this.sessionTimeout = 2 * 60 * 1000; // 2分钟
@@ -95,31 +90,29 @@ public class StandardSessionManager implements SessionManager {
 
     @Override
     public Session getSession(String sessionId, boolean create) {
-        if (sessionId == null) {
-            if (!create) {
-                return null;
-            }
-            sessionId = generateSessionId();
+        Session session = null;
+        if (!create  && (sessionId == null || sessionId.length() == 0)) {
+            return null;
+        } else if (sessionId != null && sessionId.length() > 0) {
+            // sessionId不为空
+            session = sessionMap.get(sessionId);
         }
 
-        Session session = sessionMap.get(sessionId);
-        if (session == null && create) {
-            Session createSession = null;
-            synchronized (sessionMap) {
-                session = sessionMap.get(sessionId);
-                if (session == null) {
-                    createSession = new StandardSession(this, sessionAttributeListeners, sessionId, sessionTimeout);
-                    session = createSession;
-                    sessionMap.put(sessionId, createSession);
-                }
-            }
+        if (session != null) {
+            session.validate();
+        }
 
-            if (createSession != null) {
-                //synchronized (sessionListeners) {
+        if (session == null || !session.isValidate()) {
+            if (create) {
+                sessionId = generateSessionId();
+                Session createSession = new StandardSession(this, sessionAttributeListeners, sessionId, sessionTimeout);
+                session = createSession;
+                sessionMap.put(sessionId, createSession);
                 for (SessionListener sessionListener : sessionListeners) {
                     sessionListener.sessionCreated(new SessionEvent(session));
                 }
-                //}
+            } else {
+                session = null;
             }
         }
         return session;
@@ -142,14 +135,7 @@ public class StandardSessionManager implements SessionManager {
         }
         Session session = getSession(sessionId);
         if (session != null) {
-            if (session.isValidate()) {
-                long left = session.getTimeout() - (System.currentTimeMillis() - session.getCreationTime());
-                session.setTimeout(left + sessionTimeout);
-            }
-        } else {
-            synchronized (sessionMap) {
-                removeSession(sessionId);
-            }
+            session.invalidate();
         }
     }
 
