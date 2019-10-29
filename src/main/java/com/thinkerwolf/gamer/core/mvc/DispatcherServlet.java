@@ -205,7 +205,7 @@ public class DispatcherServlet implements Servlet {
             Controller controller = controllerMap.get(command);
             if (controller == null) {
                 for (Controller v : controllerMap.values()) {
-                    if (v.getMatcher().matcher(command).matches()) {
+                    if (v.isMatch(command)) {
                         controller = v;
                         break;
                     }

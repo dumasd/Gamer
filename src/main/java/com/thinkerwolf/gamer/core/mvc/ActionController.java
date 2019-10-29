@@ -55,8 +55,8 @@ public class ActionController implements Controller {
     }
 
     @Override
-    public Pattern getMatcher() {
-        return matcher;
+    public boolean isMatch(String command) {
+        return matcher.matcher(command).matches();
     }
 
     private void init() {

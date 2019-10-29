@@ -7,8 +7,6 @@ import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.core.view.View;
 
-import java.util.regex.Pattern;
-
 /**
  * 静态资源
  *
@@ -31,8 +29,8 @@ public class ResourceController implements Controller {
     }
 
     @Override
-    public Pattern getMatcher() {
-        return null;
+    public boolean isMatch(String command) {
+        return false;
     }
 
     @Override
@@ -53,8 +51,9 @@ public class ResourceController implements Controller {
                 resourceView.render(resourceModel, request, response);
             }
         } else {
-            // 跳转到主页
-
+            // 跳转到默认主页
+            response.setStatus(ResponseStatus.NOT_FOUND);
+            ResponseUtil.renderError("Not found", request, response);
         }
     }
 }

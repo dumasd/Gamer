@@ -9,7 +9,7 @@ public interface Controller {
 
     String getCommand();
 
-    Pattern getMatcher();
+    boolean isMatch(String command);
 
     void handle(Request request, Response response) throws Exception;
 
