@@ -117,20 +117,17 @@ public class HttpRequest implements Request {
         if (cookie != null) {
             sessionId = cookie.value();
         }
+
         Session session = sessionManager.getSession(sessionId, create);
 
         if (create && (session != null && !session.getId().equals(sessionId))) {
             // session过期或者不存在，创建新的session
-            if (cookie == null) {
-                cookie = new DefaultCookie(Session.JSESSION, session.getId());
-            } else {
-                cookie.setValue(session.getId());
-            }
-            cookie.setValue(session.getId());
-            cookie.setMaxAge(session.getMaxAge());
             session.touch();
-            cookies.put(Session.JSESSION, cookie);
-            response.addCookie(cookie);
+            Cookie responseCookie = new DefaultCookie(Session.JSESSION, session.getId());
+            responseCookie.setValue(session.getId());
+            responseCookie.setMaxAge(session.getMaxAge());
+            cookies.put(Session.JSESSION, responseCookie);
+            response.addCookie(responseCookie);
         }
         return session;
     }

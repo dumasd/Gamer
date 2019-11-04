@@ -3,9 +3,11 @@ package com.thinkerwolf.gamer.netty.util;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 
 import java.util.*;
 
@@ -78,7 +80,9 @@ public class InternalHttpUtil {
     public static void addHeadersAndCookies(HttpResponse httpResponse, Response response) {
         Map<String, Cookie> cookies = (Map<String, Cookie>) response.getCookies();
         if (cookies != null) {
-            httpResponse.headers().add(HttpHeaderNames.SET_COOKIE, cookies.values());
+            for (Cookie cookie : cookies.values()) {
+                httpResponse.headers().add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+            }
         }
 
         Map<String, Object> headers = response.getHeaders();

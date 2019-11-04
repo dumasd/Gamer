@@ -44,6 +44,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
             Request request = new com.thinkerwolf.gamer.netty.http.
                     HttpRequest(requestId.incrementAndGet(), ctx.channel(), servletConfig.getServletContext(), httpRequest, response, compress);
             request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.HTTP_DECORATOR);
+            request.getSession(true);
             Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
             servlet.service(request, response);
         } catch (Exception e) {

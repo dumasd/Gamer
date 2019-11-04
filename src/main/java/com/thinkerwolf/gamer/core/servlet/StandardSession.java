@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StandardSession implements Session {
-    private final long sessionTimeout;
     private SessionManager sessionManager;
     private String sessionId;
     private volatile long createTime;
@@ -13,12 +12,13 @@ public class StandardSession implements Session {
     private volatile long timeout;
     private List<SessionAttributeListener> sessionAttributeListeners;
 
+    private volatile long lastTouchTime;
+
     public StandardSession(SessionManager sessionManager, List<SessionAttributeListener> sessionAttributeListeners, String sessionId, long timeout) {
         this.sessionManager = sessionManager;
         this.sessionAttributeListeners = sessionAttributeListeners;
         this.sessionId = sessionId;
         this.timeout = timeout;
-        this.sessionTimeout = timeout;
         this.createTime = System.currentTimeMillis();
         this.attributes = new ConcurrentHashMap<>();
     }
@@ -38,8 +38,7 @@ public class StandardSession implements Session {
 
     @Override
     public void touch() {
-        long passed = System.currentTimeMillis() - getCreationTime();
-        setTimeout(passed + sessionTimeout);
+        this.lastTouchTime = System.currentTimeMillis();
     }
 
     @Override
@@ -95,9 +94,8 @@ public class StandardSession implements Session {
 
     @Override
     public long getMaxAge() {
-        long ageMillis = timeout - (System.currentTimeMillis() - createTime);
-        long age = ageMillis / 1000 + (ageMillis % 1000 > 0 ? 1 : 0);
-        return age;
+        long ageMillis = timeout - (System.currentTimeMillis() - lastTouchTime);
+        return ageMillis / 1000 + (ageMillis % 1000 > 0 ? 1 : 0);
     }
 
     @Override

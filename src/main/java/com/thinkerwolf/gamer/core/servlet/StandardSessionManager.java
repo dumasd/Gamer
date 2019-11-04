@@ -4,7 +4,6 @@ import com.thinkerwolf.gamer.common.DefaultThreadFactory;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -52,16 +51,15 @@ public class StandardSessionManager implements SessionManager {
             @Override
             public void run() {
                 try {
-                    synchronized (sessionMap) {
-                        List<Session> invalidateSessions = new LinkedList<>();
-                        for (Session session : sessionMap.values()) {
-                            if (!session.isValidate()) {
-                                invalidateSessions.add(session);
-                            }
+//                    LOG.debug("Session tick check....");
+                    List<Session> invalidateSessions = new LinkedList<>();
+                    for (Session session : sessionMap.values()) {
+                        if (!session.isValidate()) {
+                            invalidateSessions.add(session);
                         }
-                        for (Session session : invalidateSessions) {
-                            session.invalidate();
-                        }
+                    }
+                    for (Session session : invalidateSessions) {
+                        session.invalidate();
                     }
                 } catch (Exception e) {
                     LOG.error("Session check error.", e);
@@ -91,7 +89,7 @@ public class StandardSessionManager implements SessionManager {
     @Override
     public Session getSession(String sessionId, boolean create) {
         Session session = null;
-        if (!create  && (sessionId == null || sessionId.length() == 0)) {
+        if (!create && (sessionId == null || sessionId.length() == 0)) {
             return null;
         } else if (sessionId != null && sessionId.length() > 0) {
             // sessionId不为空
@@ -141,11 +139,7 @@ public class StandardSessionManager implements SessionManager {
 
     @Override
     public void removeSession(String sessionId) {
-        Session session;
-        synchronized (sessionMap) {
-            session = sessionMap.remove(sessionId);
-        }
-
+        Session session = sessionMap.remove(sessionId);
         if (session != null) {
 //            synchronized (sessionListeners) {
             for (SessionListener sessionListener : sessionListeners) {
