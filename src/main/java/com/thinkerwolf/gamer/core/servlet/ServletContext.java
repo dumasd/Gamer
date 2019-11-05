@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.core.servlet;
 
+import java.util.List;
 import java.util.Map;
 
 public interface ServletContext {
@@ -17,6 +18,10 @@ public interface ServletContext {
     Object removeAttribute(String key);
 
     void setAttribute(String key, Object value);
+
+    List<Object> getListeners();
+
+    void setListeners(List<Object> listeners);
 
     default SessionManager  getSessionManager() {
         return (SessionManager) getAttribute(ROOT_SESSION_MANAGER_ATTRIBUTE);

@@ -8,20 +8,59 @@ import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.netty.NettyConfig;
 import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class NettyServerTests {
 
     public static void main(String[] args) throws Exception {
         InternalLoggerFactory.setDefaultLoggerFactory(new JdkLoggerFactory());
-        Map<String, String> initParams = new HashMap<>();
+        final Map<String, String> initParams = new HashMap<>();
         initParams.put("componentScanPackage", "com.thinkerwolf");
         initParams.put("compress", "true");
         initParams.put("sessionTimeout", "10");
         initParams.put(ServletConfig.SESSION_TICK_TIME, "1");
+
+        // 定义listeners
+        List<Object> listeners = new LinkedList<>();
+        listeners.add(new ServletContextListener() {
+            @Override
+            public void contextInitialized(ServletContextEvent sce) {
+
+            }
+
+            @Override
+            public void contextDestroy(ServletContextEvent sce) {
+
+            }
+        });
+
+        listeners.add(new SessionListener() {
+            @Override
+            public void sessionCreated(SessionEvent se) {
+                System.out.println("session create : " + se.getSource());
+            }
+
+            @Override
+            public void sessionDestroyed(SessionEvent se) {
+                System.out.println("session destroy : " + se.getSource());
+            }
+        });
+
+        listeners.add(new SessionAttributeListener() {
+            @Override
+            public void attributeAdded(SessionAttributeEvent sae) {
+                System.out.println("session attributeAdded : " + sae.getSource());
+            }
+
+            @Override
+            public void attributeRemoved(SessionAttributeEvent sae) {
+
+            }
+        });
+
         final ServletContext servletContext = new DefaultServletContext();
+        servletContext.setListeners(listeners);
+
         ServletConfig servletConfig = new ServletConfig() {
             @Override
             public String getServletName() {

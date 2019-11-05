@@ -6,12 +6,24 @@ public class SessionAttributeEvent extends EventObject {
 
     private String key;
 
-    private Object att;
+    private Object value;
 
-    public SessionAttributeEvent(Object source, String key, Object att) {
+    public SessionAttributeEvent(Session source, String key, Object att) {
         super(source);
         this.key = key;
-        this.att = att;
+        this.value = att;
     }
 
+    @Override
+    public Session getSource() {
+        return (Session) super.getSource();
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public Object getValue() {
+        return value;
+    }
 }

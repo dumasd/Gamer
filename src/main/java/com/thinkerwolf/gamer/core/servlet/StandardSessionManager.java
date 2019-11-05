@@ -46,6 +46,15 @@ public class StandardSessionManager implements SessionManager {
             this.sessionTimeout = 2 * 60 * 1000; // 2分钟
         }
 
+        List<Object> listeners = servletConfig.getServletContext().getListeners();
+        for (Object listener : listeners) {
+            if (listener instanceof SessionListener) {
+                addSessionListener((SessionListener) listener);
+            } else if (listener instanceof SessionAttributeListener) {
+                addSessionAttributeListener((SessionAttributeListener) listener);
+            }
+        }
+
         this.scheduledService = new ScheduledThreadPoolExecutor(3, new DefaultThreadFactory("Session-check"));
         scheduledService.schedule(new Runnable() {
             @Override
@@ -143,7 +152,7 @@ public class StandardSessionManager implements SessionManager {
         if (session != null) {
 //            synchronized (sessionListeners) {
             for (SessionListener sessionListener : sessionListeners) {
-                sessionListener.sessionCreated(new SessionEvent(session));
+                sessionListener.sessionDestroyed(new SessionEvent(session));
             }
 //            }
         }

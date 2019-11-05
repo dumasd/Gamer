@@ -76,7 +76,7 @@ public class FreemarkerHelper {
                     if (writer != null) {
                         writer.close();
                     }
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
         }

@@ -20,6 +20,7 @@ public class StandardSession implements Session {
         this.sessionId = sessionId;
         this.timeout = timeout;
         this.createTime = System.currentTimeMillis();
+        this.lastTouchTime = System.currentTimeMillis();
         this.attributes = new ConcurrentHashMap<>();
     }
 
@@ -48,7 +49,7 @@ public class StandardSession implements Session {
 
     @Override
     public boolean isValidate() {
-        return getMaxAge() > 0;
+        return timeout - (System.currentTimeMillis() - lastTouchTime) > 0;
     }
 
     @Override
