@@ -13,6 +13,7 @@ public class StandardSession implements Session {
     private List<SessionAttributeListener> sessionAttributeListeners;
 
     private volatile long lastTouchTime;
+    private Push push;
 
     public StandardSession(SessionManager sessionManager, List<SessionAttributeListener> sessionAttributeListeners, String sessionId, long timeout) {
         this.sessionManager = sessionManager;
@@ -97,6 +98,16 @@ public class StandardSession implements Session {
     public long getMaxAge() {
         long ageMillis = timeout - (System.currentTimeMillis() - lastTouchTime);
         return ageMillis / 1000 + (ageMillis % 1000 > 0 ? 1 : 0);
+    }
+
+    @Override
+    public void setPush(Push push) {
+        this.push = push;
+    }
+
+    @Override
+    public Push getPush() {
+        return push;
     }
 
     @Override

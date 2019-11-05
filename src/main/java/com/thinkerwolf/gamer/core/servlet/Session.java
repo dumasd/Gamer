@@ -51,4 +51,9 @@ public interface Session {
      * @return
      */
     long getMaxAge();
+
+    void setPush(Push push);
+
+    Push getPush();
+
 }

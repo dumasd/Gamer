@@ -18,7 +18,7 @@ public class NettyServerTests {
         initParams.put("componentScanPackage", "com.thinkerwolf");
         initParams.put("compress", "true");
         initParams.put("sessionTimeout", "10");
-        initParams.put(ServletConfig.SESSION_TICK_TIME, "1");
+        initParams.put(ServletConfig.SESSION_TICK_TIME, "5");
 
         // 定义listeners
         List<Object> listeners = new LinkedList<>();

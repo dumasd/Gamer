@@ -102,6 +102,8 @@ public class TcpRequest implements Request {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Create new session " + session);
             }
+//            session.setPush();
+
         }
         return session;
     }
