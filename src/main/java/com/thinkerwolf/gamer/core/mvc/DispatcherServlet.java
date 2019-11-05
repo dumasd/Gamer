@@ -197,7 +197,6 @@ public class DispatcherServlet implements Servlet {
     public void service(Request request, Response response) throws Exception {
         String command = request.getCommand();
         if (command == null) {
-            // FIXME 没有找到响应的command，发送
             LOG.warn("Can't find command from the request.");
             response.setStatus(ResponseStatus.BAD_REQUEST);
             ResponseUtil.renderError("Bad request,no command", request, response);
@@ -217,7 +216,6 @@ public class DispatcherServlet implements Servlet {
             }
 
             if (controller == null) {
-                // FIXME 没有找到响应的command，发送
                 LOG.warn("Can't find command in server. command:[" + command + "]");
                 response.setStatus(ResponseStatus.NOT_FOUND);
                 ResponseUtil.renderError("Can't find command in server.", request, response);

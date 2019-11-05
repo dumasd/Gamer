@@ -2,12 +2,15 @@ package com.thinkerwolf.gamer.netty.util;
 
 import com.thinkerwolf.gamer.core.servlet.Response;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
+import io.netty.handler.stream.ChunkedInput;
 
 import java.util.*;
 
@@ -109,6 +112,30 @@ public class InternalHttpUtil {
             }
         }
         return encodeSet;
+    }
+
+
+    public static void chunkResponse(Channel channel, HttpRequest httpRequest, ChunkedInput chunkedInput) {
+        HttpVersion version = httpRequest.protocolVersion();
+        HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+
+        if (version == HttpVersion.HTTP_1_0) {
+            nettyResponse.headers().add(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        }
+        nettyResponse.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+        nettyResponse.headers().add(HttpHeaderNames.CACHE_CONTROL, HttpHeaderValues.NO_CACHE);
+        nettyResponse.headers().add(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
+
+        boolean keepAlive = HttpUtil.isKeepAlive(httpRequest);
+
+        if (chunkedInput != null) {
+            ChannelFuture writeFuture = channel.write(nettyResponse);
+            channel.write(chunkedInput);
+            if (!keepAlive) {
+                writeFuture.addListener(ChannelFutureListener.CLOSE);
+            }
+        }
+
     }
 
 
