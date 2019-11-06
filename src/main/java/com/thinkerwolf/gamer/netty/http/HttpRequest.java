@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.CompressUtil;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
+import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -54,6 +55,13 @@ public class HttpRequest implements Request {
         this.response = response;
         if (compress) {
             this.encoding = CompressUtil.getCompress(InternalHttpUtil.getAcceptEncodings(nettyRequest));
+        }
+
+        if (RequestUtil.isLongHttp(command)) {
+            Session session = getSession(false);
+            if (session != null) {
+                session.setPush(new HttpPush(ctx, nettyRequest));
+            }
         }
     }
 

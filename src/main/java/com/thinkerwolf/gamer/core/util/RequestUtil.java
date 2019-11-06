@@ -7,6 +7,12 @@ import java.util.Map;
 
 public class RequestUtil {
 
+    public static final String LONG_HTTP = "longhttp";
+
+    public static boolean isLongHttp(String command) {
+        return LONG_HTTP.equalsIgnoreCase(command);
+    }
+
 
     public static Map<String, Object> parseParams(byte[] bytes) {
         Map<String, Object> params = new HashMap<>();

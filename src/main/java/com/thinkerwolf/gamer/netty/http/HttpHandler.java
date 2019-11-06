@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.core.util.ServletUtil;
 import com.thinkerwolf.gamer.netty.NettyConfig;
 import com.thinkerwolf.gamer.netty.NettyConstants;
@@ -47,12 +48,9 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
             Request request = new com.thinkerwolf.gamer.netty.http.
                     HttpRequest(requestId.incrementAndGet(), ctx, servletConfig.getServletContext(), nettyRequest, response, compress);
             request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.HTTP_DECORATOR);
-            Session session = request.getSession(true);
 
-            LOG.debug("Request command : " + request.getCommand());
-
-            if ("longhttp".equals(request.getCommand())) {
-                session.setPush(new HttpPush(ctx, nettyRequest));
+            // 长连接推送
+            if (RequestUtil.isLongHttp(request.getCommand())) {
                 return;
             }
 
