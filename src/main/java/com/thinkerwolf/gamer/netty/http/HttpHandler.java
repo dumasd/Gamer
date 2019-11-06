@@ -6,7 +6,10 @@ import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.ServletUtil;
 import com.thinkerwolf.gamer.netty.NettyConfig;
 import com.thinkerwolf.gamer.netty.NettyConstants;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
@@ -37,14 +40,22 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
         Channel channel = ctx.channel();
         try {
             boolean compress = ServletUtil.isCompress(servletConfig);
-            HttpRequest httpRequest = (HttpRequest) msg;
+            HttpRequest nettyRequest = (HttpRequest) msg;
 
-            Response response = new com.thinkerwolf.gamer.netty.http.HttpResponse(ctx.channel(), httpRequest);
+            Response response = new com.thinkerwolf.gamer.netty.http.HttpResponse(ctx.channel(), nettyRequest);
 
             Request request = new com.thinkerwolf.gamer.netty.http.
-                    HttpRequest(requestId.incrementAndGet(), ctx.channel(), servletConfig.getServletContext(), httpRequest, response, compress);
+                    HttpRequest(requestId.incrementAndGet(), ctx, servletConfig.getServletContext(), nettyRequest, response, compress);
             request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.HTTP_DECORATOR);
-            request.getSession(true);
+            Session session = request.getSession(true);
+
+            LOG.debug("Request command : " + request.getCommand());
+
+            if ("longhttp".equals(request.getCommand())) {
+                session.setPush(new HttpPush(ctx, nettyRequest));
+                return;
+            }
+
             Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
             servlet.service(request, response);
         } catch (Exception e) {

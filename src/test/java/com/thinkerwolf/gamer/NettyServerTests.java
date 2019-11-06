@@ -3,12 +3,16 @@ package com.thinkerwolf.gamer;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.jdk.JdkLoggerFactory;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.core.model.ByteModel;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.netty.NettyConfig;
 import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class NettyServerTests {
 
@@ -17,8 +21,9 @@ public class NettyServerTests {
         final Map<String, String> initParams = new HashMap<>();
         initParams.put("componentScanPackage", "com.thinkerwolf");
         initParams.put("compress", "true");
-        initParams.put("sessionTimeout", "10");
+        initParams.put("sessionTimeout", "300");
         initParams.put(ServletConfig.SESSION_TICK_TIME, "5");
+
 
         // 定义listeners
         List<Object> listeners = new LinkedList<>();
@@ -34,9 +39,12 @@ public class NettyServerTests {
             }
         });
 
+        Set<Session> sessions = new HashSet<>();
+
         listeners.add(new SessionListener() {
             @Override
             public void sessionCreated(SessionEvent se) {
+                sessions.add(se.getSource());
                 System.out.println("session create : " + se.getSource());
             }
 
@@ -90,11 +98,30 @@ public class NettyServerTests {
         Servlet servlet = ClassUtils.newInstance(servletConfig.servletClass());
         servlet.init(servletConfig);
 
+        ScheduledExecutorService schedule = Executors.newScheduledThreadPool(3);
+
+        schedule.schedule(new Runnable() {
+
+            private int num = 1;
+
+            @Override
+            public void run() {
+                for (Session session : sessions) {
+                    if (session.getPush() != null) {
+                        session.getPush().push(new ByteModel(("{\"num\":" + num + ",\"netty\":\"4.1.19\"}").getBytes()));
+                    }
+                }
+                num++;
+                schedule.schedule(this, 5, TimeUnit.SECONDS);
+
+            }
+        }, 20, TimeUnit.SECONDS);
+
+
         startupTcp(servletConfig);
         startupHttp(servletConfig);
 
     }
-
 
     private static void startupTcp(ServletConfig servletConfig) {
         NettyConfig nettyConfig = new NettyConfig();

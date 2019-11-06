@@ -130,7 +130,9 @@ public class InternalHttpUtil {
 
         if (chunkedInput != null) {
             ChannelFuture writeFuture = channel.write(nettyResponse);
-            channel.write(chunkedInput);
+            if (httpRequest.method() != HttpMethod.HEAD) {
+                channel.write(chunkedInput);
+            }
             if (!keepAlive) {
                 writeFuture.addListener(ChannelFutureListener.CLOSE);
             }

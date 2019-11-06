@@ -4,8 +4,8 @@
 <head>
     <title>登录-Easyblog</title>
     <meta charset="UTF-8">
-    <meta name="keywords" content="blog" />
-    <meta name="description" content="blog" />
+    <meta name="keywords" content="blog"/>
+    <meta name="description" content="blog"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Material Design for Bootstrap fonts and icons
@@ -18,53 +18,71 @@
 </head>
 
 <body>
-    <div class="container p-0 h-100">
-        <div class="card pt-3 pb-3 pl-3 pr-3" style="width:26rem;margin:100px auto 0">
-            <div class="card-body">
-                <h5 class="card-title font-weight-bold">密码登录</h5>
-                <form class="needs-validation" th:action="@{/login}" method="post">
-                    <div class="form-group">
-                        <label for="username" class="bmd-label-floating">用户名</label>
-                        <input type="text" name="username" class="form-control" id="username" required />
-                        <div class="invalid-feedback">
-                            请输入用户名.
-                        </div>
+<div class="container p-0 h-100">
+    <div class="card pt-3 pb-3 pl-3 pr-3" style="width:26rem;margin:100px auto 0">
+        <div class="card-body">
+            <h5 class="card-title font-weight-bold">密码登录</h5>
+            <form class="needs-validation" th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label for="username" class="bmd-label-floating">用户名</label>
+                    <input type="text" name="username" class="form-control" id="username" required/>
+                    <div class="invalid-feedback">
+                        请输入用户名.
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="password" class="bmd-label-floating">密码</label>
-                        <input type="password" name="password" class="form-control" id="password" required />
-                        <div class="invalid-feedback">
-                            请输入密码.
-                        </div>
+                <div class="form-group">
+                    <label for="password" class="bmd-label-floating">密码</label>
+                    <input type="password" name="password" class="form-control" id="password" required/>
+                    <div class="invalid-feedback">
+                        请输入密码.
                     </div>
+                </div>
 
-                    <div class="checkbox mt-4">
-                        <label><input type="checkbox" name="rememberme" id="rememberme">
-                            记住我
-                        </label>
-                    </div>
-                    <input class="btn btn-raised btn-primary rounded w-100 mt-3 mb-4" type="submit" value="登录" />
+                <div class="checkbox mt-4">
+                    <label><input type="checkbox" name="rememberme" id="rememberme">
+                        记住我
+                    </label>
+                </div>
+                <input class="btn btn-raised btn-primary rounded w-100 mt-3 mb-4" type="submit" value="登录"/>
 
-                    <div class="row">
-                        <div class="col-sm">
-                            <p>没有账号？<a class="text-primary" href="/signup" role="link" aria-disabled="true">注册</a></p>
-                        </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <p>没有账号？<a class="text-primary" href="/signup" role="link" aria-disabled="true">注册</a></p>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/jquery-3.2.1.min.js"></script>
 
-    <!--<script src="js/jquery-1.8.3.min.js" type="javascript"></script>-->
-    <script src="js/popper.js"></script>
-    <script src="js/bootstrap-material-design.js"></script>
-    <script src="js/base.js"></script>
-    <script>
-        
-    </script>
+<!--<script src="js/jquery-1.8.3.min.js" type="javascript"></script>-->
+<script src="js/popper.js"></script>
+<script src="js/bootstrap-material-design.js"></script>
+<script src="js/base.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        function push() {
+            $.ajax({
+                url: "/longhttp",
+                dataType: "json",
+                type: "GET",
+                success: function (d, s) {
+                    console.log(d);
+                },
+                complete: function (x, s) {
+                    console.log(x);
+                    setTimeout(function () {
+                        push();
+                    }, 1000);
+                }
+            });
+        }
+        push();
+    });
+</script>
 </body>
 
 

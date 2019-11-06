@@ -7,6 +7,7 @@ import com.thinkerwolf.gamer.core.util.CompressUtil;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 
@@ -21,13 +22,15 @@ public class HttpRequest implements Request {
 
     private String command;
 
+    private ChannelHandlerContext ctx;
+
     private Channel channel;
 
     private ServletContext servletContext;
 
     private Map<String, Cookie> cookies;
 
-    private io.netty.handler.codec.http.HttpRequest request;
+    private io.netty.handler.codec.http.HttpRequest nettyRequest;
 
     private Response response;
 
@@ -37,19 +40,20 @@ public class HttpRequest implements Request {
 
     private String encoding;
 
-    public HttpRequest(long requestId, Channel channel, ServletContext servletContext,
-                       io.netty.handler.codec.http.HttpRequest request, Response response, boolean compress) {
+    public HttpRequest(long requestId, ChannelHandlerContext ctx, ServletContext servletContext,
+                       io.netty.handler.codec.http.HttpRequest nettyRequest, Response response, boolean compress) {
         this.requestId = requestId;
-        this.request = request;
-        this.command = InternalHttpUtil.getCommand(request);
-        this.channel = channel;
+        this.nettyRequest = nettyRequest;
+        this.command = InternalHttpUtil.getCommand(nettyRequest);
+        this.channel = ctx.channel();
+        this.ctx = ctx;
         this.servletContext = servletContext;
-        this.cookies = InternalHttpUtil.getCookies(request);
-        this.contents = InternalHttpUtil.getRequestContent(request);
+        this.cookies = InternalHttpUtil.getCookies(nettyRequest);
+        this.contents = InternalHttpUtil.getRequestContent(nettyRequest);
         this.attributes = RequestUtil.parseParams(getContent());
         this.response = response;
         if (compress) {
-            this.encoding = CompressUtil.getCompress(InternalHttpUtil.getAcceptEncodings(request));
+            this.encoding = CompressUtil.getCompress(InternalHttpUtil.getAcceptEncodings(nettyRequest));
         }
     }
 
@@ -122,6 +126,7 @@ public class HttpRequest implements Request {
 
         if (create && (session != null && !session.getId().equals(sessionId))) {
             // session过期或者不存在，创建新的session
+            session.setPush(new HttpPush(ctx, nettyRequest));
             session.touch();
             Cookie responseCookie = new DefaultCookie(Session.JSESSION, session.getId());
             responseCookie.setValue(session.getId());
