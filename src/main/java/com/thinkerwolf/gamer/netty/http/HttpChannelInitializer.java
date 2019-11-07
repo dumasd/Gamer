@@ -16,22 +16,23 @@ public class HttpChannelInitializer extends ChannelInitializer<Channel> {
     private NettyConfig nettyConfig;
     private ServletConfig servletConfig;
     private AtomicLong requestId;
+    private HttpHandler httpHandler;
+
 
     public HttpChannelInitializer(NettyConfig nettyConfig, ServletConfig servletConfig) {
         this.nettyConfig = nettyConfig;
         this.servletConfig = servletConfig;
         this.requestId = new AtomicLong();
+        this.httpHandler = new HttpHandler();
+        this.httpHandler.init(requestId, nettyConfig, servletConfig);
     }
 
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
-        HttpHandler handler = new HttpHandler();
-        handler.init(requestId, nettyConfig, servletConfig);
-
         pipeline.addLast("http-decoder", new HttpRequestDecoder());
         pipeline.addLast("http-aggregator", new HttpObjectAggregator(65536));
         pipeline.addLast("http-encoder", new HttpResponseEncoder());
         pipeline.addLast("http-chunk", new ChunkedWriteHandler());
-        pipeline.addLast("handler", handler);
+        pipeline.addLast("handler", httpHandler);
     }
 }

@@ -21,7 +21,7 @@ public class TestAction {
 
     @Command("test@jjj*")
     public ByteModel getTest(Request request, @RequestParam("num") int num) {
-        return new ByteModel("{\"num\":888,\"netty\":\"4.1.19\"}".getBytes());
+        return new ByteModel(("{\"num\":" + num + ",\"netty\":\"4.1.19\"}").getBytes());
     }
 
     @Command("index")
@@ -30,6 +30,12 @@ public class TestAction {
         Map<String, Object> data = new HashMap<>();
         data.put("title", "Freemarker");
         return new FreemarkerModel("index.ftl", data);
+    }
+
+    @Command("user@login")
+    public ByteModel login(Request request, @RequestParam("username") String username, @RequestParam("password") String password) {
+        request.getSession(true);
+        return new ByteModel("{}".getBytes());
     }
 
 

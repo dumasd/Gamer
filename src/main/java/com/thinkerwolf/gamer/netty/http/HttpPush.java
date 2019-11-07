@@ -3,12 +3,14 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.core.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Push;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
+/**
+ * http push
+ */
 public class HttpPush implements Push {
 
     private ChannelHandlerContext ctx;
@@ -25,16 +27,23 @@ public class HttpPush implements Push {
 
     @Override
     public void push(Object data) {
-        Model model = (Model) data;
-        byte[] bytes = model.getBytes();
-        if (chunkedInput == null) {
-            pushChunkedInput = new PushChunkedInput();
-            chunkedInput = new HttpChunkedInput(pushChunkedInput);
-            InternalHttpUtil.chunkResponse(ctx.channel(), nettyRequest, chunkedInput);
-        }
-        pushChunkedInput.writeChunk(bytes);
+        if (isPushable()) {
+            Model model = (Model) data;
+            byte[] bytes = model.getBytes();
+            if (chunkedInput == null) {
+                pushChunkedInput = new PushChunkedInput();
+                chunkedInput = new HttpChunkedInput(pushChunkedInput);
+                InternalHttpUtil.chunkResponse(ctx.channel(), nettyRequest, chunkedInput);
+            }
+            pushChunkedInput.writeChunk(bytes);
 
-        ChunkedWriteHandler chunkedWriteHandler = ctx.pipeline().get(ChunkedWriteHandler.class);
-        chunkedWriteHandler.resumeTransfer();
+            ChunkedWriteHandler chunkedWriteHandler = ctx.pipeline().get(ChunkedWriteHandler.class);
+            chunkedWriteHandler.resumeTransfer();
+        }
+    }
+
+    @Override
+    public boolean isPushable() {
+        return ctx.channel().isOpen() && ctx.channel().isWritable();
     }
 }

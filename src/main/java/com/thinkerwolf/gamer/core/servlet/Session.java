@@ -5,7 +5,7 @@ package com.thinkerwolf.gamer.core.servlet;
  */
 public interface Session {
 
-    public static final String JSESSION = "JSESSION";
+    String JSESSION = "GAMER_SESSION";
 
     String getId();
 
@@ -14,12 +14,15 @@ public interface Session {
      */
     void validate();
 
+    /**
+     * 更新session上一次touch时间
+     */
     void touch();
 
     /**
-     * 失效session
+     * session过期操作
      */
-    void invalidate();
+    void expire();
 
     /**
      * session是否有效
@@ -52,8 +55,16 @@ public interface Session {
      */
     long getMaxAge();
 
+    /**
+     * 设置push
+     * @param push
+     */
     void setPush(Push push);
 
+    /**
+     * 获取push
+     * @return
+     */
     Push getPush();
 
 }

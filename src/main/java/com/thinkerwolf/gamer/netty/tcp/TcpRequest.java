@@ -19,7 +19,7 @@ public class TcpRequest implements Request {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(TcpRequest.class);
 
-    private static AttributeKey<String> SESSION_KEY = AttributeKey.newInstance(Session.JSESSION);
+    public static AttributeKey<String> SESSION_KEY = AttributeKey.newInstance(Session.JSESSION);
 
     private Map<String, Object> attributes;
 
@@ -44,6 +44,10 @@ public class TcpRequest implements Request {
         this.attributes = RequestUtil.parseParams(content);
         if (channel.hasAttr(SESSION_KEY)) {
             this.sessionId = channel.attr(SESSION_KEY).get();
+        }
+        Session session = getSession(false);
+        if (session != null) {
+            session.setPush(new TcpPush(channel));
         }
     }
 

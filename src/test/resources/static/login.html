@@ -64,6 +64,8 @@
 <script src="js/base.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
+
+
         function push() {
             $.ajax({
                 url: "/longhttp",
@@ -73,14 +75,22 @@
                     console.log(d);
                 },
                 complete: function (x, s) {
-                    console.log(x);
                     setTimeout(function () {
                         push();
                     }, 1000);
                 }
             });
         }
-        push();
+        $.ajax({
+            url: "/user@login",
+            dataType: "json",
+            type: "GET",
+            success: function (d, s) {
+                console.log(d);
+                push();
+            }
+
+        });
     });
 </script>
 </body>

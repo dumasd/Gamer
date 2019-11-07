@@ -9,6 +9,7 @@ import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.AttributeKey;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
@@ -52,10 +53,10 @@ public class TcpHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        // 注册创建session
         SessionManager sessionManager = (SessionManager) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE);
         if (sessionManager != null) {
-            sessionManager.getSession(null, true);
+            Session session = sessionManager.getSession(null, true);
+            ctx.channel().attr(TcpRequest.SESSION_KEY).set(session.getId());
         }
     }
 

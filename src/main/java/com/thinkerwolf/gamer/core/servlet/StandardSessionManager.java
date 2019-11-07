@@ -7,10 +7,7 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class StandardSessionManager implements SessionManager {
 
@@ -68,7 +65,11 @@ public class StandardSessionManager implements SessionManager {
                         }
                     }
                     for (Session session : invalidateSessions) {
-                        session.invalidate();
+                        try {
+                            session.expire();
+                        } catch (Exception e) {
+                            LOG.warn("Session expire error.", e);
+                        }
                     }
                 } catch (Exception e) {
                     LOG.error("Session check error.", e);
@@ -116,7 +117,11 @@ public class StandardSessionManager implements SessionManager {
                 session = createSession;
                 sessionMap.put(sessionId, createSession);
                 for (SessionListener sessionListener : sessionListeners) {
-                    sessionListener.sessionCreated(new SessionEvent(session));
+                    try {
+                        sessionListener.sessionCreated(new SessionEvent(session));
+                    } catch (Exception e) {
+                        LOG.warn("Exception when notify sessionCreated", e);
+                    }
                 }
             } else {
                 session = null;
@@ -142,7 +147,7 @@ public class StandardSessionManager implements SessionManager {
         }
         Session session = getSession(sessionId);
         if (session != null) {
-            session.invalidate();
+            session.expire();
         }
     }
 
@@ -152,7 +157,11 @@ public class StandardSessionManager implements SessionManager {
         if (session != null) {
 //            synchronized (sessionListeners) {
             for (SessionListener sessionListener : sessionListeners) {
-                sessionListener.sessionDestroyed(new SessionEvent(session));
+                try {
+                    sessionListener.sessionDestroyed(new SessionEvent(session));
+                } catch (Exception e) {
+                    LOG.warn("Exception when notify sessionDestroy.", e);
+                }
             }
 //            }
         }

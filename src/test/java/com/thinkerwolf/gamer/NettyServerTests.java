@@ -50,6 +50,7 @@ public class NettyServerTests {
 
             @Override
             public void sessionDestroyed(SessionEvent se) {
+                sessions.remove(se.getSource());
                 System.out.println("session destroy : " + se.getSource());
             }
         });
@@ -106,6 +107,7 @@ public class NettyServerTests {
 
             @Override
             public void run() {
+                System.out.println("session push = " + sessions.size());
                 for (Session session : sessions) {
                     if (session.getPush() != null) {
                         session.getPush().push(new ByteModel(("{\"num\":" + num + ",\"netty\":\"4.1.19\"}").getBytes()));

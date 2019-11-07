@@ -1,10 +1,16 @@
 package com.thinkerwolf.gamer.core.servlet;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StandardSession implements Session {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(StandardSession.class);
+
     private SessionManager sessionManager;
     private String sessionId;
     private volatile long createTime;
@@ -44,7 +50,7 @@ public class StandardSession implements Session {
     }
 
     @Override
-    public void invalidate() {
+    public void expire() {
         sessionManager.removeSession(sessionId);
     }
 
@@ -63,7 +69,11 @@ public class StandardSession implements Session {
         attributes.put(key, att);
         // notify
         for (SessionAttributeListener attributeListener : sessionAttributeListeners) {
-            attributeListener.attributeAdded(new SessionAttributeEvent(this, key, att));
+            try {
+                attributeListener.attributeAdded(new SessionAttributeEvent(this, key, att));
+            } catch (Exception e) {
+                LOG.warn("Exception when session attributeAdded", e);
+            }
         }
     }
 
@@ -78,7 +88,11 @@ public class StandardSession implements Session {
         if (att != null) {
             // notify
             for (SessionAttributeListener attributeListener : sessionAttributeListeners) {
-                attributeListener.attributeRemoved(new SessionAttributeEvent(this, key, att));
+                try {
+                    attributeListener.attributeRemoved(new SessionAttributeEvent(this, key, att));
+                } catch (Exception e) {
+                    LOG.warn("Exception when session attributeRemoved", e);
+                }
             }
         }
         return att;
@@ -101,12 +115,12 @@ public class StandardSession implements Session {
     }
 
     @Override
-    public void setPush(Push push) {
+    public synchronized void setPush(Push push) {
         this.push = push;
     }
 
     @Override
-    public Push getPush() {
+    public synchronized Push getPush() {
         return push;
     }
 
