@@ -18,13 +18,12 @@ public class StringView extends AbstractView {
         Protocol protocol = request.getProtocol();
         Decorator decorator = ServiceLoader.getService(request.getAttribute(Request.DECORATOR_ATTRIBUTE).toString(), Decorator.class);
         if (protocol == Protocol.TCP) {
-            response.setContentType("string");
             response.write(decorator.decorate(model, request, response));
         } else if (protocol == Protocol.HTTP) {
             response.setContentType("text/plain");
             response.write(decorator.decorate(model, request, response));
         } else if (protocol == Protocol.WEBSOCKET) {
-
+            response.write(decorator.decorate(model, request, response));
         }
     }
 }

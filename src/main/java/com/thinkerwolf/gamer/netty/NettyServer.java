@@ -28,7 +28,7 @@ public class NettyServer {
         this.servletConfig = servletConfig;
     }
 
-    public void startup() {
+    public void startup() throws Exception {
         ServerBootstrap sb = new ServerBootstrap();
         EventLoopGroup bossGroup = new NioEventLoopGroup(config.getBossThreads());
         EventLoopGroup workerGroup = new NioEventLoopGroup(config.getWorkThreads());
@@ -52,10 +52,15 @@ public class NettyServer {
         ChannelInitializer channelInitializer = ChannelHandlers.createChannelInitializer(config, servletConfig);
         sb.childHandler(channelInitializer);
         ChannelFuture future = sb.bind(new InetSocketAddress(config.getPort()));
+
         future.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
-                LOG.info("Listen @" + config.getProtocol().name().toLowerCase() + " on @" + config.getPort() + " success");
+                if (future.isSuccess()) {
+                    LOG.info("Listen @" + config.getProtocol().name().toLowerCase() + " on @" + config.getPort() + " success");
+                } else {
+                    LOG.error("Can't start server", future.cause());
+                }
             }
         });
     }

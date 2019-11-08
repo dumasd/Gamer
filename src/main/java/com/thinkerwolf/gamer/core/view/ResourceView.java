@@ -12,22 +12,12 @@ import java.util.Map;
 
 public class ResourceView extends AbstractView {
 
-    private Map<Protocol, Map<String, String>> mimeMappings;
+    private Map<String, String> mimeMappings;
 
     public ResourceView() {
         mimeMappings = new HashMap<>();
 
-        Map<String, String> tcpMimeMappings = new HashMap<>();
-        tcpMimeMappings.put("json", "json");
-        tcpMimeMappings.put("txt", "text/plain");
-        tcpMimeMappings.put("png", "image/png");
-        tcpMimeMappings.put("gif", "image/gif");
-        tcpMimeMappings.put("jpg", "image/jpeg");
-        tcpMimeMappings.put("jpeg", "image/jpeg");
-        mimeMappings.put(Protocol.TCP, tcpMimeMappings);
-
-
-        Map<String, String> httpMimeMappings = new HashMap<>();
+        Map<String, String> httpMimeMappings = mimeMappings;
         httpMimeMappings.put("html", "text/html");
         httpMimeMappings.put("txt", "text/plain");
         httpMimeMappings.put("css", "text/css");
@@ -42,8 +32,6 @@ public class ResourceView extends AbstractView {
         httpMimeMappings.put("ico", "image/x-icon");
         httpMimeMappings.put("tff", "image/tiff");
         httpMimeMappings.put("svg", "image/svg");
-        mimeMappings.put(Protocol.HTTP, httpMimeMappings);
-
     }
 
     @Override
@@ -53,6 +41,11 @@ public class ResourceView extends AbstractView {
 
     @Override
     protected void doRender(Model model, Request request, Response response) throws Exception {
+
+        if (request.getProtocol() == Protocol.TCP) {
+            throw new UnsupportedOperationException("Tcp not supported");
+        }
+
         ResourceModel resourceModel = (ResourceModel) model;
         Protocol protocol = request.getProtocol();
         String mime = findMimeType(protocol, resourceModel.getExtension());
@@ -69,11 +62,7 @@ public class ResourceView extends AbstractView {
 
 
     private String findMimeType(Protocol protocol, String extension) {
-        Map<String, String> mimes = mimeMappings.get(protocol);
-        if (mimes == null) {
-            return null;
-        }
-        return mimes.get(extension);
+        return mimeMappings.get(extension);
     }
 
 }

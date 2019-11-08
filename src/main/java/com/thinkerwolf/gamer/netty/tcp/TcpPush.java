@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.netty.tcp;
 import com.google.protobuf.ByteString;
 import com.thinkerwolf.gamer.core.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Push;
+import com.thinkerwolf.gamer.netty.tcp.protobuf.PacketProto;
 import io.netty.channel.Channel;
 
 /**

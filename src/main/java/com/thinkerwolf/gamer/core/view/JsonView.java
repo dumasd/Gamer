@@ -25,7 +25,6 @@ public class JsonView extends AbstractView {
         switch (protocol) {
             case TCP:
                 // wrapper
-                response.setContentType("json");
                 response.write(decorator.decorate(model, request, response));
                 break;
             case HTTP:
@@ -34,6 +33,7 @@ public class JsonView extends AbstractView {
                 response.write(decorator.decorate(model, request, response));
                 break;
             case WEBSOCKET:
+                response.write(decorator.decorate(model, request, response));
                 break;
         }
     }

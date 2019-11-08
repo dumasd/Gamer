@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Action(views = {
         @View(name = "byte", type = JsonView.class),
-
+        @View(name = "freemarker", type = HtmlView.class)
 })
 public class TestAction {
 
@@ -25,7 +25,6 @@ public class TestAction {
     }
 
     @Command("index")
-    @View(name = "freemarker", type = HtmlView.class)
     public FreemarkerModel index() {
         Map<String, Object> data = new HashMap<>();
         data.put("title", "Freemarker");

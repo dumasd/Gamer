@@ -140,5 +140,9 @@ public class InternalHttpUtil {
 
     }
 
+    public static String getWebSocketUrl(HttpRequest httpRequest) {
+        return "ws://" + httpRequest.headers().get(HttpHeaderNames.HOST) + httpRequest.uri();
+    }
+
 
 }

@@ -4,10 +4,10 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
+import com.thinkerwolf.gamer.netty.AbstractRequest;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,33 +15,25 @@ import java.util.Map;
  *
  * @author wukai
  */
-public class TcpRequest implements Request {
+public class TcpRequest extends AbstractRequest {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(TcpRequest.class);
 
     public static AttributeKey<String> SESSION_KEY = AttributeKey.newInstance(Session.JSESSION);
 
-    private Map<String, Object> attributes;
-
-    private Channel channel;
-
-    private long requestId;
-
     private ServletContext servletContext;
 
     private byte[] content;
 
-    private String command;
-
     private String sessionId;
 
-    public TcpRequest(long requestId, String command, Channel channel, ServletContext servletContext, byte[] content) {
-        this.requestId = requestId;
-        this.command = command;
-        this.channel = channel;
+    public TcpRequest(int requestId, String command, Channel channel, ServletContext servletContext, byte[] content) {
+        super(requestId, command, channel);
         this.servletContext = servletContext;
         this.content = content;
-        this.attributes = RequestUtil.parseParams(content);
+
+        RequestUtil.parseParams(this, getContent());
+
         if (channel.hasAttr(SESSION_KEY)) {
             this.sessionId = channel.attr(SESSION_KEY).get();
         }
@@ -49,36 +41,6 @@ public class TcpRequest implements Request {
         if (session != null) {
             session.setPush(new TcpPush(channel));
         }
-    }
-
-    @Override
-    public long getRequestId() {
-        return requestId;
-    }
-
-    @Override
-    public String getCommand() {
-        return command;
-    }
-
-    @Override
-    public Object getAttribute(String key) {
-        return attributes.get(key);
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return new HashMap<String, Object>(attributes);
-    }
-
-    @Override
-    public Object removeAttribute(String key) {
-        return attributes.remove(key);
-    }
-
-    @Override
-    public void setAttribute(String key, Object value) {
-        attributes.put(key, value);
     }
 
     @Override
@@ -102,7 +64,7 @@ public class TcpRequest implements Request {
             // session create or update
             session.touch();
             this.sessionId = session.getId();
-            channel.attr(SESSION_KEY).set(sessionId);
+            getChannel().attr(SESSION_KEY).set(sessionId);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Create new session " + session);
             }

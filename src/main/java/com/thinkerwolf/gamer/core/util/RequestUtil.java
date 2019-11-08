@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.core.util;
 
+import com.thinkerwolf.gamer.core.servlet.Request;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.HashMap;
@@ -28,6 +29,17 @@ public class RequestUtil {
             }
         }
         return params;
+    }
+
+    public static void parseParams(Request request, byte[] bytes) {
+        String s = new String(bytes);
+        String[] ss = StringUtils.split(s.trim(), '&');
+        for (String sss : ss) {
+            String[] kp = StringUtils.split(sss, '=');
+            if (kp.length > 1) {
+                request.setAttribute(kp[0].trim(), kp[1].trim());
+            }
+        }
     }
 
 }

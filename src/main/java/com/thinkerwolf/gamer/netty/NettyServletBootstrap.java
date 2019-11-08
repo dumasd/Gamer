@@ -19,7 +19,7 @@ public class NettyServletBootstrap {
     /**
      * 启动
      */
-    public void startup() {
+    public void startup() throws Exception {
         loadConfig();
         NettyServer server = new NettyServer(nettyConfig, servletConfig);
         server.startup();

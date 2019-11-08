@@ -2,8 +2,8 @@ package com.thinkerwolf.gamer.netty.http;
 
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import com.thinkerwolf.gamer.netty.NettyConfig;
+import com.thinkerwolf.gamer.netty.tcp.ChannelHandlerConfiger;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
@@ -12,19 +12,16 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class HttpChannelInitializer extends ChannelInitializer<Channel> {
-    private NettyConfig nettyConfig;
-    private ServletConfig servletConfig;
+public class HttpChannelConfiger extends ChannelHandlerConfiger<Channel> {
     private AtomicLong requestId;
-    private HttpHandler httpHandler;
+    private HttpDefaultHandler httpDefaultHandler;
 
 
-    public HttpChannelInitializer(NettyConfig nettyConfig, ServletConfig servletConfig) {
-        this.nettyConfig = nettyConfig;
-        this.servletConfig = servletConfig;
+    @Override
+    public void init(NettyConfig nettyConfig, ServletConfig servletConfig) throws Exception {
         this.requestId = new AtomicLong();
-        this.httpHandler = new HttpHandler();
-        this.httpHandler.init(requestId, nettyConfig, servletConfig);
+        this.httpDefaultHandler = new HttpDefaultHandler();
+        this.httpDefaultHandler.init(requestId, nettyConfig, servletConfig);
     }
 
     protected void initChannel(Channel ch) throws Exception {
@@ -33,6 +30,8 @@ public class HttpChannelInitializer extends ChannelInitializer<Channel> {
         pipeline.addLast("http-aggregator", new HttpObjectAggregator(65536));
         pipeline.addLast("http-encoder", new HttpResponseEncoder());
         pipeline.addLast("http-chunk", new ChunkedWriteHandler());
-        pipeline.addLast("handler", httpHandler);
+        pipeline.addLast("http-handler", httpDefaultHandler);
     }
+
+
 }

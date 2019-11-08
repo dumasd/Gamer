@@ -11,7 +11,9 @@ public interface Request {
 
     String DECORATOR_ATTRIBUTE = Request.class + ".decorator";
 
-    long getRequestId();
+    Object getChannel();
+
+    int getRequestId();
 
     String getCommand();
 

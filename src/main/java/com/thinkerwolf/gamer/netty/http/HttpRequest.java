@@ -5,9 +5,8 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.CompressUtil;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
-import com.thinkerwolf.gamer.core.util.ResponseUtil;
+import com.thinkerwolf.gamer.netty.AbstractRequest;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -15,17 +14,11 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import java.util.List;
 import java.util.Map;
 
-public class HttpRequest implements Request {
+public class HttpRequest extends AbstractRequest {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(HttpRequest.class);
 
-    private long requestId;
-
-    private String command;
-
     private ChannelHandlerContext ctx;
-
-    private Channel channel;
 
     private ServletContext servletContext;
 
@@ -35,64 +28,29 @@ public class HttpRequest implements Request {
 
     private Response response;
 
-    private Map<String, Object> attributes;
-
     private List<byte[]> contents;
 
     private String encoding;
 
-    public HttpRequest(long requestId, ChannelHandlerContext ctx, ServletContext servletContext,
+    public HttpRequest(ChannelHandlerContext ctx, ServletContext servletContext,
                        io.netty.handler.codec.http.HttpRequest nettyRequest, Response response, boolean compress) {
-        this.requestId = requestId;
+        super(0, InternalHttpUtil.getCommand(nettyRequest), ctx.channel());
         this.nettyRequest = nettyRequest;
-        this.command = InternalHttpUtil.getCommand(nettyRequest);
-        this.channel = ctx.channel();
         this.ctx = ctx;
         this.servletContext = servletContext;
         this.cookies = InternalHttpUtil.getCookies(nettyRequest);
         this.contents = InternalHttpUtil.getRequestContent(nettyRequest);
-        this.attributes = RequestUtil.parseParams(getContent());
         this.response = response;
         if (compress) {
             this.encoding = CompressUtil.getCompress(InternalHttpUtil.getAcceptEncodings(nettyRequest));
         }
-
-        if (RequestUtil.isLongHttp(command)) {
+        RequestUtil.parseParams(this, getContent());
+        if (RequestUtil.isLongHttp(getCommand())) {
             Session session = getSession(false);
             if (session != null) {
                 session.setPush(new HttpPush(ctx, nettyRequest));
             }
         }
-    }
-
-    @Override
-    public long getRequestId() {
-        return requestId;
-    }
-
-    @Override
-    public String getCommand() {
-        return command;
-    }
-
-    @Override
-    public Object getAttribute(String key) {
-        return attributes.get(key);
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    @Override
-    public Object removeAttribute(String key) {
-        return attributes.remove(key);
-    }
-
-    @Override
-    public void setAttribute(String key, Object value) {
-        attributes.put(key, value);
     }
 
     @Override

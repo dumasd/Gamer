@@ -15,14 +15,14 @@ public class HtmlView extends AbstractView {
     }
 
     @Override
-    protected void doRender(Model model, Request request, Response response) throws Exception{
+    protected void doRender(Model model, Request request, Response response) throws Exception {
         Protocol protocol = request.getProtocol();
         Decorator decorator = ServiceLoader.getService(request.getAttribute(Request.DECORATOR_ATTRIBUTE).toString(), Decorator.class);
-        if (protocol == Protocol.TCP) {
+        if (protocol != Protocol.HTTP) {
             throw new UnsupportedOperationException("Tcp does't support html");
-        } else if (protocol == Protocol.HTTP) {
-            response.setContentType("text/html");
-            response.write(decorator.decorate(model, request, response));
         }
+
+        response.setContentType("text/html");
+        response.write(decorator.decorate(model, request, response));
     }
 }

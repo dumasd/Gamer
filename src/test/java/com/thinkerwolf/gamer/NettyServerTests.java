@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.jdk.JdkLoggerFactory;
+import com.thinkerwolf.gamer.common.log.slf4j.Slf4jLoggerFactory;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.model.ByteModel;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class NettyServerTests {
 
     public static void main(String[] args) throws Exception {
-        InternalLoggerFactory.setDefaultLoggerFactory(new JdkLoggerFactory());
+        InternalLoggerFactory.setDefaultLoggerFactory(new Slf4jLoggerFactory());
         final Map<String, String> initParams = new HashMap<>();
         initParams.put("componentScanPackage", "com.thinkerwolf");
         initParams.put("compress", "true");
@@ -125,7 +126,7 @@ public class NettyServerTests {
 
     }
 
-    private static void startupTcp(ServletConfig servletConfig) {
+    private static void startupTcp(ServletConfig servletConfig) throws Exception {
         NettyConfig nettyConfig = new NettyConfig();
         nettyConfig.setProtocol(Protocol.TCP);
         nettyConfig.setPort(8090);
@@ -134,7 +135,7 @@ public class NettyServerTests {
     }
 
 
-    private static void startupHttp(ServletConfig servletConfig) {
+    private static void startupHttp(ServletConfig servletConfig) throws Exception {
         NettyConfig nettyConfig = new NettyConfig();
         nettyConfig.setPort(8080);
         nettyConfig.setProtocol(Protocol.HTTP);

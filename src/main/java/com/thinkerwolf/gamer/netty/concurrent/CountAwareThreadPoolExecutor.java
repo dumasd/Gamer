@@ -74,7 +74,9 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
 
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
-        logger.error("Exception", t);
+        if (t != null) {
+            logger.error("Exception", t);
+        }
     }
 
     /**
