@@ -6,11 +6,12 @@ package com.thinkerwolf.gamer.core.servlet;
 public interface Push {
 
     /**
-     * 推送数据
      *
-     * @param data
+     * @param opcode
+     * @param command
+     * @param content
      */
-    void push(Object data);
+    void push(int opcode, String command, byte[] content);
 
     /**
      * 通道能否推送

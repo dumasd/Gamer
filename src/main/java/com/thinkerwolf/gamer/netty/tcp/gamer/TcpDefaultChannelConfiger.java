@@ -25,11 +25,11 @@ public class TcpDefaultChannelConfiger extends ChannelHandlerConfiger<Channel> {
     @Override
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipe = ch.pipeline();
-        ServerDefaultHandler tcpHandler = new ServerDefaultHandler();
+        DefaultServerHandler tcpHandler = new DefaultServerHandler();
         tcpHandler.init(executor, nettyConfig, servletConfig);
 
-        pipe.addLast("decoder", new RequestPacketDecoder());
-        pipe.addLast("encoder", new ResponsePacketEncoder());
+        pipe.addLast("decoder", new PacketDecoder());
+        pipe.addLast("encoder", new PacketEncoder());
         pipe.addLast("handler", tcpHandler);
     }
 

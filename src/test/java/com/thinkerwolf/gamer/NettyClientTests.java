@@ -1,10 +1,7 @@
 package com.thinkerwolf.gamer;
 
 import com.google.protobuf.ByteString;
-import com.thinkerwolf.gamer.netty.tcp.gamer.RequestPacket;
-import com.thinkerwolf.gamer.netty.tcp.gamer.RequestPacketEncoder;
-import com.thinkerwolf.gamer.netty.tcp.gamer.ResponsePacket;
-import com.thinkerwolf.gamer.netty.tcp.gamer.ResponsePacketDecoder;
+import com.thinkerwolf.gamer.netty.tcp.gamer.*;
 import com.thinkerwolf.gamer.netty.tcp.protobuf.PacketProto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -56,11 +53,11 @@ public class NettyClientTests {
     }
 
     private static Object getSendMsgGamer() {
-        RequestPacket requestPacket = new RequestPacket();
-        requestPacket.setCommand("test@jjjc");
-        requestPacket.setRequestId(2);
-        requestPacket.setContent("num=190".getBytes(Charset.forName("UTF-8")));
-        return requestPacket;
+        Packet packet = new Packet();
+        packet.setCommand("test@jjjc");
+        packet.setRequestId(2);
+        packet.setContent("num=190".getBytes(Charset.forName("UTF-8")));
+        return packet;
     }
 
 
@@ -89,13 +86,13 @@ public class NettyClientTests {
         return new ChannelInitializer<Channel>() {
             @Override
             protected void initChannel(Channel ch) throws Exception {
-                ch.pipeline().addLast("encoder", new RequestPacketEncoder());
-                ch.pipeline().addLast("decoder", new ResponsePacketDecoder());
+                ch.pipeline().addLast("encoder", new PacketEncoder());
+                ch.pipeline().addLast("decoder", new PacketDecoder());
 
                 ch.pipeline().addLast("handler", new SimpleChannelInboundHandler<Object>() {
                     @Override
                     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-                        ResponsePacket packet = (ResponsePacket) msg;
+                        Packet packet = (Packet) msg;
                         System.err.println(new String(packet.getContent()));
                     }
                 });

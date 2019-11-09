@@ -9,15 +9,16 @@ import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
 import com.thinkerwolf.gamer.netty.IServerHandler;
 import com.thinkerwolf.gamer.netty.tcp.TcpRequest;
 import com.thinkerwolf.gamer.netty.tcp.TcpResponse;
+import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.concurrent.Executor;
 
-public class ServerHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
+public class ProtobufServerHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
 
-    private static final Logger LOG = InternalLoggerFactory.getLogger(ServerHandler.class);
+    private static final Logger LOG = InternalLoggerFactory.getLogger(ProtobufServerHandler.class);
 
     private Executor executor;
     private NettyConfig nettyConfig;
@@ -55,7 +56,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> implement
         SessionManager sessionManager = (SessionManager) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE);
         if (sessionManager != null) {
             Session session = sessionManager.getSession(null, true);
-            ctx.channel().attr(TcpRequest.SESSION_KEY).set(session.getId());
+            ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(session.getId());
         }
     }
 

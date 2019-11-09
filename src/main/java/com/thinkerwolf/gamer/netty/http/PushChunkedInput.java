@@ -10,7 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class PushChunkedInput implements ChunkedInput<ByteBuf> {
 
-    private Queue<byte[]> chunkQueue = new LinkedBlockingQueue<>();
+    private Queue<ByteBuf> chunkQueue = new LinkedBlockingQueue<>();
 
     @Override
     public boolean isEndOfInput() throws Exception {
@@ -29,10 +29,7 @@ public class PushChunkedInput implements ChunkedInput<ByteBuf> {
 
     @Override
     public ByteBuf readChunk(ByteBufAllocator allocator) throws Exception {
-        byte[] bs = chunkQueue.poll();
-        ByteBuf buf = allocator.buffer(bs.length);
-        buf.writeBytes(bs);
-        return buf;
+        return chunkQueue.poll();
     }
 
     @Override
@@ -45,7 +42,7 @@ public class PushChunkedInput implements ChunkedInput<ByteBuf> {
         return 0;
     }
 
-    public void writeChunk(byte[] chunk) {
-        chunkQueue.add(chunk);
+    public void writeChunk(ByteBuf buf) {
+        chunkQueue.add(buf);
     }
 }

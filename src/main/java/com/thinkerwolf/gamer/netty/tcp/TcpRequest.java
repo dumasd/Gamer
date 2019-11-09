@@ -5,10 +5,9 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.netty.AbstractRequest;
+import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
-
-import java.util.Map;
 
 /**
  * TCP
@@ -18,8 +17,6 @@ import java.util.Map;
 public class TcpRequest extends AbstractRequest {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(TcpRequest.class);
-
-    public static AttributeKey<String> SESSION_KEY = AttributeKey.newInstance(Session.JSESSION);
 
     private ServletContext servletContext;
 
@@ -34,8 +31,8 @@ public class TcpRequest extends AbstractRequest {
 
         RequestUtil.parseParams(this, getContent());
 
-        if (channel.hasAttr(SESSION_KEY)) {
-            this.sessionId = channel.attr(SESSION_KEY).get();
+        if (channel.hasAttr(InternalHttpUtil.CHANNEL_JSESSIONID)) {
+            this.sessionId = channel.attr(InternalHttpUtil.CHANNEL_JSESSIONID).get();
         }
         Session session = getSession(false);
         if (session != null) {
@@ -62,14 +59,16 @@ public class TcpRequest extends AbstractRequest {
         Session session = sessionManager.getSession(sessionId, true);
         if (create && session != null && !session.getId().equals(sessionId)) {
             // session create or update
-            session.touch();
             this.sessionId = session.getId();
-            getChannel().attr(SESSION_KEY).set(sessionId);
+            getChannel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(sessionId);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Create new session " + session);
             }
 //            session.setPush();
 
+        }
+        if (session != null) {
+            session.touch();
         }
         return session;
     }

@@ -10,7 +10,10 @@ public class TcpDecorator implements Decorator {
     @Override
     public Object decorate(Model<?> model, Request request, Response response) {
         byte[] bytes = model.getBytes();
-        ResponsePacket packet = new ResponsePacket(request.getRequestId(), (int) response.getStatus(), request.getCommand());
+        Packet packet = new Packet();
+        packet.setOpcode((Integer) response.getContentType());
+        packet.setRequestId(request.getRequestId());
+        packet.setCommand(request.getCommand());
         packet.setContent(bytes);
         return packet;
     }

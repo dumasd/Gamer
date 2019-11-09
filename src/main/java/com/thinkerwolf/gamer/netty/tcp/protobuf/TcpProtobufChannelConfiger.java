@@ -35,7 +35,7 @@ public class TcpProtobufChannelConfiger extends ChannelHandlerConfiger<Channel> 
 
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipe = ch.pipeline();
-        ServerHandler tcpHandler = new ServerHandler();
+        ProtobufServerHandler tcpHandler = new ProtobufServerHandler();
         tcpHandler.init(executor, nettyConfig, servletConfig);
 
         pipe.addLast(new ProtobufVarint32FrameDecoder());

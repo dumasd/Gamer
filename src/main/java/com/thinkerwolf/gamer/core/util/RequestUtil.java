@@ -42,4 +42,17 @@ public class RequestUtil {
         }
     }
 
+    public static Map<String, Object> parseParams(String text) {
+        String[] ss = StringUtils.split(text.trim(), '&');
+        Map<String, Object> params = new HashMap<>();
+        for (String sss : ss) {
+            String[] kp = StringUtils.split(sss, '=');
+            if (kp.length > 1) {
+                params.put(kp[0].trim(), kp[1].trim());
+            }
+        }
+        return params;
+    }
+
+
 }

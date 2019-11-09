@@ -1,6 +1,8 @@
 package com.thinkerwolf.gamer.netty.util;
 
 import com.thinkerwolf.gamer.core.servlet.Response;
+import com.thinkerwolf.gamer.core.servlet.ServletContext;
+import com.thinkerwolf.gamer.core.servlet.Session;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -11,12 +13,15 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.handler.stream.ChunkedInput;
+import io.netty.util.AttributeKey;
 
 import java.util.*;
 
 public class InternalHttpUtil {
 
     private static final byte[] EMPTY_BYTE = new byte[]{};
+
+    public static final AttributeKey<String> CHANNEL_JSESSIONID = AttributeKey.newInstance(Session.JSESSION);
 
     public static List<byte[]> getRequestContent(HttpRequest request) {
         List<byte[]> result = new LinkedList<>();
@@ -122,7 +127,9 @@ public class InternalHttpUtil {
         if (version == HttpVersion.HTTP_1_0) {
             nettyResponse.headers().add(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         }
-        nettyResponse.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+
+        // 二进制流
+        nettyResponse.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_OCTET_STREAM);
         nettyResponse.headers().add(HttpHeaderNames.CACHE_CONTROL, HttpHeaderValues.NO_CACHE);
         nettyResponse.headers().add(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
 

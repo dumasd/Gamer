@@ -1,3 +1,4 @@
 nettyProtobuf=com.thinkerwolf.gamer.netty.tcp.protobuf.TcpDecorator
 nettyGamer=com.thinkerwolf.gamer.netty.tcp.gamer.TcpDecorator
-nettyHttpDecorator=com.thinkerwolf.gamer.netty.http.HttpDecorator
+nettyHttp=com.thinkerwolf.gamer.netty.http.HttpDecorator
+nettyWebSocket=com.thinkerwolf.gamer.netty.websocket.WebSocketDecorator

@@ -12,6 +12,12 @@ public class WebSocketResponse implements Response {
 
     private Channel channel;
 
+    private Integer contentType;
+
+    public WebSocketResponse(Channel channel) {
+        this.channel = channel;
+    }
+
     @Override
     public Object getStatus() {
         return null;
@@ -24,7 +30,7 @@ public class WebSocketResponse implements Response {
 
     @Override
     public Protocol getProtocol() {
-        return null;
+        return Protocol.WEBSOCKET;
     }
 
     @Override
@@ -34,36 +40,36 @@ public class WebSocketResponse implements Response {
 
     @Override
     public void addCookie(Object cookie) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Object getCookies() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Object getHeader(String header) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Object setHeader(String header, Object value) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Map<String, Object> getHeaders() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getContentType() {
-        return null;
+    public Integer getContentType() {
+        return contentType;
     }
 
     @Override
-    public void setContentType(String contentType) {
-
+    public void setContentType(Object contentType) {
+        this.contentType = (Integer) contentType;
     }
 }

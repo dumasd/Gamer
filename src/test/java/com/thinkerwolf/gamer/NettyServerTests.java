@@ -111,7 +111,7 @@ public class NettyServerTests {
                 System.out.println("session push = " + sessions.size());
                 for (Session session : sessions) {
                     if (session.getPush() != null) {
-                        session.getPush().push(new ByteModel(("{\"num\":" + num + ",\"netty\":\"4.1.19\"}").getBytes()));
+                        session.getPush().push(1, "push@command",("{\"num\":" + num + ",\"netty\":\"4.1.19\"}").getBytes());
                     }
                 }
                 num++;

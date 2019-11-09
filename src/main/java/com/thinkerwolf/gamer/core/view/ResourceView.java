@@ -19,12 +19,16 @@ public class ResourceView extends AbstractView {
 
         Map<String, String> httpMimeMappings = mimeMappings;
         httpMimeMappings.put("html", "text/html");
+        httpMimeMappings.put("htm", "text/html");
         httpMimeMappings.put("txt", "text/plain");
         httpMimeMappings.put("css", "text/css");
+
         httpMimeMappings.put("json", "application/json");
         httpMimeMappings.put("js", "application/x-javascript");
         httpMimeMappings.put("woff", "application/x-font-woff");
         httpMimeMappings.put("woff2", "application/font-woff2");
+        httpMimeMappings.put("pdf", "application/pdf");
+
         httpMimeMappings.put("png", "image/png");
         httpMimeMappings.put("gif", "image/gif");
         httpMimeMappings.put("jpg", "image/jpeg");
@@ -32,6 +36,7 @@ public class ResourceView extends AbstractView {
         httpMimeMappings.put("ico", "image/x-icon");
         httpMimeMappings.put("tff", "image/tiff");
         httpMimeMappings.put("svg", "image/svg");
+        httpMimeMappings.put("tif", "image/tiff");
     }
 
     @Override

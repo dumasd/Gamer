@@ -5,7 +5,6 @@ import com.thinkerwolf.gamer.core.decorator.Decorator;
 import com.thinkerwolf.gamer.core.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
-import com.thinkerwolf.gamer.netty.tcp.protobuf.PacketProto;
 
 public class TcpDecorator implements Decorator {
 

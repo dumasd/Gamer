@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 
 public abstract class AbstractView implements View {
+
     @Override
     public void render(Model model, Request request, Response response) throws Exception {
         prepareRender(model, request, response);

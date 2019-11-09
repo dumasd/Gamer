@@ -9,14 +9,15 @@ import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
 import com.thinkerwolf.gamer.netty.IServerHandler;
 import com.thinkerwolf.gamer.netty.tcp.TcpRequest;
 import com.thinkerwolf.gamer.netty.tcp.TcpResponse;
+import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.concurrent.Executor;
 
-public class ServerDefaultHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
-    private static final Logger LOG = InternalLoggerFactory.getLogger(ServerDefaultHandler.class);
+public class DefaultServerHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
+    private static final Logger LOG = InternalLoggerFactory.getLogger(DefaultServerHandler.class);
 
     private Executor executor;
     private NettyConfig nettyConfig;
@@ -34,7 +35,7 @@ public class ServerDefaultHandler extends SimpleChannelInboundHandler<Object> im
             @Override
             public void run() {
                 try {
-                    RequestPacket packet = (RequestPacket) msg;
+                    Packet packet = (Packet) msg;
                     TcpRequest request = new TcpRequest(packet.getRequestId(), packet.getCommand(), channel, servletConfig.getServletContext(), packet.getContent());
                     request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.TCP_GAMER_DECORATOR);
                     request.getSession(true);
@@ -54,7 +55,7 @@ public class ServerDefaultHandler extends SimpleChannelInboundHandler<Object> im
         SessionManager sessionManager = (SessionManager) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE);
         if (sessionManager != null) {
             Session session = sessionManager.getSession(null, true);
-            ctx.channel().attr(TcpRequest.SESSION_KEY).set(session.getId());
+            ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(session.getId());
         }
     }
 

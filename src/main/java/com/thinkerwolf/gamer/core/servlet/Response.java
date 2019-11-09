@@ -32,8 +32,8 @@ public interface Response {
 
     Map<String, Object> getHeaders();
 
-    void setContentType(String contentType);
+    void setContentType(Object contentType);
 
-    String getContentType();
+    Object getContentType();
 
 }

@@ -1710,7 +1710,7 @@ public final class PacketProto {
        * @return This builder for chaining.
        */
       public Builder setContentType(
-          java.lang.String value) {
+              Object value) {
         if (value == null) {
     throw new NullPointerException();
   }

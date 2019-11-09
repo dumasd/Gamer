@@ -22,7 +22,7 @@ public class HttpResponse implements Response {
 
     private Map<String, Object> headers;
 
-    private Object status;
+    private Integer status;
 
     private HttpRequest httpRequest;
 
@@ -54,13 +54,13 @@ public class HttpResponse implements Response {
     }
 
     @Override
-    public Object getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
     @Override
     public void setStatus(Object status) {
-        this.status = status;
+        this.status = (Integer) status;
     }
 
     @Override
@@ -106,12 +106,12 @@ public class HttpResponse implements Response {
     }
 
     @Override
-    public String getContentType() {
-        return getHeader(HttpHeaderNames.CONTENT_TYPE.toString()).toString();
+    public Object getContentType() {
+        return getHeader(HttpHeaderNames.CONTENT_TYPE.toString());
     }
 
     @Override
-    public void setContentType(String contentType) {
+    public void setContentType(Object contentType) {
         getInternalHeaders().put(HttpHeaderNames.CONTENT_TYPE.toString(), contentType);
     }
 }

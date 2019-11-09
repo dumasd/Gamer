@@ -6,5 +6,9 @@ public class NettyConstants {
 
     public static final String TCP_GAMER_DECORATOR = "nettyGamer";
 
-    public static final String HTTP_DECORATOR = "nettyHttpDecorator";
+    public static final String HTTP_DECORATOR = "nettyHttp";
+
+    public static final String WEBSOCKET_DECORATOR = "nettyWebSocket";
+
+
 }

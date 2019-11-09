@@ -13,7 +13,7 @@ public class TcpResponse implements Response {
 
     private Channel channel;
 
-    private String contentType;
+    private Object contentType;
 
     private Object status;
 
@@ -75,12 +75,12 @@ public class TcpResponse implements Response {
     }
 
     @Override
-    public String getContentType() {
+    public Object getContentType() {
         return contentType;
     }
 
     @Override
-    public void setContentType(String contentType) {
+    public void setContentType(Object contentType) {
         this.contentType = contentType;
     }
 }

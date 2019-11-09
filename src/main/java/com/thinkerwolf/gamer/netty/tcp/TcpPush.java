@@ -1,9 +1,7 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
-import com.google.protobuf.ByteString;
-import com.thinkerwolf.gamer.core.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Push;
-import com.thinkerwolf.gamer.netty.tcp.protobuf.PacketProto;
+import com.thinkerwolf.gamer.netty.tcp.gamer.Packet;
 import io.netty.channel.Channel;
 
 /**
@@ -18,17 +16,13 @@ public class TcpPush implements Push {
     }
 
     @Override
-    public void push(Object data) {
-        if (isPushable()) {
-            Model model = (Model) data;
-            PacketProto.ResponsePacket.Builder builder = PacketProto.ResponsePacket.newBuilder();
-            builder.setCommand("push");
-            builder.setRequestId(0);
-            builder.setContent(ByteString.copyFrom(model.getBytes()));
-            builder.setContentType("json");
-            builder.setStatus(200);
-            channel.writeAndFlush(builder.build());
-        }
+    public void push(int opcode, String command, byte[] content) {
+        Packet packet = new Packet();
+        packet.setOpcode(opcode);
+        packet.setRequestId(0);
+        packet.setCommand(command);
+        packet.setContent(content);
+        channel.writeAndFlush(packet);
     }
 
     @Override

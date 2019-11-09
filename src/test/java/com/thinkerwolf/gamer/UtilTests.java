@@ -156,7 +156,24 @@ public class UtilTests {
             System.err.println(generator.generateSessionId("yyy"));
         }
         System.err.println("Spend time : " + (System.currentTimeMillis() - t1));
+    }
 
+
+    @Test
+    public void charTest() {
+        char LF = 10;
+        char CR = 13;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("acc:578")
+                .append('\r')
+                .append('\n')
+                .append("zxc:78");
+
+        String s = sb.toString();
+        System.out.println(s);
+
+        System.out.println(Arrays.toString(s.split("\n")));
 
     }
 

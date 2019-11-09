@@ -7,26 +7,27 @@ import io.netty.util.CharsetUtil;
 
 import java.util.List;
 
-public class RequestPacketDecoder extends ByteToMessageDecoder {
+public class PacketDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        // 头长度
-        if (in.readableBytes() < 4 + 4) {
+        // opcode(4) + requestId(4) + commandLen(4) + contentLen(4)
+        if (in.readableBytes() < 16) {
             return;
         }
 
-        // 整包长度不够
-        int commandLen = in.getInt(in.readerIndex());
-        int contentLen = in.getInt(4 + in.readerIndex());
-        if (in.readableBytes() < 4 + 4 + commandLen + contentLen + 4) {
+        int commandLen = in.getInt(8 + in.readerIndex());
+        int contentLen = in.getInt(12 + in.readerIndex());
+
+        if (in.readableBytes() < 16 + commandLen + contentLen) {
             return;
         }
 
+        int opcode = in.readInt();
+        int requestId = in.readInt();
         commandLen = in.readInt();
         contentLen = in.readInt();
 
-        int requestId = in.readInt();
         byte[] commandBytes = new byte[commandLen];
         in.readBytes(commandBytes);
         String command = new String(commandBytes, CharsetUtil.UTF_8);
@@ -34,7 +35,8 @@ public class RequestPacketDecoder extends ByteToMessageDecoder {
         byte[] content = new byte[contentLen];
         in.readBytes(content);
 
-        RequestPacket packet = new RequestPacket();
+        Packet packet = new Packet();
+        packet.setOpcode(opcode);
         packet.setRequestId(requestId);
         packet.setCommand(command);
         packet.setContent(content);
