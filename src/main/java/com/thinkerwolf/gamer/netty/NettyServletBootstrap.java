@@ -73,8 +73,7 @@ public class NettyServletBootstrap {
                 }
                 List<String> listenersConf = (List<String>) conf.get("listeners");
                 loadNettyConfig(nettyConfs);
-                loadServletConfig(servletConf);
-                loadListeners(listenersConf);
+                loadServletConfig(servletConf, listenersConf);
             } catch (Exception e) {
                 throw e;
             } finally {
@@ -151,7 +150,7 @@ public class NettyServletBootstrap {
     }
 
     @SuppressWarnings("unchecked")
-    private void loadServletConfig(Map<String, Object> servletConf) throws Exception {
+    private void loadServletConfig(Map<String, Object> servletConf, List<String> listenersConf) throws Exception {
         Class<?> servletClass;
         if (servletConf.get("servletClass") == null) {
             servletClass = DispatcherServlet.class;
@@ -198,6 +197,7 @@ public class NettyServletBootstrap {
                 return servletContext;
             }
         };
+        loadListeners(listenersConf);
         Servlet servlet = ClassUtils.newInstance(servletConfig.servletClass());
         servlet.init(servletConfig);
     }

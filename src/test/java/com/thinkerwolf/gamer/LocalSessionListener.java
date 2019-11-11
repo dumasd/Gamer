@@ -15,11 +15,20 @@ public class LocalSessionListener implements SessionListener {
 
     private Set<Session> sessions = new LinkedHashSet<>();
     private ScheduledExecutorService schedule = Executors.newScheduledThreadPool(3);
+    private volatile boolean started;
 
     @Override
     public void sessionCreated(SessionEvent se) {
         sessions.add(se.getSource());
         System.out.println("session create : " + se.getSource());
+        if (!started) {
+            synchronized (this) {
+                if (!started) {
+                    started = true;
+                    startPushTest();
+                }
+            }
+        }
     }
 
     @Override
