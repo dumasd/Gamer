@@ -45,7 +45,7 @@ public class NettyServer {
         if (config.getChildOptions() != null) {
             for (Map.Entry<String, Object> op : config.getChildOptions().entrySet()) {
                 if (ChannelOption.exists(op.getKey())) {
-                    sb.childOption(ChannelOption.valueOf(op.getKey()), op.getValue());
+                    sb.childOption(ChannelOption.valueOf(op.getKey().toUpperCase()), op.getValue());
                 }
             }
         }
