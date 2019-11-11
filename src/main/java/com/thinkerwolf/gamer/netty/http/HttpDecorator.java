@@ -1,7 +1,7 @@
 package com.thinkerwolf.gamer.netty.http;
 
-import com.thinkerwolf.gamer.core.decorator.Decorator;
-import com.thinkerwolf.gamer.core.model.Model;
+import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
+import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;

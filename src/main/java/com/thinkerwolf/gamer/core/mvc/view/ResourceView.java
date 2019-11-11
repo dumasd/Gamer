@@ -1,9 +1,9 @@
-package com.thinkerwolf.gamer.core.view;
+package com.thinkerwolf.gamer.core.mvc.view;
 
 import com.thinkerwolf.gamer.common.ServiceLoader;
-import com.thinkerwolf.gamer.core.decorator.Decorator;
-import com.thinkerwolf.gamer.core.model.Model;
-import com.thinkerwolf.gamer.core.model.ResourceModel;
+import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
+import com.thinkerwolf.gamer.core.mvc.model.Model;
+import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 

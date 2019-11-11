@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core.model;
+package com.thinkerwolf.gamer.core.mvc.model;
 
 import java.nio.charset.Charset;
 

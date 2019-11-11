@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  *
@@ -26,6 +27,10 @@ public class NettyServletBootstrap {
     }
 
     private void loadConfig() {
+
+        Yaml yaml = new Yaml();
+        yaml.load(getClass().getClassLoader().getResourceAsStream("conf.yaml"));
+
         // 加载配置
         if (servletConfig == null) {
 

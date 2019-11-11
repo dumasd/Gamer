@@ -45,7 +45,7 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
         try {
             handleHttpRequest(ctx, (HttpRequest) msg);
         } catch (Exception e) {
-            LOG.info("error", e);
+            LOG.info("Error handle http request", e);
             HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
             response.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN);
             channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);

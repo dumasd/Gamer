@@ -10,5 +10,5 @@ public @interface View {
 
     String name() default "";
 
-    Class<? extends com.thinkerwolf.gamer.core.view.View> type();
+    Class<? extends com.thinkerwolf.gamer.core.mvc.view.View> type();
 }

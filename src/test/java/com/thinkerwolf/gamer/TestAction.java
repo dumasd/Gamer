@@ -4,11 +4,11 @@ import com.thinkerwolf.gamer.core.annotation.Action;
 import com.thinkerwolf.gamer.core.annotation.Command;
 import com.thinkerwolf.gamer.core.annotation.RequestParam;
 import com.thinkerwolf.gamer.core.annotation.View;
-import com.thinkerwolf.gamer.core.model.ByteModel;
-import com.thinkerwolf.gamer.core.model.FreemarkerModel;
+import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
+import com.thinkerwolf.gamer.core.mvc.model.FreemarkerModel;
 import com.thinkerwolf.gamer.core.servlet.Request;
-import com.thinkerwolf.gamer.core.view.HtmlView;
-import com.thinkerwolf.gamer.core.view.JsonView;
+import com.thinkerwolf.gamer.core.mvc.view.HtmlView;
+import com.thinkerwolf.gamer.core.mvc.view.JsonView;
 
 import java.util.HashMap;
 import java.util.Map;

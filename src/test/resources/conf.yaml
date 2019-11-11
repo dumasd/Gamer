@@ -1,0 +1,32 @@
+servlet:
+    servletName: gamer
+    servletClass: com.thinkerwolf.gamer.core.mvc.DispatcherServlet
+    initParams:
+        componentScanPackage: com.thinkerwolf
+        compress: true
+        sessionTimeout: 3600
+        sessionTickTime: 5
+
+
+netty:
+    -
+      bossThreads: 3
+      workerThreads: 5
+      coreThreads: 5
+      maxThreads: 10
+      countPerChannel: 1000
+      protocol: tcp
+      port: 8090
+      options:
+          TCP_NODELAY: true
+
+    -
+      bossThreads: 3
+      workerThreads: 5
+      coreThreads: 5
+      maxThreads: 10
+      countPerChannel: 1000
+      protocol: http
+      port: 8080
+      options:
+          TCP_NODELAY: true

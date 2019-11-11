@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core.adaptor;
+package com.thinkerwolf.gamer.core.mvc.adaptor;
 
 import com.thinkerwolf.gamer.core.annotation.RequestParam;
 import com.thinkerwolf.gamer.core.annotation.SessionParam;

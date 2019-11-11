@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core.model;
+package com.thinkerwolf.gamer.core.mvc.model;
 
 /**
  * 请求后的数据模型，与View绑定

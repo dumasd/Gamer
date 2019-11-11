@@ -1,11 +1,12 @@
 package com.thinkerwolf.gamer.core.mvc;
 
-import com.thinkerwolf.gamer.core.model.ResourceModel;
+import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
+import com.thinkerwolf.gamer.core.servlet.ServletErrorType;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
-import com.thinkerwolf.gamer.core.view.View;
+import com.thinkerwolf.gamer.core.mvc.view.View;
 
 /**
  * 静态资源
@@ -45,7 +46,7 @@ public class ResourceController implements Controller {
             }
             if (resourceModel == null) {
                 response.setStatus(ResponseStatus.NOT_FOUND);
-                ResponseUtil.renderError("Not found", request, response);
+                ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, new Exception("Not found"));
             } else {
                 response.setStatus(ResponseStatus.OK);
                 resourceView.render(resourceModel, request, response);

@@ -1,6 +1,6 @@
-package com.thinkerwolf.gamer.core.view;
+package com.thinkerwolf.gamer.core.mvc.view;
 
-import com.thinkerwolf.gamer.core.model.Model;
+import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 

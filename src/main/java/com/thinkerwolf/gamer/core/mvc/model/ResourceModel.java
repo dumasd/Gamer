@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core.model;
+package com.thinkerwolf.gamer.core.mvc.model;
 
 public class ResourceModel extends ByteModel {
 

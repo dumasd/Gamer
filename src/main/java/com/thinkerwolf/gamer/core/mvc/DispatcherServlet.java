@@ -8,14 +8,14 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.annotation.Action;
 import com.thinkerwolf.gamer.core.annotation.Command;
 import com.thinkerwolf.gamer.core.listener.SpringContextLoadListener;
-import com.thinkerwolf.gamer.core.model.Model;
+import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.spring.SpringObjectFactory;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.core.util.ServletUtil;
-import com.thinkerwolf.gamer.core.view.ResourceView;
-import com.thinkerwolf.gamer.core.view.View;
-import com.thinkerwolf.gamer.core.view.ViewManager;
+import com.thinkerwolf.gamer.core.mvc.view.ResourceView;
+import com.thinkerwolf.gamer.core.mvc.view.View;
+import com.thinkerwolf.gamer.core.mvc.view.ViewManager;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
@@ -196,35 +196,30 @@ public class DispatcherServlet implements Servlet {
     @Override
     public void service(Request request, Response response) throws Exception {
         String command = request.getCommand();
-        if (command == null) {
-            LOG.warn("Can't find command from the request.");
-            response.setStatus(ResponseStatus.BAD_REQUEST);
-            ResponseUtil.renderError("Bad request,no command", request, response);
-        } else {
-            Controller controller = controllerMap.get(command);
-            if (controller == null) {
-                for (Controller v : controllerMap.values()) {
-                    if (v.isMatch(command)) {
-                        controller = v;
-                        break;
-                    }
+        Controller controller = controllerMap.get(command);
+        if (controller == null) {
+            for (Controller v : controllerMap.values()) {
+                if (v.isMatch(command)) {
+                    controller = v;
+                    break;
                 }
             }
-
-            if (controller == null) {
-                controller = resourceController;
-            }
-
-            if (controller == null) {
-                LOG.warn("Can't find command in server. command:[" + command + "]");
-                response.setStatus(ResponseStatus.NOT_FOUND);
-                ResponseUtil.renderError("Can't find command in server.", request, response);
-                return;
-            }
-
-            FilterChain filterChain = new ApplicationFilterChain(filters);
-            filterChain.doFilter(controller, request, response);
         }
+
+        if (controller == null) {
+            controller = resourceController;
+        }
+
+        if (controller == null) {
+            LOG.warn("Can't find command in server. command:[" + command + "]");
+            response.setStatus(ResponseStatus.NOT_FOUND);
+            ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, null);
+            return;
+        }
+
+        FilterChain filterChain = new ApplicationFilterChain(filters);
+        filterChain.doFilter(controller, request, response);
+
     }
 
 

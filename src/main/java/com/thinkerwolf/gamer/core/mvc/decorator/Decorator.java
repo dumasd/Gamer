@@ -1,7 +1,7 @@
-package com.thinkerwolf.gamer.core.decorator;
+package com.thinkerwolf.gamer.core.mvc.decorator;
 
 import com.thinkerwolf.gamer.common.SPI;
-import com.thinkerwolf.gamer.core.model.Model;
+import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 

@@ -5,7 +5,7 @@ import com.thinkerwolf.gamer.common.io.Resources;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ResourceUtils;
-import com.thinkerwolf.gamer.core.model.ResourceModel;
+import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import com.thinkerwolf.gamer.core.util.CompressUtil;
 

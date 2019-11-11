@@ -2,17 +2,17 @@ package com.thinkerwolf.gamer.core.mvc;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
-import com.thinkerwolf.gamer.core.adaptor.DefaultParamAdaptor;
-import com.thinkerwolf.gamer.core.adaptor.ParamAdaptor;
-import com.thinkerwolf.gamer.core.model.ByteModel;
-import com.thinkerwolf.gamer.core.model.Model;
+import com.thinkerwolf.gamer.core.mvc.adaptor.DefaultParamAdaptor;
+import com.thinkerwolf.gamer.core.mvc.adaptor.ParamAdaptor;
+import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
+import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
 import com.thinkerwolf.gamer.core.util.CompressUtil;
-import com.thinkerwolf.gamer.core.view.View;
-import com.thinkerwolf.gamer.core.view.ViewManager;
+import com.thinkerwolf.gamer.core.mvc.view.View;
+import com.thinkerwolf.gamer.core.mvc.view.ViewManager;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 
 import java.io.IOException;

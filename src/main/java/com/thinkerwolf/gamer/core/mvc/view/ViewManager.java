@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core.view;
+package com.thinkerwolf.gamer.core.mvc.view;
 
 import java.util.HashMap;
 import java.util.Map;

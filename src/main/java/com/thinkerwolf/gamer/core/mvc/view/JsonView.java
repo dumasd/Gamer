@@ -1,11 +1,12 @@
-package com.thinkerwolf.gamer.core.view;
+package com.thinkerwolf.gamer.core.mvc.view;
 
 import com.thinkerwolf.gamer.common.ServiceLoader;
-import com.thinkerwolf.gamer.core.decorator.Decorator;
-import com.thinkerwolf.gamer.core.model.Model;
+import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
+import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
+import com.thinkerwolf.gamer.core.util.ResponseUtil;
 
 /**
  * @author wukai
@@ -25,7 +26,7 @@ public class JsonView extends AbstractView {
         switch (protocol) {
             case TCP:
                 // wrapper
-                response.setContentType(1);
+                response.setContentType(ResponseUtil.CONTENT_JSON);
                 response.write(decorator.decorate(model, request, response));
                 break;
             case HTTP:
@@ -33,7 +34,7 @@ public class JsonView extends AbstractView {
                 response.write(decorator.decorate(model, request, response));
                 break;
             case WEBSOCKET:
-                response.setContentType(1);
+                response.setContentType(ResponseUtil.CONTENT_JSON);
                 response.write(decorator.decorate(model, request, response));
                 break;
         }

@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.thinkerwolf</groupId>
-    <artifactId>gamer-spring-boot-starter</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>gamer</artifactId>
+    <version>1.0.0</version>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -40,7 +40,6 @@
             <version>2.3.9</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -59,11 +58,10 @@
             <version>2.5</version>
         </dependency>
 
-
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.25</version>
         </dependency>
 
     </dependencies>
