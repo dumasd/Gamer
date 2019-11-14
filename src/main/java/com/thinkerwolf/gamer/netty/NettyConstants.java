@@ -11,4 +11,8 @@ public class NettyConstants {
     public static final String WEBSOCKET_DECORATOR = "nettyWebSocket";
 
 
+    public static final int DEFAULT_TCP_PORT = 8090;
+
+    public static final int DEFALT_HTTP_PORT = 8080;
+
 }

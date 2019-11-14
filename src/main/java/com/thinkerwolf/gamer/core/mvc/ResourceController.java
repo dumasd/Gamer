@@ -45,16 +45,14 @@ public class ResourceController implements Controller {
                 resourceModel = resourceManager.getResource(command);
             }
             if (resourceModel == null) {
-                response.setStatus(ResponseStatus.NOT_FOUND);
                 ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, new Exception("Not found"));
             } else {
-                response.setStatus(ResponseStatus.OK);
                 resourceView.render(resourceModel, request, response);
             }
         } else {
             // 跳转到默认主页
-            response.setStatus(ResponseStatus.NOT_FOUND);
-            ResponseUtil.renderError("Not found", request, response);
+            ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, new Exception("Not found"));
+
         }
     }
 }

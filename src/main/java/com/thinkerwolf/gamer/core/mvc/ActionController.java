@@ -6,10 +6,7 @@ import com.thinkerwolf.gamer.core.mvc.adaptor.DefaultParamAdaptor;
 import com.thinkerwolf.gamer.core.mvc.adaptor.ParamAdaptor;
 import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
-import com.thinkerwolf.gamer.core.servlet.Protocol;
-import com.thinkerwolf.gamer.core.servlet.Request;
-import com.thinkerwolf.gamer.core.servlet.Response;
-import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
+import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.CompressUtil;
 import com.thinkerwolf.gamer.core.mvc.view.View;
 import com.thinkerwolf.gamer.core.mvc.view.ViewManager;
@@ -79,8 +76,7 @@ public class ActionController implements Controller {
             }
 
             if (responseView == null) {
-                response.setStatus(ResponseStatus.INTERNAL_SERVER_ERROR);
-                ResponseUtil.renderError(ResponseUtil.INTERNAL_SERVER_ERROR_MODEL, request, response);
+                ResponseUtil.renderError(ServletErrorType.EXCEPTION, request, response, new NullPointerException());
                 return;
             }
 
@@ -101,13 +97,10 @@ public class ActionController implements Controller {
                     }
                 }
             }
-
-            response.setStatus(ResponseStatus.OK);
             responseView.render(result, request, response);
         } catch (Exception e) {
             LOG.error("Internal error", e);
-            response.setStatus(ResponseStatus.INTERNAL_SERVER_ERROR);
-            ResponseUtil.renderError(ResponseUtil.INTERNAL_SERVER_ERROR_MODEL, request, response);
+            ResponseUtil.renderError(ServletErrorType.EXCEPTION, request, response, e);
         }
 
 

@@ -74,11 +74,12 @@ public class NettyServletBootstrap {
                 List<String> listenersConf = (List<String>) conf.get("listeners");
                 loadNettyConfig(nettyConfs);
                 loadServletConfig(servletConf, listenersConf);
-            } catch (Exception e) {
-                throw e;
+            } catch (Exception thrown) {
+                throw thrown;
             } finally {
                 try {
-                    is.close();
+                    if (is != null)
+                        is.close();
                 } catch (IOException ignored) {
                 }
             }
@@ -119,9 +120,9 @@ public class NettyServletBootstrap {
                 nettyConfig.setPort((Integer) nettyConf.get("port"));
             } else {
                 if (nettyConfig.getProtocol() == Protocol.TCP) {
-                    nettyConfig.setPort(8090);
+                    nettyConfig.setPort(NettyConstants.DEFAULT_TCP_PORT);
                 } else {
-                    nettyConfig.setPort(8080);
+                    nettyConfig.setPort(NettyConstants.DEFALT_HTTP_PORT);
                 }
             }
             if (nettyConf.containsKey("options")) {

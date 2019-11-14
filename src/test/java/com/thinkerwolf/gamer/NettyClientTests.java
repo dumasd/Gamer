@@ -20,29 +20,35 @@ public class NettyClientTests {
     }
 
     private static void startupTcp() {
-        for (int i = 0; i < 1; i++) {
-            Bootstrap b = new Bootstrap();
-            b.group(new NioEventLoopGroup(1));
-            b.channel(NioSocketChannel.class);
-            b.handler(getInitializerGamer());
-            final ChannelFuture cf = b.connect("127.0.0.1", 8090);
-            try {
-                cf.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        for (int i = 0; i < 1000; i++) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Bootstrap b = new Bootstrap();
+                    b.group(new NioEventLoopGroup(1));
+                    b.channel(NioSocketChannel.class);
+                    b.handler(getInitializerGamer());
+                    final ChannelFuture cf = b.connect("127.0.0.1", 8090);
+                    try {
+                        cf.await();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
-            Object packet = getSendMsgGamer();
+                    Object packet = getSendMsgGamer();
 
-            cf.channel().writeAndFlush(packet);
+                    cf.channel().writeAndFlush(packet);
 
-            try {
-                Thread.sleep(21 * 1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            cf.channel().writeAndFlush(packet);
+                    try {
+                        Thread.sleep(21 * 1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    cf.channel().writeAndFlush(packet);
+                }
+            }).start();
         }
+
     }
 
 

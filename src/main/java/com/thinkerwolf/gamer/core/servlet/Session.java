@@ -7,6 +7,11 @@ public interface Session {
 
     String JSESSION = "GAMER_SESSION";
 
+    /**
+     * 获取id
+     *
+     * @return
+     */
     String getId();
 
     /**
@@ -31,12 +36,35 @@ public interface Session {
      */
     boolean isValidate();
 
+    /**
+     * 获取session创建时间
+     *
+     * @return
+     */
     long getCreationTime();
 
+    /**
+     * 设置属性
+     *
+     * @param key
+     * @param att
+     */
     void setAttribute(String key, Object att);
 
+    /**
+     * 获取属性
+     *
+     * @param key
+     * @return
+     */
     Object getAttribute(String key);
 
+    /**
+     * 移除属性
+     *
+     * @param key
+     * @return
+     */
     Object removeAttribute(String key);
 
     /**
@@ -46,6 +74,11 @@ public interface Session {
      */
     long getTimeout();
 
+    /**
+     * 设置session超时时间
+     *
+     * @param interval
+     */
     void setTimeout(long interval);
 
     /**
@@ -56,15 +89,26 @@ public interface Session {
     long getMaxAge();
 
     /**
+     * 获取push
+     *
+     * @return
+     */
+    Push getPush();
+
+    /**
      * 设置push
+     *
      * @param push
      */
     void setPush(Push push);
 
     /**
-     * 获取push
-     * @return
+     * 推送消息
+     *
+     * @param opcode  操作码
+     * @param command 命令
+     * @param content 内容
      */
-    Push getPush();
+    void push(int opcode, String command, byte[] content);
 
 }

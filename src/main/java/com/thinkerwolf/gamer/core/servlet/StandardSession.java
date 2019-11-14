@@ -3,23 +3,32 @@ package com.thinkerwolf.gamer.core.servlet;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 标准session实现
+ *
+ * @author wukai
+ */
 public class StandardSession implements Session {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(StandardSession.class);
-
+    private final Object lock = new Object();
     private SessionManager sessionManager;
     private String sessionId;
     private volatile long createTime;
     private Map<String, Object> attributes;
     private volatile long timeout;
     private List<SessionAttributeListener> sessionAttributeListeners;
-
     private volatile long lastTouchTime;
     private Push push;
+    /**
+     * Session通道不可推送时，推送记录存储起来
+     */
+    private List<HistoryMsg> historyMsgs = new LinkedList<>();
 
     public StandardSession(SessionManager sessionManager, List<SessionAttributeListener> sessionAttributeListeners, String sessionId, long timeout) {
         this.sessionManager = sessionManager;
@@ -115,17 +124,58 @@ public class StandardSession implements Session {
     }
 
     @Override
+    public synchronized Push getPush() {
+        return push;
+    }
+
+    @Override
     public synchronized void setPush(Push push) {
         this.push = push;
     }
 
     @Override
-    public synchronized Push getPush() {
-        return push;
+    public void push(int opcode, String command, byte[] content) {
+        if (isPushable()) {
+            handleHistoryMsg();
+            getPush().push(opcode, command, content);
+        } else {
+            synchronized (lock) {
+                historyMsgs.add(new HistoryMsg(opcode, command, content));
+            }
+        }
+    }
+
+    private void handleHistoryMsg() {
+        synchronized (lock) {
+            if (!historyMsgs.isEmpty()) {
+                for (HistoryMsg msg : historyMsgs) {
+                    getPush().push(msg.opcode, msg.command, msg.content);
+                }
+                historyMsgs.clear();
+            }
+        }
+    }
+
+    private boolean isPushable() {
+        return push != null && push.isPushable();
     }
 
     @Override
     public String toString() {
         return "ID:" + sessionId + ", MaxAge:" + getMaxAge();
     }
+
+
+    private static class HistoryMsg {
+        int opcode;
+        String command;
+        byte[] content;
+
+        HistoryMsg(int opcode, String command, byte[] content) {
+            this.opcode = opcode;
+            this.command = command;
+            this.content = content;
+        }
+    }
+
 }

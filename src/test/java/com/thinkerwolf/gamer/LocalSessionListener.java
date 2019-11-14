@@ -17,9 +17,13 @@ public class LocalSessionListener implements SessionListener {
     private ScheduledExecutorService schedule = Executors.newScheduledThreadPool(3);
     private volatile boolean started;
 
+    private final Object lock = new Object();
+
     @Override
     public void sessionCreated(SessionEvent se) {
-        sessions.add(se.getSource());
+        synchronized (lock) {
+            sessions.add(se.getSource());
+        }
         System.out.println("session create : " + se.getSource());
         if (!started) {
             synchronized (this) {
@@ -33,7 +37,9 @@ public class LocalSessionListener implements SessionListener {
 
     @Override
     public void sessionDestroyed(SessionEvent se) {
-        sessions.remove(se.getSource());
+        synchronized (lock) {
+            sessions.remove(se.getSource());
+        }
         System.out.println("session destroy : " + se.getSource());
     }
 
@@ -43,9 +49,9 @@ public class LocalSessionListener implements SessionListener {
             @Override
             public void run() {
                 System.out.println("session push = " + sessions.size());
-                for (Session session : sessions) {
-                    if (session.getPush() != null) {
-                        session.getPush().push(ResponseUtil.CONTENT_JSON, "push@command",("{\"num\":" + num + ",\"netty\":\"4.1.19\"}").getBytes());
+                synchronized (lock) {
+                    for (Session session : sessions) {
+                        session.push(ResponseUtil.CONTENT_JSON, "push@command",("{\"num\":" + num + ",\"netty\":\"4.1.19\"}").getBytes());
                     }
                 }
                 num++;
