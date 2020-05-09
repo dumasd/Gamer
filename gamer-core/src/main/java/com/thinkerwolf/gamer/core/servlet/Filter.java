@@ -11,7 +11,7 @@ public interface Filter {
 
     void init(ServletConfig servletConfig) throws Exception;
 
-    void doFilter(Controller controller, Request request, Response response, FilterChain filterChain);
+    void doFilter(Controller controller, Request request, Response response, FilterChain filterChain) throws Exception;
 
     void destroy() throws Exception;
 

@@ -45,6 +45,8 @@ public interface ServletConfig {
      */
     public static final String COMPRESS = "compress";
 
+    public static final String FILTERS = "filters";
+
     String getServletName();
 
     Class<? extends Servlet> servletClass();
@@ -54,7 +56,5 @@ public interface ServletConfig {
     Collection<String> getInitParamNames();
 
     ServletContext getServletContext();
-
-    
 
 }

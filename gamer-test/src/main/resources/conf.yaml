@@ -3,20 +3,18 @@
 servlet:
   servletName: gamer
   servletClass: com.thinkerwolf.gamer.core.mvc.DispatcherServlet   # servlet类名
-  filters:  # 过滤器
-    - com.thinkerwolf.gamer.ExceptionFilter
   initParams: # 参数列表
     componentScanPackage: com.thinkerwolf # 组件扫描包名
     compress: true # 传输压缩(仅http生效)
     sessionTimeout: 3600 # session超时时间(s)
     sessionTickTime: 5 # session检查tick(s)
+    filters: com.thinkerwolf.gamer.ExceptionFilter;com.thinkerwolf.gamer.LoginSessionFilter
 
 
 # 监听器配置列表
 listeners:
   - com.thinkerwolf.gamer.LocalSessionListener
   - com.thinkerwolf.gamer.LocalSessionAttributeListener
-
 
 # Netty配置列表
 netty:

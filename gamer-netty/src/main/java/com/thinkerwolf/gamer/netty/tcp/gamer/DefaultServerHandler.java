@@ -38,7 +38,7 @@ public class DefaultServerHandler extends SimpleChannelInboundHandler<Object> im
                     Packet packet = (Packet) msg;
                     TcpRequest request = new TcpRequest(packet.getRequestId(), packet.getCommand(), channel, servletConfig.getServletContext(), packet.getContent());
                     request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.TCP_GAMER_DECORATOR);
-                    request.getSession(true);
+                    //request.getSession(true);
                     TcpResponse response = new TcpResponse(channel);
                     Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
                     servlet.service(request, response);
@@ -54,8 +54,10 @@ public class DefaultServerHandler extends SimpleChannelInboundHandler<Object> im
         super.channelRegistered(ctx);
         SessionManager sessionManager = (SessionManager) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE);
         if (sessionManager != null) {
-            Session session = sessionManager.getSession(null, true);
-            ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(session.getId());
+            Session session = sessionManager.getSession(null, false);
+            if (session != null) {
+                ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(session.getId());
+            }
         }
     }
 

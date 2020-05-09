@@ -55,7 +55,7 @@ public class TcpRequest extends AbstractRequest {
         if (sessionManager == null) {
             return null;
         }
-        Session session = sessionManager.getSession(sessionId, true);
+        Session session = sessionManager.getSession(sessionId, create);
         if (create && session != null && !session.getId().equals(sessionId)) {
             // session create or update
             this.sessionId = session.getId();
