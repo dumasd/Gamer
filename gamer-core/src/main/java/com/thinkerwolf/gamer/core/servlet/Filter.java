@@ -1,6 +1,6 @@
 package com.thinkerwolf.gamer.core.servlet;
 
-import com.thinkerwolf.gamer.core.mvc.Controller;
+import com.thinkerwolf.gamer.core.mvc.Invocation;
 
 /**
  * 过滤器
@@ -11,7 +11,7 @@ public interface Filter {
 
     void init(ServletConfig servletConfig) throws Exception;
 
-    void doFilter(Controller controller, Request request, Response response, FilterChain filterChain) throws Exception;
+    void doFilter(Invocation invocation, Request request, Response response, FilterChain filterChain) throws Exception;
 
     void destroy() throws Exception;
 

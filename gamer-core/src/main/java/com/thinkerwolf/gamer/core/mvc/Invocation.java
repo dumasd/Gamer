@@ -5,7 +5,7 @@ import com.thinkerwolf.gamer.core.servlet.Response;
 
 import java.util.regex.Pattern;
 
-public interface Controller {
+public interface Invocation {
 
     String getCommand();
 

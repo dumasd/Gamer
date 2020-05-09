@@ -17,6 +17,7 @@
         <module>gamer-netty</module>
         <module>gamer-test</module>
         <module>gamer-all</module>
+        <module>gamer-rpc</module>
     </modules>
 
     <properties>
@@ -79,6 +80,11 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
                 <version>3.10.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.62</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

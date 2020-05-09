@@ -7,6 +7,7 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.annotation.Action;
 import com.thinkerwolf.gamer.core.annotation.Command;
+import com.thinkerwolf.gamer.core.annotation.RpcAction;
 import com.thinkerwolf.gamer.core.listener.SpringContextLoadListener;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.*;
@@ -39,9 +40,9 @@ public class DispatcherServlet implements Servlet {
 
     private ServletConfig servletConfig;
 
-    private Map<String, Controller> controllerMap;
+    private Map<String, Invocation> controllerMap;
 
-    private Controller resourceController;
+    private Invocation resourceInvocation;
 
     /**
      * 初始化servlet
@@ -57,6 +58,7 @@ public class DispatcherServlet implements Servlet {
             initObjectFactory(config);
             initFilters(config);
             initAction(config);
+            initRpcAction(config);
             initSessionManager(config);
             FreemarkerHelper.init(config);
         } catch (Exception e) {
@@ -148,7 +150,7 @@ public class DispatcherServlet implements Servlet {
             }
             Method[] methods = obj.getClass().getDeclaredMethods();
             for (Method method : methods) {
-                ActionController controller = createController(config, urlPrefix, method, obj, viewManager);
+                ActionInvocation controller = createController(config, urlPrefix, method, obj, viewManager);
                 if (controller != null) {
                     if (controllerMap.containsKey(controller.getCommand())) {
                         throw new RuntimeException("Duplicate action command :" + controller.getCommand());
@@ -161,11 +163,27 @@ public class DispatcherServlet implements Servlet {
         View view = (View) objectFactory.buildObject(ResourceView.class);
         ResourceManager resourceManager = (ResourceManager) objectFactory.buildObject(ResourceManager.class);
         resourceManager.init(config);
-        this.resourceController = new ResourceController(resourceManager, view);
+        this.resourceInvocation = new ResourceInvocation(resourceManager, view);
+    }
+
+    private void initRpcAction(ServletConfig config) throws Exception {
+        ApplicationContext context = (ApplicationContext) config.getServletContext().getAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE);
+        Map<String, Object> actionBeans = context.getBeansWithAnnotation(RpcAction.class);
+        for (Object obj : actionBeans.values()) {
+            RpcAction rpcAction = obj.getClass().getAnnotation(RpcAction.class);
+            Class<?> interfaceClass = rpcAction.interfaceClass();
+            for (Method method : interfaceClass.getDeclaredMethods()) {
+                String command = ServletUtil.getRpcInterfaceCommand(interfaceClass, method);
+                if (controllerMap.containsKey(command)) {
+                    throw new RuntimeException("Duplicate action command :" + command);
+                }
+                controllerMap.put(command, new RpcInvocation(command, obj, method));
+            }
+        }
     }
 
 
-    private ActionController createController(ServletConfig config, String prefix, Method method, Object obj, ViewManager vm) {
+    private ActionInvocation createController(ServletConfig config, String prefix, Method method, Object obj, ViewManager vm) {
         Command command = method.getAnnotation(Command.class);
         if (command == null) {
             return null;
@@ -180,7 +198,7 @@ public class DispatcherServlet implements Servlet {
         if (view != null) {
             responseView = createView(view);
         }
-        return new ActionController(prefix + comm, method, obj, vm, responseView);
+        return new ActionInvocation(prefix + comm, method, obj, vm, responseView);
     }
 
     private View createView(com.thinkerwolf.gamer.core.annotation.View view) {
@@ -196,21 +214,21 @@ public class DispatcherServlet implements Servlet {
     @Override
     public void service(Request request, Response response) throws Exception {
         String command = request.getCommand();
-        Controller controller = controllerMap.get(command);
-        if (controller == null) {
-            for (Controller v : controllerMap.values()) {
+        Invocation invocation = controllerMap.get(command);
+        if (invocation == null) {
+            for (Invocation v : controllerMap.values()) {
                 if (v.isMatch(command)) {
-                    controller = v;
+                    invocation = v;
                     break;
                 }
             }
         }
 
-        if (controller == null) {
-            controller = resourceController;
+        if (invocation == null) {
+            invocation = resourceInvocation;
         }
 
-        if (controller == null) {
+        if (invocation == null) {
             LOG.warn("Can't find command in server. command:[" + command + "]");
             response.setStatus(ResponseStatus.NOT_FOUND);
             ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, null);
@@ -218,7 +236,7 @@ public class DispatcherServlet implements Servlet {
         }
 
         FilterChain filterChain = new ApplicationFilterChain(filters);
-        filterChain.doFilter(controller, request, response);
+        filterChain.doFilter(invocation, request, response);
 
     }
 

@@ -3,7 +3,6 @@ package com.thinkerwolf.gamer.core.mvc;
 import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
-import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
 import com.thinkerwolf.gamer.core.servlet.ServletErrorType;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.core.mvc.view.View;
@@ -13,13 +12,13 @@ import com.thinkerwolf.gamer.core.mvc.view.View;
  *
  * @author wukai
  */
-public class ResourceController implements Controller {
+public class ResourceInvocation implements Invocation {
 
     private ResourceManager resourceManager;
 
     private View resourceView;
 
-    public ResourceController(ResourceManager resourceManager, View resourceView) {
+    public ResourceInvocation(ResourceManager resourceManager, View resourceView) {
         this.resourceManager = resourceManager;
         this.resourceView = resourceView;
     }

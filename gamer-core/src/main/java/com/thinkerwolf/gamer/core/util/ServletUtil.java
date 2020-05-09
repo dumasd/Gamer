@@ -2,6 +2,8 @@ package com.thinkerwolf.gamer.core.util;
 
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 
+import java.lang.reflect.Method;
+
 public class ServletUtil {
 
     public static boolean isCompress(ServletConfig servletConfig) {
@@ -18,6 +20,10 @@ public class ServletUtil {
             return true;
         }
         return Boolean.parseBoolean(s);
+    }
+
+    public static String getRpcInterfaceCommand(Class<?> ifaceClass, Method method) {
+        return "rpc@" + ifaceClass.getCanonicalName() + "_" + method.getName();
     }
 
 }

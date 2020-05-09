@@ -175,6 +175,8 @@ public class UtilTests {
 
         System.out.println(Arrays.toString(s.split("\n")));
 
+        System.out.println(String.class.getCanonicalName());
+
     }
 
 }

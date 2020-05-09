@@ -17,9 +17,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-public class ActionController implements Controller {
+public class ActionInvocation implements Invocation {
 
-    private static final Logger LOG = InternalLoggerFactory.getLogger(ActionController.class);
+    private static final Logger LOG = InternalLoggerFactory.getLogger(ActionInvocation.class);
 
     private String command;
 
@@ -37,7 +37,7 @@ public class ActionController implements Controller {
      */
     private Pattern matcher;
 
-    public ActionController(String command, Method method, Object obj, ViewManager viewManager, View view) {
+    public ActionInvocation(String command, Method method, Object obj, ViewManager viewManager, View view) {
         this.command = command;
         this.method = method;
         this.obj = obj;
