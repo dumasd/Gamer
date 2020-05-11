@@ -7,5 +7,13 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 public @interface RpcClient {
-    String serialize() default "fastjson";
+    /**
+     * 序列化方式
+     */
+    String serialize() default "jdk";
+
+    /**
+     * 是否异步
+     */
+    boolean async() default false;
 }

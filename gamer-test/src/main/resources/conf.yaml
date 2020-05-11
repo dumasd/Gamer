@@ -15,7 +15,7 @@ servlet:
 listeners:
   - com.thinkerwolf.gamer.LocalSessionListener
   - com.thinkerwolf.gamer.LocalSessionAttributeListener
-  - com.thinkerwolf.gamer.rpc.RpcServiceLoadListener
+  - com.thinkerwolf.gamer.rpc.mvc.RpcServiceLoadListener
 
 # Netty配置列表
 netty:
@@ -24,7 +24,7 @@ netty:
     workerThreads: 5 # worker线程数
     coreThreads: 5 # tcp业务核心线程 (目前仅限tcp协议)
     maxThreads: 10 # tpc业务最大线程 (目前仅限tcp协议)
-    countPerChannel: 30 # 客户端最大并发数量 (目前仅限tcp协议)
+    countPerChannel: 100 # 客户端最大并发数量 (目前仅限tcp协议)
     protocol: TCP # 协议
     port: 8090 # 段口
     options: # netty option

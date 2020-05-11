@@ -4,7 +4,6 @@ import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import com.thinkerwolf.gamer.netty.tcp.TcpDefaultChannelConfiger;
 import com.thinkerwolf.gamer.netty.http.HttpChannelConfiger;
-import com.thinkerwolf.gamer.netty.tcp.ChannelHandlerConfiger;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 

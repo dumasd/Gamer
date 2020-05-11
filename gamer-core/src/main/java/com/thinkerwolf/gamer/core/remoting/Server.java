@@ -7,5 +7,4 @@ public interface Server extends Endpoint {
 
     boolean isBound();
 
-
 }

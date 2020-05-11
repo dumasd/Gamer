@@ -5,16 +5,17 @@ import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.core.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.core.remoting.ChannelHandlerAdapter;
 import com.thinkerwolf.gamer.core.remoting.RemotingException;
-import com.thinkerwolf.gamer.core.serialization.ObjectInput;
-import com.thinkerwolf.gamer.core.serialization.ObjectOutput;
-import com.thinkerwolf.gamer.core.serialization.Serializer;
+import com.thinkerwolf.gamer.common.serialization.ObjectInput;
+import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
+import com.thinkerwolf.gamer.common.serialization.Serializer;
+import com.thinkerwolf.gamer.netty.NettyClient;
+import com.thinkerwolf.gamer.netty.NettyConfigurator;
 import com.thinkerwolf.gamer.netty.tcp.Packet;
 import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
 import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
-import com.thinkerwolf.gamer.rpc.RequestArgs;
+import com.thinkerwolf.gamer.rpc.Request;
+import com.thinkerwolf.gamer.rpc.Response;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
-import com.thinkerwolf.gamer.rpc.remoting.NettyClient;
-import com.thinkerwolf.gamer.rpc.remoting.NettyConfigurator;
 import io.netty.channel.Channel;
 
 import java.io.ByteArrayInputStream;
@@ -46,10 +47,10 @@ public class RemotingNettyClientTest {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutput oo = serializer.serialize(baos);
 
-            RequestArgs requestArgs = new RequestArgs();
-            requestArgs.setArgs(new Object[]{"wukai"});
+            Request request = new Request();
+            request.setArgs(new Object[]{"wukai"});
 
-            oo.writeObject(requestArgs);
+            oo.writeObject(request);
             packet.setContent(baos.toByteArray());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -64,12 +65,11 @@ public class RemotingNettyClientTest {
             public void received(com.thinkerwolf.gamer.core.remoting.Channel channel, Object message) throws RemotingException {
                 try {
                     Packet packet = (Packet) message;
-                    Method method = IRpcAction.class.getMethod("sayHello", String.class);
                     Serializer serializer = ServiceLoader.getDefaultService(Serializer.class);
                     ByteArrayInputStream bais = new ByteArrayInputStream(packet.getContent());
                     ObjectInput oi = serializer.deserialize(bais);
 
-                    System.err.println(oi.readObject(method.getReturnType()));
+                    System.err.println(oi.readObject(Response.class));
                 } catch (Exception e) {
                     throw new RemotingException(e);
                 }

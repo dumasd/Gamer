@@ -39,13 +39,19 @@
         <maven_jacoco_version>0.8.2</maven_jacoco_version>
         <maven_flatten_version>1.1.0</maven_flatten_version>
         <maven_enforce_version>3.0.0-M2</maven_enforce_version>
+
+        <spring_version>5.0.7.RELEASE</spring_version>
+        <netty_version>4.1.42.Final</netty_version>
+        <fastjson_version>1.2.62</fastjson_version>
+        <hessian_version>4.0.38</hessian_version>
+        <kryo_version>4.0.0</kryo_version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>5.0.7.RELEASE</version>
+            <version>${spring_version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -59,7 +65,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
-                <version>4.1.42.Final</version>
+                <version>${netty_version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -84,7 +90,17 @@
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
-                <version>1.2.62</version>
+                <version>${fastjson_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${hessian_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo</artifactId>
+                <version>${kryo_version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
+ * RPC Server servlet
  */
 public class RpcDispatchServlet implements Servlet {
 
@@ -80,8 +80,7 @@ public class RpcDispatchServlet implements Servlet {
     }
 
     private RpcInvocation createInvocation(Object obj, Class interfaceClass, Method method, RpcClient rpcClient) {
-        RpcInvocation invocation = new RpcInvocation(interfaceClass, method, obj, rpcClient);
-        return invocation;
+        return new RpcInvocation(interfaceClass, method, obj, rpcClient);
     }
 
     @Override
@@ -104,6 +103,9 @@ public class RpcDispatchServlet implements Servlet {
 
     @Override
     public void destroy() throws Exception {
-
+        rpcInvocationMap.clear();
+        if (delegate != null) {
+            delegate.destroy();
+        }
     }
 }

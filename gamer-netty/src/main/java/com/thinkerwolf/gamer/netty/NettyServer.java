@@ -1,10 +1,7 @@
 package com.thinkerwolf.gamer.netty;
 
-import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
-import com.thinkerwolf.gamer.core.remoting.RemotingException;
-import com.thinkerwolf.gamer.core.remoting.Server;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -56,14 +53,11 @@ public class NettyServer  {
         sb.childHandler(channelInitializer);
         ChannelFuture future = sb.bind(new InetSocketAddress(config.getPort()));
 
-        future.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if (future.isSuccess()) {
-                    LOG.info("Listen @" + config.getProtocol().name().toLowerCase() + " on @" + config.getPort() + " success");
-                } else {
-                    LOG.error("Can't start server", future.cause());
-                }
+        future.addListener((ChannelFutureListener) f -> {
+            if (f.isSuccess()) {
+                LOG.info("Listen @" + config.getProtocol().name().toLowerCase() + " on @" + config.getPort() + " success");
+            } else {
+                LOG.error("Can't start server", f.cause());
             }
         });
     }

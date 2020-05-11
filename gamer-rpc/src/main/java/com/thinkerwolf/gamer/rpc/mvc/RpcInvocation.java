@@ -3,16 +3,16 @@ package com.thinkerwolf.gamer.rpc.mvc;
 import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
+import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.core.mvc.Invocation;
 import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
 import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
-import com.thinkerwolf.gamer.core.serialization.ObjectInput;
-import com.thinkerwolf.gamer.core.serialization.ObjectOutput;
-import com.thinkerwolf.gamer.core.serialization.Serializer;
-import com.thinkerwolf.gamer.core.servlet.Request;
+import com.thinkerwolf.gamer.common.serialization.ObjectInput;
+import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
+import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
-import com.thinkerwolf.gamer.rpc.RequestArgs;
+import com.thinkerwolf.gamer.rpc.Request;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
 import com.thinkerwolf.gamer.rpc.annotation.RpcClient;
 
@@ -23,16 +23,11 @@ import java.lang.reflect.Method;
 public class RpcInvocation implements Invocation {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(RpcInvocation.class);
-
-    private Class interfaceClass;
-
-    private Method method;
-
-    private Object obj;
-
-    private RpcClient rpcClient;
-
     private final String command;
+    private Class interfaceClass;
+    private Method method;
+    private Object obj;
+    private RpcClient rpcClient;
 
     public RpcInvocation(Class interfaceClass, Method method, Object obj, RpcClient rpcClient) {
         this.interfaceClass = interfaceClass;
@@ -53,20 +48,19 @@ public class RpcInvocation implements Invocation {
     }
 
     @Override
-    public void handle(Request request, Response response) throws Exception {
+    public void handle(com.thinkerwolf.gamer.core.servlet.Request request, Response response) throws Exception {
         Serializer serializer = ServiceLoader.getService(rpcClient.serialize(), Serializer.class);
-        ByteArrayInputStream bais = new ByteArrayInputStream(request.getContent());
-        ObjectInput objectInput = serializer.deserialize(bais);
-        RequestArgs args = objectInput.readObject(RequestArgs.class);
+
+        Request args = Serializations.getObject(serializer, request.getContent(), Request.class);
         Object result = method.invoke(obj, args.getArgs());
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutput objectOutput = serializer.serialize(baos);
-        objectOutput.writeObject(result);
-        byte[] bytes = baos.toByteArray();
+        com.thinkerwolf.gamer.rpc.Response rpcResponse = new com.thinkerwolf.gamer.rpc.Response();
+        rpcResponse.setResult(result);
+
+        byte[] bytes = Serializations.getBytes(serializer, rpcResponse);
 
         response.setContentType(ResponseUtil.CONTENT_BYTES);
-        Decorator decorator = ServiceLoader.getService(request.getAttribute(Request.DECORATOR_ATTRIBUTE).toString(), Decorator.class);
+        Decorator decorator = ServiceLoader.getService(request.getAttribute(com.thinkerwolf.gamer.core.servlet.Request.DECORATOR_ATTRIBUTE).toString(), Decorator.class);
         response.write(decorator.decorate(new ByteModel(bytes), request, response));
     }
 }

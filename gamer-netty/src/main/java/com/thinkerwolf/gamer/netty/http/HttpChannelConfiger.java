@@ -2,7 +2,7 @@ package com.thinkerwolf.gamer.netty.http;
 
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import com.thinkerwolf.gamer.netty.NettyConfig;
-import com.thinkerwolf.gamer.netty.tcp.ChannelHandlerConfiger;
+import com.thinkerwolf.gamer.netty.ChannelHandlerConfiger;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpObjectAggregator;

@@ -7,4 +7,5 @@ public interface Client extends Endpoint {
 
     void reconnect() throws RemotingException;
 
+    Channel channel();
 }

@@ -1,2 +1,0 @@
-fastjson=com.thinkerwolf.gamer.core.serialization.fastjson.FastjsonSerializer
-jdk=com.thinkerwolf.gamer.core.serialization.jdk.JdkSerializer

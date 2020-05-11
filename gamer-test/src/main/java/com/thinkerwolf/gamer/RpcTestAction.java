@@ -7,6 +7,11 @@ public class RpcTestAction implements IRpcAction {
 
     @Override
     public String sayHello(String hello) {
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return "Hello " + hello;
     }
 
