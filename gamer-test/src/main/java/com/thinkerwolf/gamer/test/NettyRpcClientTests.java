@@ -1,10 +1,16 @@
-package com.thinkerwolf.gamer;
+package com.thinkerwolf.gamer.test;
 
 import com.google.protobuf.ByteString;
+import com.thinkerwolf.gamer.common.ServiceLoader;
+import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.common.serialization.ObjectInput;
+import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
+import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.netty.tcp.Packet;
 import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
 import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
 import com.thinkerwolf.gamer.netty.protobuf.PacketProto;
+import com.thinkerwolf.gamer.rpc.*;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -14,15 +20,48 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 
-import java.nio.charset.Charset;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Method;
 
-public class NettyClientTests {
+public class NettyRpcClientTests {
     public static void main(String[] args) {
-        startupTcp();
+        //startupTcp();
+        startRpcConnection();
+    }
+
+    private static void startRpcConnection() {
+        URL url = URL.parse("tcp://127.0.0.1:8090");
+        int loop = 3;
+        //while (loop-- > 0) {
+            IRpcAction action = RpcReferenceManager.getInstance().getConnection(IRpcAction.class, url);
+            for (int i = 0 ; i < 100; i++) {
+                final int c = i;
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        action.sayHello("rpc aaaaaaaaa " + c);
+                        RpcContext.getContext().addListener(new RpcCallback<String>() {
+                            @Override
+                            protected void onSuccess(String result) throws Exception {
+
+                                System.out.println(result);
+                            }
+
+                            @Override
+                            protected void onError(Throwable t) throws Exception {
+
+                            }
+                        });
+                    }
+                });
+                t.start();
+            }
+       // }
     }
 
     private static void startupTcp() {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 2; i++) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -42,7 +81,7 @@ public class NettyClientTests {
                     cf.channel().writeAndFlush(packet);
 
                     try {
-                        Thread.sleep(21 * 1000);
+                        Thread.sleep(10 * 1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -55,16 +94,31 @@ public class NettyClientTests {
 
 
     private static Object getSendMsgProtobuf() {
-       return PacketProto.RequestPacket.newBuilder()
+        return PacketProto.RequestPacket.newBuilder()
                 .setRequestId(1).setCommand("test@jjjc")
                 .setContent(ByteString.copyFromUtf8("num=2")).build();
     }
 
     private static Object getSendMsgGamer() {
         Packet packet = new Packet();
-        packet.setCommand("test@jjjc");
-        packet.setRequestId(2);
-        packet.setContent("num=190".getBytes(Charset.forName("UTF-8")));
+        try {
+            Method method = IRpcAction.class.getMethod("sayHello", String.class);
+
+            String command = RpcUtils.getRpcCommand(IRpcAction.class, method);
+            packet.setCommand(command);
+            packet.setRequestId(2);
+            Serializer serializer = ServiceLoader.getDefaultService(Serializer.class);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutput oo = serializer.serialize(baos);
+
+            Request request = new Request();
+            request.setArgs(new Object[]{"wukai"});
+
+            oo.writeObject(request);
+            packet.setContent(baos.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return packet;
     }
 
@@ -101,11 +155,16 @@ public class NettyClientTests {
                     @Override
                     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
                         Packet packet = (Packet) msg;
-                        System.err.println(new String(packet.getContent()));
+                        Serializer serializer = ServiceLoader.getDefaultService(Serializer.class);
+                        ByteArrayInputStream bais = new ByteArrayInputStream(packet.getContent());
+                        ObjectInput oi = serializer.deserialize(bais);
+
+                        System.err.println(oi.readObject(Response.class));
                     }
                 });
             }
         };
     }
+
 
 }

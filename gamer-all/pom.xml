@@ -36,6 +36,13 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.thinkerwolf</groupId>
+            <artifactId>gamer-rpc</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
@@ -81,6 +88,7 @@
                                     <include>com.thinkerwolf:gamer-common</include>
                                     <include>com.thinkerwolf:gamer-core</include>
                                     <include>com.thinkerwolf:gamer-netty</include>
+                                    <include>com.thinkerwolf:gamer-rpc</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
@@ -93,10 +101,33 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>
+                                        META-INF/gamer/com.thinkerwolf.gamer.common.serialization.Serializer
+                                    </resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>
                                         META-INF/gamer/com.thinkerwolf.gamer.common.ObjectFactory
                                     </resource>
                                 </transformer>
                             </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

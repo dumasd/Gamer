@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer;
+package com.thinkerwolf.gamer.test;
 
 import com.alibaba.fastjson.JSON;
 import com.thinkerwolf.gamer.common.ServiceLoader;

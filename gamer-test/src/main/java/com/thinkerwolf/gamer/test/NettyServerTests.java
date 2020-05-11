@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer;
+package com.thinkerwolf.gamer.test;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.slf4j.Slf4jLoggerFactory;

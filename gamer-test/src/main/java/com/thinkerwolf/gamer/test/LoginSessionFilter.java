@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer;
+package com.thinkerwolf.gamer.test;
 
 import com.thinkerwolf.gamer.core.mvc.Invocation;
 import com.thinkerwolf.gamer.core.servlet.*;
