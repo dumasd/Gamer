@@ -10,6 +10,7 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -53,7 +54,7 @@ public class ResourceUtils {
      * @return
      */
     public static Set<String> findClasspathFilePaths(String rootDir, String suffix) {
-        Set<String> paths = new HashSet<>();
+        Set<String> paths = new LinkedHashSet<>();
         suffix = StringUtils.isEmpty(suffix) ? "" : "." + suffix;
         try {
             Enumeration<URL> en = ClassUtils.getDefaultClassLoader().getResources(rootDir);
@@ -188,8 +189,6 @@ public class ResourceUtils {
             while (-1 != (n = inputStream.read(buffer))) {
                 baos.write(buffer, 0, n);
             }
-            byte[] bytes = baos.toByteArray();
-
             return baos.toByteArray();
         } catch (IOException e) {
             throw e;

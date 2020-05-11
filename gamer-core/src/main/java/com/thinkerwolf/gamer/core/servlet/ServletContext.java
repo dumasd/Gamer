@@ -11,6 +11,8 @@ public interface ServletContext {
 
     public static final String ROOT_SESSION_MANAGER_ATTRIBUTE = ServletContext.class.getName() + ".ROOT.SESSION.MANAGER";
 
+    public static final String ROOT_OBJECT_FACTORY = ServletContext.class.getName() + ".ROOT.OBJECT.FACTORY";
+
     Object getAttribute(String key);
 
     Map<String, Object> getAttributes();

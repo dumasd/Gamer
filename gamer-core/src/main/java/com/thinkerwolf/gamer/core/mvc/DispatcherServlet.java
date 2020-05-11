@@ -7,7 +7,6 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.annotation.Action;
 import com.thinkerwolf.gamer.core.annotation.Command;
-import com.thinkerwolf.gamer.core.annotation.RpcAction;
 import com.thinkerwolf.gamer.core.listener.SpringContextLoadListener;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.*;
@@ -40,7 +39,7 @@ public class DispatcherServlet implements Servlet {
 
     private ServletConfig servletConfig;
 
-    private Map<String, Invocation> controllerMap;
+    private Map<String, Invocation> invocationMap;
 
     private Invocation resourceInvocation;
 
@@ -52,13 +51,12 @@ public class DispatcherServlet implements Servlet {
     @Override
     public void init(ServletConfig config) throws Exception {
         this.servletConfig = config;
-        this.controllerMap = new HashMap<>();
+        this.invocationMap = new HashMap<>();
         try {
             initSpringContext(config);
             initObjectFactory(config);
             initFilters(config);
             initAction(config);
-            initRpcAction(config);
             initSessionManager(config);
             FreemarkerHelper.init(config);
         } catch (Exception e) {
@@ -74,8 +72,8 @@ public class DispatcherServlet implements Servlet {
 
     @Override
     public void destroy() throws Exception {
-        if (controllerMap != null) {
-            controllerMap.clear();
+        if (invocationMap != null) {
+            invocationMap.clear();
         }
         if (filters != null) {
             filters.clear();
@@ -90,11 +88,14 @@ public class DispatcherServlet implements Servlet {
     }
 
     private void initObjectFactory(ServletConfig config) {
-        ApplicationContext springContext = (ApplicationContext) config.getServletContext().getAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE);
-        if (springContext != null) {
-            this.objectFactory = new SpringObjectFactory(springContext);
-        } else {
-            this.objectFactory = new DefaultObjectFactory();
+        objectFactory = (ObjectFactory) config.getServletContext().getAttribute(ServletContext.ROOT_OBJECT_FACTORY);
+        if (objectFactory == null) {
+            ApplicationContext springContext = (ApplicationContext) config.getServletContext().getAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE);
+            if (springContext != null) {
+                this.objectFactory = new SpringObjectFactory(springContext);
+            } else {
+                this.objectFactory = new DefaultObjectFactory();
+            }
         }
     }
 
@@ -150,12 +151,12 @@ public class DispatcherServlet implements Servlet {
             }
             Method[] methods = obj.getClass().getDeclaredMethods();
             for (Method method : methods) {
-                ActionInvocation controller = createController(config, urlPrefix, method, obj, viewManager);
-                if (controller != null) {
-                    if (controllerMap.containsKey(controller.getCommand())) {
-                        throw new RuntimeException("Duplicate action command :" + controller.getCommand());
+                Invocation invocation = createInvocation(config, urlPrefix, method, obj, viewManager);
+                if (invocation != null) {
+                    if (invocationMap.containsKey(invocation.getCommand())) {
+                        throw new RuntimeException("Duplicate action command :" + invocation.getCommand());
                     }
-                    controllerMap.put(controller.getCommand(), controller);
+                    invocationMap.put(invocation.getCommand(), invocation);
                 }
             }
         }
@@ -166,24 +167,7 @@ public class DispatcherServlet implements Servlet {
         this.resourceInvocation = new ResourceInvocation(resourceManager, view);
     }
 
-    private void initRpcAction(ServletConfig config) throws Exception {
-        ApplicationContext context = (ApplicationContext) config.getServletContext().getAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE);
-        Map<String, Object> actionBeans = context.getBeansWithAnnotation(RpcAction.class);
-        for (Object obj : actionBeans.values()) {
-            RpcAction rpcAction = obj.getClass().getAnnotation(RpcAction.class);
-            Class<?> interfaceClass = rpcAction.interfaceClass();
-            for (Method method : interfaceClass.getDeclaredMethods()) {
-                String command = ServletUtil.getRpcInterfaceCommand(interfaceClass, method);
-                if (controllerMap.containsKey(command)) {
-                    throw new RuntimeException("Duplicate action command :" + command);
-                }
-                controllerMap.put(command, new RpcInvocation(command, obj, method));
-            }
-        }
-    }
-
-
-    private ActionInvocation createController(ServletConfig config, String prefix, Method method, Object obj, ViewManager vm) {
+    private ActionInvocation createInvocation(ServletConfig config, String prefix, Method method, Object obj, ViewManager vm) {
         Command command = method.getAnnotation(Command.class);
         if (command == null) {
             return null;
@@ -214,9 +198,9 @@ public class DispatcherServlet implements Servlet {
     @Override
     public void service(Request request, Response response) throws Exception {
         String command = request.getCommand();
-        Invocation invocation = controllerMap.get(command);
+        Invocation invocation = invocationMap.get(command);
         if (invocation == null) {
-            for (Invocation v : controllerMap.values()) {
+            for (Invocation v : invocationMap.values()) {
                 if (v.isMatch(command)) {
                     invocation = v;
                     break;

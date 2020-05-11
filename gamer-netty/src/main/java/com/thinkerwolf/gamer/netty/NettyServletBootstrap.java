@@ -198,9 +198,9 @@ public class NettyServletBootstrap {
                 return servletContext;
             }
         };
-        loadListeners(listenersConf);
         Servlet servlet = ClassUtils.newInstance(servletConfig.servletClass());
         servlet.init(servletConfig);
+        loadListeners(listenersConf);
     }
 
 

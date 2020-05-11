@@ -63,12 +63,7 @@ public final class Resources {
         String rootDir = getRootDir(rootPath);
         Pattern p = Pattern.compile(rootPath.replaceAll("\\*", ".*"));
         Set<String> set = ResourceUtils.findClasspathFilePaths(rootDir, "");
-        for (Iterator<String> iter = set.iterator(); iter.hasNext(); ) {
-            String s = iter.next();
-            if (!p.matcher(s).matches()) {
-                iter.remove();
-            }
-        }
+        set.removeIf(s -> !p.matcher(s).matches());
         Resource[] resources = new Resource[set.size()];
         Iterator<String> iter = set.iterator();
         for (int i = 0; i < set.size(); i++) {
@@ -88,12 +83,7 @@ public final class Resources {
         String rootDir = getRootDir(rootPath);
         Pattern p = Pattern.compile(rootPath.replaceAll("\\*", ".*"));
         Set<String> set = ResourceUtils.findFilePaths(rootDir);
-        for (Iterator<String> iter = set.iterator(); iter.hasNext(); ) {
-            String s = iter.next();
-            if (!p.matcher(s).matches()) {
-                iter.remove();
-            }
-        }
+        set.removeIf(s -> !p.matcher(s).matches());
         Resource[] resources = new Resource[set.size()];
         Iterator<String> iter = set.iterator();
         for (int i = 0; i < set.size(); i++) {

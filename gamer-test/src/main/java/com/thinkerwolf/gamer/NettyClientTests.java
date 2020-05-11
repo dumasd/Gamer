@@ -1,10 +1,10 @@
 package com.thinkerwolf.gamer;
 
 import com.google.protobuf.ByteString;
-import com.thinkerwolf.gamer.netty.tcp.gamer.Packet;
-import com.thinkerwolf.gamer.netty.tcp.gamer.PacketDecoder;
-import com.thinkerwolf.gamer.netty.tcp.gamer.PacketEncoder;
-import com.thinkerwolf.gamer.netty.tcp.protobuf.PacketProto;
+import com.thinkerwolf.gamer.netty.tcp.Packet;
+import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
+import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
+import com.thinkerwolf.gamer.netty.protobuf.PacketProto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;

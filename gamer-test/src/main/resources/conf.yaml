@@ -15,6 +15,7 @@ servlet:
 listeners:
   - com.thinkerwolf.gamer.LocalSessionListener
   - com.thinkerwolf.gamer.LocalSessionAttributeListener
+  - com.thinkerwolf.gamer.rpc.RpcServiceLoadListener
 
 # Netty配置列表
 netty:

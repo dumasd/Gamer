@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.core.serialization.fastjson;
 
 import com.alibaba.fastjson.serializer.JSONSerializer;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializeWriter;
 import com.thinkerwolf.gamer.core.serialization.ObjectInput;
 import com.thinkerwolf.gamer.core.serialization.ObjectOutput;
@@ -16,7 +17,7 @@ public class FastjsonSerializer implements Serializer {
 	@Override
 	public ObjectOutput serialize(OutputStream os) throws IOException {
 		SerializeWriter out = new SerializeWriter(new OutputStreamWriter(os));
-		JSONSerializer serializer = new JSONSerializer(out);
+		JSONSerializer serializer = new JSONSerializer(out, SerializeConfig.globalInstance);
 		return new FastjsonObjectOutput(serializer);
 	}
 

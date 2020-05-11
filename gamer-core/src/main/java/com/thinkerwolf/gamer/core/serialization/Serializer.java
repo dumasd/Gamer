@@ -12,7 +12,7 @@ import java.io.OutputStream;
  *
  * @author wukai
  */
-@SPI("fastjson")
+@SPI("jdk")
 public interface Serializer {
 
     ObjectOutput serialize(OutputStream os) throws IOException;

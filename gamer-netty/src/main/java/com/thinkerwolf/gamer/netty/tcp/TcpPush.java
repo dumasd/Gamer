@@ -1,7 +1,6 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
 import com.thinkerwolf.gamer.core.servlet.Push;
-import com.thinkerwolf.gamer.netty.tcp.gamer.Packet;
 import io.netty.channel.Channel;
 
 /**

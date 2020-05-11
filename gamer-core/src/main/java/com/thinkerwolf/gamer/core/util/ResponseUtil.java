@@ -21,7 +21,7 @@ public class ResponseUtil {
     public static Integer CONTENT_TEXT = 1;
     public static Integer CONTENT_JSON = 2;
     public static Integer CONTENT_EXCEPTION = 3;
-
+    public static Integer CONTENT_BYTES = 4;
 
     public static ByteModel INTERNAL_SERVER_ERROR_MODEL = new ByteModel("Internal Server error".getBytes());
 

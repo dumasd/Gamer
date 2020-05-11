@@ -1,9 +1,18 @@
 package com.thinkerwolf.gamer.common.util;
 
 
+import com.thinkerwolf.gamer.common.io.Resources;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 public class ClassUtils {
 
@@ -162,7 +171,38 @@ public class ClassUtils {
         return null;
     }
 
+    public static <A extends Annotation> A getAnnotation(Class clazz, Class<A> annotationClass) {
+        if (clazz == Object.class) {
+            return null;
+        }
+        Annotation res = clazz.getAnnotation(annotationClass);
+        if (res != null) {
+            return (A) res;
+        }
+        res = getAnnotation(clazz.getSuperclass(), annotationClass);
+        if (res != null) {
+            return (A) res;
+        }
+        Class<?>[] interfaces = clazz.getInterfaces();
+        for (Class<?> ifac : interfaces) {
+            res = getAnnotation(ifac, annotationClass);
+            if (res != null) {
+                return (A) res;
+            }
+        }
+        return null;
+    }
 
+    public static Set<Class> scanClasses(String basePackage) {
+        basePackage = basePackage.replace('.', '/');
+        Set<String> set = ResourceUtils.findClasspathFilePaths(basePackage, "class");
+        Set<Class> result = new LinkedHashSet<>();
+        for (String s : set) {
+            String classname = s.replaceAll("/", ".").replaceAll(".class", "");
+            result.add(forName(classname));
+        }
+        return result;
+    }
 
 
 }
