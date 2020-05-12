@@ -13,14 +13,14 @@ import java.util.*;
 public class NettyServerTests {
 
     public static void main(String[] args) throws Exception {
+        System.out.println("Command args : " + Arrays.toString(args));
         InternalLoggerFactory.setDefaultLoggerFactory(new Slf4jLoggerFactory());
+        startFromConfig(args);
+    }
 
-
-//        ServletConfig servletConfig = getCodeServletConfig();
-//        startupTcp(servletConfig);
-//        startupHttp(servletConfig);
-
-        startFromConfig();
+    private static void startFromConfig(String[] args) throws Exception {
+        NettyServletBootstrap bootstrap = new NettyServletBootstrap(args.length > 0 ? args[0] : null);
+        bootstrap.startup();
     }
 
     private static void startupTcp(ServletConfig servletConfig) throws Exception {
@@ -31,17 +31,11 @@ public class NettyServerTests {
         bootstrap.startup();
     }
 
-
     private static void startupHttp(ServletConfig servletConfig) throws Exception {
         NettyConfig nettyConfig = new NettyConfig();
         nettyConfig.setPort(8080);
         nettyConfig.setProtocol(Protocol.HTTP);
         NettyServletBootstrap bootstrap = new NettyServletBootstrap(nettyConfig, servletConfig);
-        bootstrap.startup();
-    }
-
-    private static void startFromConfig() throws Exception {
-        NettyServletBootstrap bootstrap = new NettyServletBootstrap();
         bootstrap.startup();
     }
 

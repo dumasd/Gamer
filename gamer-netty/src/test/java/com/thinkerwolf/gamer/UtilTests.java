@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -177,6 +178,18 @@ public class UtilTests {
 
         System.out.println(String.class.getCanonicalName());
 
+    }
+
+
+    @Test
+    public void freeMarker() throws Exception {
+        URL url =  FreemarkerHelper.class.getClassLoader().getResource("templates/internal_error.ftl");
+        System.out.println(url);
+        url = ClassUtils.class.getResource("templates/internal_error.ftl");
+        System.out.println(url);
+
+        FreemarkerHelper.init(null);
+        FreemarkerHelper.getTemplateBytes("internal_error.ftl", new HashMap<>());
     }
 
 }

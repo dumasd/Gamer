@@ -12,6 +12,8 @@ import com.thinkerwolf.gamer.core.mvc.view.JsonView;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 @Action(views = {
         @View(name = "byte", type = JsonView.class),
@@ -19,9 +21,17 @@ import java.util.Map;
 })
 public class TestAction {
 
+    private AtomicInteger atomicInteger = new AtomicInteger();
+
     @Command("test@jjj*")
     public ByteModel getTest(Request request, @RequestParam("num") int num) {
         return new ByteModel(("{\"num\":" + num + ",\"netty\":\"4.1.19\"}").getBytes());
+    }
+
+    @Command("test@hello")
+    public ByteModel getTest2(Request request, @RequestParam("name") String name) {
+        String hello = "Hello " + name;
+        return new ByteModel(("{\"seqId\":" + atomicInteger.incrementAndGet() + ",\"words\":\"" + hello + "\"}").getBytes());
     }
 
     @Command("index")
@@ -36,6 +46,5 @@ public class TestAction {
         request.getSession(true);
         return new ByteModel("{}".getBytes());
     }
-
 
 }

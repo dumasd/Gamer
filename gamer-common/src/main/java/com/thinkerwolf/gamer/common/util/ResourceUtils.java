@@ -35,7 +35,6 @@ public class ResourceUtils {
 
     static {
         CLASS_PATH_LOCATION = ClassUtils.getDefaultClassLoader().getResource("").getPath();
-        LOG.debug(CLASS_PATH_LOCATION);
         try {
             Enumeration<URL> classpathUrls = ClassUtils.getDefaultClassLoader().getResources("");
             while (classpathUrls.hasMoreElements()) {
@@ -187,10 +186,14 @@ public class ResourceUtils {
      * @throws IOException
      */
     public static InputStream findInputStream(String root, String file) throws IOException {
-        root = root.replace('.', '/');
-        root = root.replace('\\', '/');
-        if (root.charAt(root.length() - 1) != '/') {
-            root = root + '/';
+        if (!org.apache.commons.lang.StringUtils.isBlank(root)) {
+            root = root.replace('.', '/');
+            root = root.replace('\\', '/');
+            if (root.charAt(root.length() - 1) != '/') {
+                root = root + '/';
+            }
+        } else {
+            root = "";
         }
         String path = root + file;
         File f = new File(file);

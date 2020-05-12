@@ -1,10 +1,14 @@
 package com.thinkerwolf.gamer.netty;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.common.util.ResourceUtils;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -15,6 +19,10 @@ import java.util.*;
  *
  */
 public class NettyServletBootstrap {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(NettyServletBootstrap.class);
+
+    private String configFile;
 
     private ServletConfig servletConfig;
 
@@ -39,6 +47,10 @@ public class NettyServletBootstrap {
     public NettyServletBootstrap() {
     }
 
+    public NettyServletBootstrap(String configFile) {
+        this.configFile = configFile;
+    }
+
     /**
      * 启动
      */
@@ -54,7 +66,14 @@ public class NettyServletBootstrap {
     private void loadConfig() throws Exception {
         if (servletConfig == null || nettyConfigs == null || nettyConfigs.size() == 0) {
             Yaml yaml = new Yaml();
-            InputStream is = getClass().getClassLoader().getResourceAsStream("conf.yaml");
+            String file = StringUtils.isBlank(configFile) ? "conf.yaml" : configFile;
+            InputStream is = ResourceUtils.findInputStream("", file);
+            if (is == null) {
+                LOG.info("Can't load config from [" + configFile + "]");
+            }
+            if (is == null) {
+                is = ResourceUtils.findInputStream("", "conf.yaml");
+            }
             try {
                 Map<String, Object> conf = yaml.load(is);
                 Map<String, Object> servletConf = (Map<String, Object>) conf.get("servlet");
@@ -75,13 +94,14 @@ public class NettyServletBootstrap {
                 List<String> listenersConf = (List<String>) conf.get("listeners");
                 loadNettyConfig(nettyConfs);
                 loadServletConfig(servletConf, listenersConf);
-            } catch (Exception thrown) {
-                throw thrown;
+            } catch (Exception rethrown) {
+                throw rethrown;
             } finally {
                 IOUtils.closeQuietly(is);
             }
         }
     }
+
 
     @SuppressWarnings("unchecked")
     private void loadNettyConfig(List<Map<String, Object>> nettyConfs) {

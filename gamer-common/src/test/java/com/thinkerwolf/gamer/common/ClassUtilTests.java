@@ -60,13 +60,6 @@ public class ClassUtilTests {
         System.out.println(u);
     }
 
-    @Test
-    public void testResourceUtils() throws IOException {
-        ResourceUtils.findClasspathFilePaths("org/junit", "class");
 
-        InputStream is = ResourceUtils.findInputStream("org/junit", "Test.class");
-
-
-    }
 
 }
