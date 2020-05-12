@@ -8,7 +8,8 @@ servlet:
     compress: true # 传输压缩(仅http生效)
     sessionTimeout: 3600 # session超时时间(s)
     sessionTickTime: 5 # session检查tick(s)
-    filters: com.thinkerwolf.gamer.test.ExceptionFilter;com.thinkerwolf.gamer.test.LoginSessionFilter
+    filters: com.thinkerwolf.gamer.test.ExceptionFilter;
+    # com.thinkerwolf.gamer.test.LoginSessionFilter
 
 
 # 监听器配置列表

@@ -4,6 +4,8 @@ import java.nio.charset.Charset;
 
 public class StringModel implements Model<String> {
 
+    public static final String NAME = "string";
+
     private String data;
 
     private Charset charset;
@@ -25,7 +27,7 @@ public class StringModel implements Model<String> {
 
     @Override
     public String name() {
-        return "string";
+        return NAME;
     }
 
     @Override

@@ -31,7 +31,7 @@ public class NettyRpcClientTests {
     }
 
     private static void startRpcConnection() {
-        URL url = URL.parse("tcp://127.0.0.1:8090");
+        URL url = URL.parse("tcp://106.13.146.85:8090");
         int loop = 3;
         //while (loop-- > 0) {
             IRpcAction action = RpcReferenceManager.getInstance().getConnection(IRpcAction.class, url);

@@ -1,6 +1,8 @@
 package com.thinkerwolf.gamer.common.util;
 
 import com.thinkerwolf.gamer.common.io.Resource;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,6 +24,8 @@ import java.util.jar.JarFile;
  */
 public class ResourceUtils {
 
+    private static final Logger LOG  = InternalLoggerFactory.getLogger(ResourceUtils.class);
+
     public static final Set<URL> classPathURLs = new HashSet<>();
 
     public static final String CLASS_PATH_LOCATION;
@@ -36,6 +40,7 @@ public class ResourceUtils {
 
     static {
         CLASS_PATH_LOCATION = ClassUtils.getDefaultClassLoader().getResource("").getPath();
+        LOG.debug(CLASS_PATH_LOCATION);
         try {
             Enumeration<URL> classpathUrls = ClassUtils.getDefaultClassLoader().getResources("");
             while (classpathUrls.hasMoreElements()) {

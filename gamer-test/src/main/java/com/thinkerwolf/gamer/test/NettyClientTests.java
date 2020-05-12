@@ -18,10 +18,12 @@ import java.nio.charset.Charset;
 
 public class NettyClientTests {
     public static void main(String[] args) {
-        startupTcp();
+        // 106.13.146.85
+
+        startupTcp("106.13.146.85", 8090);
     }
 
-    private static void startupTcp() {
+    private static void startupTcp(final String host, final int port) {
         for (int i = 0; i < 1000; i++) {
             new Thread(new Runnable() {
                 @Override
@@ -30,11 +32,19 @@ public class NettyClientTests {
                     b.group(new NioEventLoopGroup(1));
                     b.channel(NioSocketChannel.class);
                     b.handler(getInitializerGamer());
-                    final ChannelFuture cf = b.connect("127.0.0.1", 8090);
+                    final ChannelFuture cf = b.connect(host, port);
                     try {
                         cf.await();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    }
+
+                    Object loginPacket = login();
+                    cf.channel().writeAndFlush(loginPacket);
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
                     }
 
                     Object packet = getSendMsgGamer();
@@ -58,6 +68,14 @@ public class NettyClientTests {
        return PacketProto.RequestPacket.newBuilder()
                 .setRequestId(1).setCommand("test@jjjc")
                 .setContent(ByteString.copyFromUtf8("num=2")).build();
+    }
+
+    private static Object login() {
+        Packet packet = new Packet();
+        packet.setCommand("user@login");
+        packet.setRequestId(1);
+        packet.setContent("username=wk&password=123".getBytes(Charset.defaultCharset()));
+        return packet;
     }
 
     private static Object getSendMsgGamer() {

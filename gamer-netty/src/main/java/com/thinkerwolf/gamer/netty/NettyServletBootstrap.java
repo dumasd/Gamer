@@ -4,6 +4,7 @@ import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
+import org.apache.commons.io.IOUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -77,11 +78,7 @@ public class NettyServletBootstrap {
             } catch (Exception thrown) {
                 throw thrown;
             } finally {
-                try {
-                    if (is != null)
-                        is.close();
-                } catch (IOException ignored) {
-                }
+                IOUtils.closeQuietly(is);
             }
         }
     }

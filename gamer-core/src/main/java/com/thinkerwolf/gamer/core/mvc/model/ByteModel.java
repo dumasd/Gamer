@@ -3,6 +3,8 @@ package com.thinkerwolf.gamer.core.mvc.model;
 
 public class ByteModel implements Model<byte[]> {
 
+    public static final String NAME = "byte";
+
     private byte[] bytes;
 
     private String encoding;
@@ -23,7 +25,7 @@ public class ByteModel implements Model<byte[]> {
 
     @Override
     public String name() {
-        return "byte";
+        return NAME;
     }
 
     @Override

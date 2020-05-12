@@ -5,6 +5,9 @@ import com.thinkerwolf.gamer.core.mvc.FreemarkerHelper;
 import java.util.Map;
 
 public class FreemarkerModel implements Model<Map<String, Object>> {
+
+    public static final String NAME = "freemarker";
+
     /**
      * freemarker template
      */
@@ -24,7 +27,7 @@ public class FreemarkerModel implements Model<Map<String, Object>> {
 
     @Override
     public String name() {
-        return "freemarker";
+        return NAME;
     }
 
     @Override

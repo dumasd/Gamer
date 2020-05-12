@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.netty.http;
 
+import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
@@ -24,7 +25,7 @@ public class HttpDecorator implements Decorator {
             httpResponse.headers().add(HttpHeaderNames.CONTENT_ENCODING, model.encoding());
         }
         httpResponse.headers().add(HttpHeaderNames.DATE, new Date());
-        httpResponse.headers().add(HttpHeaderNames.SERVER, "Gamer");
+        httpResponse.headers().add(HttpHeaderNames.SERVER, Constants.FRAMEWORK_NAME_VERSION);
         httpResponse.content().writeBytes(bytes);
         return httpResponse;
     }
