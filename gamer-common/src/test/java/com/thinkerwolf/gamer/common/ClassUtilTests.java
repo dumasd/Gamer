@@ -1,9 +1,13 @@
 package com.thinkerwolf.gamer.common;
 
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.common.util.ResourceUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -54,6 +58,15 @@ public class ClassUtilTests {
         String url = "default://wukai:123@127.0.0.1:8080/fdadt?useUnicode=true";
         URL u = URL.parse(url);
         System.out.println(u);
+    }
+
+    @Test
+    public void testResourceUtils() throws IOException {
+        ResourceUtils.findClasspathFilePaths("org/junit", "class");
+
+        InputStream is = ResourceUtils.findInputStream("org/junit", "Test.class");
+
+
     }
 
 }

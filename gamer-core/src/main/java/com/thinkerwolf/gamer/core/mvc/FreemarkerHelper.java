@@ -20,6 +20,8 @@ public class FreemarkerHelper {
     private static Map<String, Configuration> configurationMap = new LinkedHashMap<>();
 
     public static void init(ServletConfig servletConfig) throws Exception {
+        ResourceUtils.class.getClassLoader().getResources(DEFAULT_TEMPLATE_LOCATION);
+
         File defaultFile = new File(ResourceUtils.CLASS_PATH_LOCATION + DEFAULT_TEMPLATE_LOCATION);
         if (defaultFile.exists()) {
             Configuration defaultConfiguration = new Configuration();

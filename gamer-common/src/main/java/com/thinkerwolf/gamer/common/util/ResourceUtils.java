@@ -1,13 +1,9 @@
 package com.thinkerwolf.gamer.common.util;
 
-import com.thinkerwolf.gamer.common.io.Resource;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
@@ -24,12 +20,11 @@ import java.util.jar.JarFile;
  */
 public class ResourceUtils {
 
-    private static final Logger LOG  = InternalLoggerFactory.getLogger(ResourceUtils.class);
-
     public static final Set<URL> classPathURLs = new HashSet<>();
-
     public static final String CLASS_PATH_LOCATION;
-
+    public static final String PROTOCOL_FILE = "file";
+    public static final String PROTOCOL_JAR = "jar";
+    private static final Logger LOG = InternalLoggerFactory.getLogger(ResourceUtils.class);
     private static ThreadLocal<byte[]> threadBuffer = new ThreadLocal<byte[]>() {
         @Override
         protected byte[] initialValue() {
@@ -50,6 +45,7 @@ public class ResourceUtils {
             throw new RuntimeException(e);
         }
     }
+
 
     /**
      * 获取指定classpath目录下所有文件的路径
@@ -129,7 +125,7 @@ public class ResourceUtils {
      * @return
      */
     public static Set<String> findFilePaths(File rootFile) {
-        Set<String> paths = new HashSet<>();
+        Set<String> paths = new LinkedHashSet<>();
         findPathsByFile(rootFile, paths);
         return paths;
     }
@@ -182,12 +178,39 @@ public class ResourceUtils {
         }
     }
 
-    public static byte[] toByteArray(Resource resource) throws IOException {
+    /**
+     * 从文件系统或者classpath下查找文件
+     *
+     * @param root
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static InputStream findInputStream(String root, String file) throws IOException {
+        root = root.replace('.', '/');
+        root = root.replace('\\', '/');
+        if (root.charAt(root.length() - 1) != '/') {
+            root = root + '/';
+        }
+        String path = root + file;
+        File f = new File(file);
+        if (f.exists()) {
+            try {
+                return new FileInputStream(f);
+            } catch (FileNotFoundException ignored) {
+            }
+        }
+        URL url = ClassUtils.getDefaultClassLoader().getResource(path);
+        if (url != null) {
+            return url.openStream();
+        }
+        return null;
+    }
+
+    public static byte[] readFully(InputStream inputStream) throws IOException {
         ByteArrayOutputStream baos = null;
-        InputStream inputStream = null;
         try {
             byte[] buffer = threadBuffer.get();
-            inputStream = resource.getInputStream();
             int estimate = inputStream.available();
             baos = new ByteArrayOutputStream(estimate);
             int n;
@@ -198,18 +221,17 @@ public class ResourceUtils {
         } catch (IOException e) {
             throw e;
         } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-                if (baos != null) {
-                    baos.close();
-                }
-            } catch (IOException e) {
-
-            }
+            closeQuietly(inputStream);
+            closeQuietly(baos);
         }
+    }
 
+    public static void closeQuietly(Closeable closeable) {
+        try {
+            if (closeable != null)
+                closeable.close();
+        } catch (IOException ignored) {
+        }
     }
 
 }

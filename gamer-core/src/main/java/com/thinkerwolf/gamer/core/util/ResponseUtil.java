@@ -4,10 +4,8 @@ import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
 import com.thinkerwolf.gamer.core.mvc.model.FreemarkerModel;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.mvc.model.StringModel;
+import com.thinkerwolf.gamer.core.mvc.view.*;
 import com.thinkerwolf.gamer.core.servlet.*;
-import com.thinkerwolf.gamer.core.mvc.view.NullView;
-import com.thinkerwolf.gamer.core.mvc.view.StringView;
-import com.thinkerwolf.gamer.core.mvc.view.View;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -62,19 +60,8 @@ public class ResponseUtil {
             } else {
                 response.setStatus(ResponseStatus.INTERNAL_SERVER_ERROR);
             }
-            response.setContentType("text/html");
-            Map<String, Object> data = new HashMap<>();
-            data.put("code", response.getStatus());
-            data.put("msg", "E0010");
-            if (exceptionStackBytes != null) {
-                data.put("detail", new String(exceptionStackBytes, Charset.forName("utf-8")));
-            } else {
-                data.put("detail", "");
-            }
-            NULL_VIEW.render(new FreemarkerModel("internal_error.ftl", data), request, response);
+            renderError("Not found", request, response);
         }
-
-
 
     }
 

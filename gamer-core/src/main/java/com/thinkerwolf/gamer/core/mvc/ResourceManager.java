@@ -8,9 +8,13 @@ import com.thinkerwolf.gamer.common.util.ResourceUtils;
 import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import com.thinkerwolf.gamer.core.util.CompressUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -28,27 +32,21 @@ public class ResourceManager {
 
     private static final String DEFAULT_RESOURCE_PUBLIC = "public";
 
-    private List<String> resourceLocations = new LinkedList<>();
+    /**
+     * 资源路径，支持绝对路径和classpath
+     */
+    private Set<String> resourceLocations = new LinkedHashSet<>();
 
     private Map<String, ResourceModel> modelCache = new HashMap<>();
 
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
 
     public void init(ServletConfig servletConfig) {
-        resourceLocations.add(ResourceUtils.CLASS_PATH_LOCATION + DEFAULT_RESOURCE_PUBLIC);
-        resourceLocations.add(ResourceUtils.CLASS_PATH_LOCATION + DEFAULT_RESOURCE_STATIC);
-
         String location = servletConfig.getInitParam(ServletConfig.RESOURCE_LOCATION);
         if (location != null && location.length() > 0) {
-            String[] ls = location.split(";");
-            for (String l : ls) {
-                if (l != null && l.length() > 0) {
-                    File file = new File(ResourceUtils.CLASS_PATH_LOCATION + l);
-                    if (file.exists()) {
-                        resourceLocations.add(file.getAbsolutePath());
-                    } else {
-                        LOG.info("Resource location not found : " + l);
-                    }
+            for (String l : StringUtils.split(location, ';')) {
+                if (StringUtils.isNotBlank(l)) {
+                    resourceLocations.add(l);
                 }
             }
         }
@@ -69,14 +67,17 @@ public class ResourceManager {
             readWriteLock.readLock().unlock();
         }
 
-        File file = null;
+        InputStream is = null;
         for (String location : resourceLocations) {
-            file = new File(location + File.separator + path);
-            if (file.exists()) {
-                break;
-            }
+            is = ResourceUtils.findInputStream(location, path);
         }
-        if (file == null || !file.exists()) {
+        if (is == null) {
+            is = ResourceUtils.findInputStream(DEFAULT_RESOURCE_STATIC, path);
+        }
+        if (is == null) {
+            is = ResourceUtils.findInputStream(DEFAULT_RESOURCE_PUBLIC, path);
+        }
+        if (is == null) {
             return null;
         }
 
@@ -87,8 +88,7 @@ public class ResourceManager {
 
         readWriteLock.writeLock().lock();
         try {
-            Resource resource = Resources.getResource("file:" + file.getAbsolutePath());
-            byte[] data = ResourceUtils.toByteArray(resource);
+            byte[] data = ResourceUtils.readFully(is);
             ResourceModel resourceModel = new ResourceModel(data, name, extension);
             modelCache.put(path, resourceModel);
             return resourceModel;
