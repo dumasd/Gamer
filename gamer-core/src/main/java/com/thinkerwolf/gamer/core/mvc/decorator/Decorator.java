@@ -5,6 +5,11 @@ import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 
+/**
+ * 网络数据包装器
+ *
+ * @author wukai
+ */
 @SPI
 public interface Decorator {
 

@@ -14,9 +14,12 @@ public class WebSocketChannelConfiger extends ChannelHandlerConfiger<Channel> {
 
     private ServletConfig servletConfig;
 
+    private WebSocketServerHandler handler;
+
     @Override
     public void init(NettyConfig nettyConfig, ServletConfig servletConfig) throws Exception {
         this.servletConfig = servletConfig;
+        this.handler = new WebSocketServerHandler(null, servletConfig);
     }
 
     @Override
@@ -26,6 +29,6 @@ public class WebSocketChannelConfiger extends ChannelHandlerConfiger<Channel> {
         pipeline.addLast(new HttpObjectAggregator(65536));
         pipeline.addLast(new WebSocketServerCompressionHandler());
         pipeline.addLast(new WebSocketServerProtocolHandler("websocket", null, true));
-        pipeline.addLast(new WebSocketServerHandler(servletConfig));
+        pipeline.addLast(handler);
     }
 }

@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.netty.IServerHandler;
 import com.thinkerwolf.gamer.netty.NettyConfig;
 import com.thinkerwolf.gamer.netty.NettyConstants;
+import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.netty.websocket.WebSocketServerHandler;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
@@ -16,7 +17,9 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
+import io.netty.util.AttributeKey;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 @ChannelHandler.Sharable
@@ -24,13 +27,11 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(HttpDefaultHandler.class);
 
-    private AtomicLong requestId;
-    private NettyConfig nettyConfig;
     private ServletConfig servletConfig;
+    private Executor executor;
 
-    public void init(AtomicLong requestId, NettyConfig nettyConfig, ServletConfig servletConfig) {
-        this.requestId = requestId;
-        this.nettyConfig = nettyConfig;
+    public HttpDefaultHandler(Executor executor, ServletConfig servletConfig) {
+        this.executor = executor;
         this.servletConfig = servletConfig;
     }
 
@@ -63,33 +64,59 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
             } else {
                 handshaker.handshake(ctx.channel(), nettyRequest);
                 ctx.pipeline().remove("http-timeout");
-                ctx.pipeline().replace("http-handler", "websocket-handler", new WebSocketServerHandler(servletConfig));
+                ctx.pipeline().replace("http-handler", "websocket-handler", new WebSocketServerHandler(executor, servletConfig));
             }
             return;
         }
 
-        Response response = new com.thinkerwolf.gamer.netty.http.HttpResponse(ctx.channel(), nettyRequest);
+        final Response response = new com.thinkerwolf.gamer.netty.http.HttpResponse(ctx.channel(), nettyRequest);
         boolean compress = ServletUtil.isCompress(servletConfig);
-        Request request = new com.thinkerwolf.gamer.netty.http.HttpRequest(ctx, servletConfig.getServletContext(), nettyRequest, response, compress);
+        final Request request = new com.thinkerwolf.gamer.netty.http.HttpRequest(ctx, servletConfig.getServletContext(), nettyRequest, response, compress);
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.HTTP_DECORATOR);
 
         // 长连接推送
-        if (RequestUtil.isLongHttp(request.getCommand())) {
+        boolean longHttp = RequestUtil.isLongHttp(request.getCommand());
+        ctx.channel().attr(AttributeKey.valueOf(RequestUtil.LONG_HTTP)).set(longHttp);
+        if (longHttp) {
             return;
         }
-        
-        Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
-        servlet.service(request, response);
+
+        if (executor != null) {
+            executor.execute(new ChannelRunnable(ctx.channel(), null) {
+                @Override
+                public void run() {
+                    Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
+                    try {
+                        servlet.service(request, response);
+                    } catch (Exception e) {
+                        // FIXME 如何处理???
+                        LOG.error("Servlet service error", e);
+                    }
+                }
+            });
+        } else {
+            Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
+            servlet.service(request, response);
+        }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel channel = ctx.channel();
-        channel.close();
         LOG.debug("Channel error. channel:" + channel.id()
                 + ", isWritable:" + channel.isWritable()
                 + ", isOpen:" + channel.isOpen()
                 + ", isActive:" + channel.isActive()
                 + ", isRegistered:" + channel.isRegistered(), cause);
+    }
+
+    static class RequestResponsePair {
+        RequestResponsePair(Request request, Response response) {
+            this.request = request;
+            this.response = response;
+        }
+
+        Request request;
+        Response response;
     }
 }

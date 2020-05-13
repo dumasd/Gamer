@@ -6,17 +6,17 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
+import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 import org.apache.commons.collections.MapUtils;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
+@ChannelHandler.Sharable
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(WebSocketServerHandler.class);
@@ -25,7 +25,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private Servlet servlet;
 
-    public WebSocketServerHandler(ServletConfig servletConfig) {
+    private Executor executor;
+
+    public WebSocketServerHandler(Executor executor, ServletConfig servletConfig) {
+        this.executor = executor;
         this.servletConfig = servletConfig;
         this.servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
     }
@@ -51,7 +54,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
 
-    private void processBinaryFrame(BinaryWebSocketFrame frame, ChannelHandlerContext ctx) {
+    private void processBinaryFrame(BinaryWebSocketFrame frame, final ChannelHandlerContext ctx) {
         ByteBuf buf = frame.content();
 
         buf.readInt();
@@ -64,17 +67,31 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
         buf.readBytes(command);
         buf.readBytes(content);
-        WebSocketRequest request = new WebSocketRequest(requestId, new String(command, CharsetUtil.UTF_8), ctx, content, servletConfig.getServletContext());
-        WebSocketResponse response = new WebSocketResponse(ctx.channel());
+        final WebSocketRequest request = new WebSocketRequest(requestId, new String(command, CharsetUtil.UTF_8), ctx, content, servletConfig.getServletContext());
+        final WebSocketResponse response = new WebSocketResponse(ctx.channel());
 
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.WEBSOCKET_DECORATOR);
+
+        if (executor != null) {
+            executor.execute(new ChannelRunnable(ctx.channel()) {
+                @Override
+                public void run() {
+                    service(servlet, request, response, ctx);
+                }
+            });
+        } else {
+            service(servlet, request, response, ctx);
+        }
+    }
+
+
+    private static void service(Servlet servlet, WebSocketRequest request, WebSocketResponse response, ChannelHandlerContext ctx) {
         try {
             servlet.service(request, response);
         } catch (Exception e) {
             ctx.writeAndFlush(new CloseWebSocketFrame());
         }
     }
-
 
     private void processTextFrame(TextWebSocketFrame frame, ChannelHandlerContext ctx) {
         String text = frame.text();
@@ -103,7 +120,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel channel = ctx.channel();
-        channel.close();
         LOG.debug("Channel error. channel:" + channel.id()
                 + ", isWritable:" + channel.isWritable()
                 + ", isOpen:" + channel.isOpen()

@@ -8,6 +8,11 @@ public abstract class ChannelRunnable implements Runnable {
 	protected Channel channel;
 	protected Object msg;
 
+	public ChannelRunnable(Channel channel) {
+		this.channel = channel;
+		this.msg = "";
+	}
+
 	public ChannelRunnable(Channel channel, Object msg) {
 		this.channel = channel;
 		this.msg = msg;
