@@ -84,7 +84,7 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel channel = ctx.channel();
-        LOG.info("Channel error. channel:" + channel.id()
+        LOG.error("Channel error. channel:" + channel.id()
                 + ", isWritable:" + channel.isWritable()
                 + ", isOpen:" + channel.isOpen()
                 + ", isActive:" + channel.isActive()

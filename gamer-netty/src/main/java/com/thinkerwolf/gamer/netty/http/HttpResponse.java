@@ -73,7 +73,7 @@ public class HttpResponse implements Response {
         // is keep alive
         boolean keepAlive = HttpUtil.isKeepAlive(httpRequest);
         ChannelFuture channelFuture = channel.writeAndFlush(obj);
-        if (keepAlive) {
+        if (!keepAlive) {
             channelFuture.addListener(ChannelFutureListener.CLOSE);
         }
         return channelFuture;

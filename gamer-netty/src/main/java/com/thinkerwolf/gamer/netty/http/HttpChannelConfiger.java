@@ -9,7 +9,9 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class HttpChannelConfiger extends ChannelHandlerConfiger<Channel> {
@@ -26,6 +28,7 @@ public class HttpChannelConfiger extends ChannelHandlerConfiger<Channel> {
 
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
+        pipeline.addLast("http-timeout", new ReadTimeoutHandler(3000, TimeUnit.MILLISECONDS));
         pipeline.addLast("http-decoder", new HttpRequestDecoder());
         pipeline.addLast("http-aggregator", new HttpObjectAggregator(65536));
         pipeline.addLast("http-encoder", new HttpResponseEncoder());
