@@ -4,6 +4,7 @@ import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.concurrent.DefaultPromise;
 import com.thinkerwolf.gamer.common.concurrent.Promise;
+import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.core.remoting.*;
 import com.thinkerwolf.gamer.common.serialization.ObjectInput;
 import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
@@ -65,12 +66,7 @@ public class TcpExchangeClient implements ExchangeClient {
             request.setArgs(msg.getParameters());
 
             Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutput oo = serializer.serialize(baos);
-            oo.writeObject(request);
-            oo.close();
-
-            packet.setContent(baos.toByteArray());
+            packet.setContent(Serializations.getBytes(serializer, request));
         } catch (IOException e) {
             promise.setFailure(e);
             return promise;
@@ -99,15 +95,13 @@ public class TcpExchangeClient implements ExchangeClient {
         @Override
         public void received(Channel channel, Object message) throws RemotingException {
             Packet packet = (Packet) message;
-            ByteArrayInputStream bais = new ByteArrayInputStream(packet.getContent());
 
             DefaultPromise promise = waitResultMap.get(packet.getRequestId());
             RpcMessage rpcMsg = (RpcMessage) promise.getAttachment();
             Serializer serializer = ServiceLoader.getService(rpcMsg.getSerial(), Serializer.class);
             try {
-                ObjectInput oi = serializer.deserialize(bais);
-                promise.setSuccess(oi.readObject(Response.class));
-                oi.close();
+                Response response = Serializations.getObject(serializer, packet.getContent(), Response.class);
+                promise.setSuccess(response);
             } catch (IOException | ClassNotFoundException e) {
                 promise.setFailure(e);
                 throw new RemotingException(e);

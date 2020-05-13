@@ -9,11 +9,11 @@ import com.thinkerwolf.gamer.core.mvc.model.FreemarkerModel;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.mvc.view.HtmlView;
 import com.thinkerwolf.gamer.core.mvc.view.JsonView;
+import com.thinkerwolf.gamer.test.service.ITestService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 @Action(views = {
         @View(name = "byte", type = JsonView.class),
@@ -21,17 +21,17 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 })
 public class TestAction {
 
-    private AtomicInteger atomicInteger = new AtomicInteger();
+    @Autowired
+    private ITestService testService;
 
     @Command("test@jjj*")
     public ByteModel getTest(Request request, @RequestParam("num") int num) {
-        return new ByteModel(("{\"num\":" + num + ",\"netty\":\"4.1.19\"}").getBytes());
+        return new ByteModel(testService.serverInfo(num));
     }
 
     @Command("test@hello")
     public ByteModel getTest2(Request request, @RequestParam("name") String name) {
-        String hello = "Hello " + name;
-        return new ByteModel(("{\"seqId\":" + atomicInteger.incrementAndGet() + ",\"words\":\"" + hello + "\"}").getBytes());
+        return new ByteModel(testService.sayHello(name));
     }
 
     @Command("index")

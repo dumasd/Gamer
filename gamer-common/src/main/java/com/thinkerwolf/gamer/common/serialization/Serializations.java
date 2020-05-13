@@ -2,10 +2,14 @@ package com.thinkerwolf.gamer.common.serialization;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * 序列化集合
+ * 序列化集合工具
+ *
+ * @author wukai
+ * @date 2020/5/13 17:31
  */
 public final class Serializations {
 
@@ -20,11 +24,12 @@ public final class Serializations {
         } catch (IOException e) {
             throw e;
         } finally {
+            closeQuietly(baos);
             closeQuietly(oo);
         }
     }
 
-    public  static <T> T getObject(Serializer serializer, byte[] data, Class<T> clazz) throws IOException, ClassNotFoundException {
+    public static <T> T getObject(Serializer serializer, byte[] data, Class<T> clazz) throws IOException, ClassNotFoundException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         ObjectInput oi = null;
         try {
@@ -33,7 +38,16 @@ public final class Serializations {
         } catch (IOException e) {
             throw e;
         } finally {
+            closeQuietly(bais);
             closeQuietly(oi);
+        }
+    }
+
+    private static void closeQuietly(Closeable closeable) {
+        try {
+            if (closeable != null)
+                closeable.close();
+        } catch (IOException ignored) {
         }
     }
 
