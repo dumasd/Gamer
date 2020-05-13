@@ -29,6 +29,13 @@ public class NettyServletBootstrap {
 
     private List<NettyConfig> nettyConfigs;
 
+    public NettyServletBootstrap() {
+    }
+
+    public NettyServletBootstrap(String configFile) {
+        this.configFile = configFile;
+    }
+
     public NettyServletBootstrap(NettyConfig nettyConfig, ServletConfig servletConfig) {
         if (nettyConfig == null || servletConfig == null) {
             throw new NullPointerException();
@@ -43,13 +50,6 @@ public class NettyServletBootstrap {
         }
         this.nettyConfigs = nettyConfigs;
         this.servletConfig = servletConfig;
-    }
-
-    public NettyServletBootstrap() {
-    }
-
-    public NettyServletBootstrap(String configFile) {
-        this.configFile = configFile;
     }
 
     /**
