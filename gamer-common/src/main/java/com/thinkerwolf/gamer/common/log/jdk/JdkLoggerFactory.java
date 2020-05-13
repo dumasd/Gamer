@@ -4,7 +4,7 @@ import com.thinkerwolf.gamer.common.io.Resource;
 import com.thinkerwolf.gamer.common.io.Resources;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
-import com.thinkerwolf.gamer.common.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.logging.LogManager;
 

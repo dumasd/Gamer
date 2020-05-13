@@ -35,6 +35,10 @@ netty:
   -
     bossThreads: 3
     workerThreads: 5
+    ssl:
+      enabled: true
+      keyStore: C:\Users\wukai\.keystore
+      keyStorePassword: 123456
     protocol: HTTP
     port: 8080
     options:

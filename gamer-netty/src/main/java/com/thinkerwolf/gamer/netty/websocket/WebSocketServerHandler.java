@@ -8,10 +8,12 @@ import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
+import org.apache.commons.collections.MapUtils;
 
 import java.util.Map;
 
@@ -19,14 +21,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(WebSocketServerHandler.class);
 
-    private WebSocketServerHandshaker handshaker;
-
     private ServletConfig servletConfig;
 
     private Servlet servlet;
 
-    public WebSocketServerHandler(WebSocketServerHandshaker handshaker, ServletConfig servletConfig) {
-        this.handshaker = handshaker;
+    public WebSocketServerHandler(ServletConfig servletConfig) {
         this.servletConfig = servletConfig;
         this.servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
     }
@@ -36,7 +35,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         if (msg instanceof WebSocketFrame) {
             WebSocketFrame frame = (WebSocketFrame) msg;
             if (frame instanceof CloseWebSocketFrame) {
-                handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame);
+                ctx.channel().writeAndFlush(frame).addListener(ChannelFutureListener.CLOSE);
             } else if (frame instanceof PingWebSocketFrame) {
                 ctx.channel().writeAndFlush(new PongWebSocketFrame(frame.content()));
             } else if (frame instanceof BinaryWebSocketFrame) {
@@ -79,10 +78,15 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private void processTextFrame(TextWebSocketFrame frame, ChannelHandlerContext ctx) {
         String text = frame.text();
-        // command=3333&token=1&
+        // command=3333&requestId=1&
         Map<String, Object> params = RequestUtil.parseParams(text);
-        String command = params.get("command").toString();
-        int requestId = Integer.parseInt(params.get("token").toString());
+
+        String command = MapUtils.getString(params, "command");
+        if (command == null) {
+            ctx.writeAndFlush(new TextWebSocketFrame("No command in text message")).addListener(ChannelFutureListener.CLOSE);
+            return;
+        }
+        int requestId = MapUtils.getInteger(params, "requestId", 0);
 
         WebSocketRequest request = new WebSocketRequest(requestId, command, ctx, text.getBytes(CharsetUtil.UTF_8), servletConfig.getServletContext());
         WebSocketResponse response = new WebSocketResponse(ctx.channel());
@@ -99,7 +103,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel channel = ctx.channel();
-        LOG.info("Channel error. channel:" + channel.id()
+        channel.close();
+        LOG.debug("Channel error. channel:" + channel.id()
                 + ", isWritable:" + channel.isWritable()
                 + ", isOpen:" + channel.isOpen()
                 + ", isActive:" + channel.isActive()

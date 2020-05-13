@@ -62,7 +62,8 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
                 WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
             } else {
                 handshaker.handshake(ctx.channel(), nettyRequest);
-                ctx.pipeline().replace("http-handler", "websocket-handler", new WebSocketServerHandler(handshaker, servletConfig));
+                ctx.pipeline().remove("http-timeout");
+                ctx.pipeline().replace("http-handler", "websocket-handler", new WebSocketServerHandler(servletConfig));
             }
             return;
         }
@@ -84,7 +85,8 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel channel = ctx.channel();
-        LOG.error("Channel error. channel:" + channel.id()
+        channel.close();
+        LOG.debug("Channel error. channel:" + channel.id()
                 + ", isWritable:" + channel.isWritable()
                 + ", isOpen:" + channel.isOpen()
                 + ", isActive:" + channel.isActive()

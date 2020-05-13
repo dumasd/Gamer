@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer.common.util;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.net.JarURLConnection;

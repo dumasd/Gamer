@@ -7,11 +7,12 @@ import com.thinkerwolf.gamer.common.util.ResourceUtils;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.ssl.SslConfig;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -118,21 +119,14 @@ public class NettyServletBootstrap {
             } else {
                 throw new ConfigurationException("Netty config missing protocol");
             }
-            if (nettyConf.containsKey("bossThreads")) {
-                nettyConfig.setBossThreads((Integer) nettyConf.get("bossThreads"));
-            }
-            if (nettyConf.containsKey("workerThreads")) {
-                nettyConfig.setWorkThreads((Integer) nettyConf.get("workerThreads"));
-            }
-            if (nettyConf.containsKey("coreThreads")) {
-                nettyConfig.setCoreThreads((Integer) nettyConf.get("coreThreads"));
-            }
-            if (nettyConf.containsKey("maxThreads")) {
-                nettyConfig.setMaxThreads((Integer) nettyConf.get("maxThreads"));
-            }
-            if (nettyConf.containsKey("countPerChannel")) {
-                nettyConfig.setCountPerChannel((Integer) nettyConf.get("countPerChannel"));
-            }
+            nettyConfig.setBossThreads(MapUtils.getInteger(nettyConf, "bossThreads", 1));
+            nettyConfig.setWorkThreads(MapUtils.getInteger(nettyConf, "workerThreads", 3));
+            nettyConfig.setCoreThreads(MapUtils.getInteger(nettyConf, "coreThreads", 5));
+            nettyConfig.setMaxThreads(MapUtils.getInteger(nettyConf, "maxThreads", 8));
+            nettyConfig.setCountPerChannel(MapUtils.getInteger(nettyConf, "countPerChannel", 50));
+            nettyConfig.setOptions(MapUtils.getMap(nettyConf, "options", Collections.EMPTY_MAP));
+            nettyConfig.setChildOptions(MapUtils.getMap(nettyConf, "childOptions", Collections.EMPTY_MAP));
+            initSslConfig(nettyConfig, MapUtils.getMap(nettyConf, "ssl", null));
             if (nettyConf.containsKey("port")) {
                 nettyConfig.setPort((Integer) nettyConf.get("port"));
             } else {
@@ -142,15 +136,24 @@ public class NettyServletBootstrap {
                     nettyConfig.setPort(NettyConstants.DEFALT_HTTP_PORT);
                 }
             }
-            if (nettyConf.containsKey("options")) {
-                nettyConfig.setOptions((Map<String, Object>) nettyConf.get("options"));
-            }
-            if (nettyConf.containsKey("childOptions")) {
-                nettyConfig.setChildOptions((Map<String, Object>) nettyConf.get("childOptions"));
-            }
+
             nettyConfigs.add(nettyConfig);
         }
     }
+
+    private void initSslConfig(NettyConfig nettyConfig, Map<String, Object> sslConf) {
+        SslConfig sslConfig = nettyConfig.getSslConfig();
+        if (sslConf != null) {
+            sslConfig.setEnabled(MapUtils.getBoolean(sslConf, "enabled", false));
+            if (!sslConfig.isEnabled()) {
+                return;
+            }
+            sslConfig.setKeyStore(MapUtils.getString(sslConf, "keyStore"));
+            sslConfig.setKeyStorePassword(MapUtils.getString(sslConf, "keyStorePassword"));
+            sslConfig.setTrustStore(MapUtils.getString(sslConf, "trustStore"));
+        }
+    }
+
 
     private void loadListeners(List<String> listenersConf) throws Exception {
         List<Object> listeners = new ArrayList<>();

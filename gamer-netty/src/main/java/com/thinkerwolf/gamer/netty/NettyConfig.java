@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.core.servlet.Protocol;
+import com.thinkerwolf.gamer.core.ssl.SslConfig;
 
 import java.util.Map;
 
@@ -30,6 +31,8 @@ public class NettyConfig {
     private int countPerChannel = 50;
 
     private int port = 8080;
+
+    private SslConfig sslConfig = new SslConfig();
 
     private Map<String, Object> options;
 
@@ -107,5 +110,10 @@ public class NettyConfig {
 
     public void setCoreThreads(int coreThreads) {
         this.coreThreads = coreThreads;
+    }
+
+
+    public SslConfig getSslConfig() {
+        return sslConfig;
     }
 }

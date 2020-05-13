@@ -122,19 +122,6 @@
     <script>
         $(document).ready(function () {
             $('#login-drop-menu').hide();
-            $.ajax({
-                url: '/api/member/curmem',
-                dataType: 'json',
-                success: function (message) {
-                    if (message.state == 'success') {
-                        console.log(message.data);
-                        user = message.data;
-                        $('#head-pic').attr('src', 'images/' + user.headPic);
-                        $('#logout-drop-meun').hide();
-                        $('#login-drop-menu').show();
-                    }
-                }
-            });
 
             $('#search-control').click(function (event) {
                 if ($('#search-content').hasClass('open')) {

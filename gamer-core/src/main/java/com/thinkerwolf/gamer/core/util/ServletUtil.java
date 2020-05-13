@@ -22,8 +22,4 @@ public class ServletUtil {
         return Boolean.parseBoolean(s);
     }
 
-    public static String getRpcInterfaceCommand(Class<?> ifaceClass, Method method) {
-        return "rpc@" + ifaceClass.getCanonicalName() + "_" + method.getName();
-    }
-
 }

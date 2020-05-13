@@ -3,8 +3,8 @@ package com.thinkerwolf.gamer.rpc;
 import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
-import com.thinkerwolf.gamer.common.util.StringUtils;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
