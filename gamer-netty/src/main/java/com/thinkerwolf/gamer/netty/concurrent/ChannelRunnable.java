@@ -1,28 +1,27 @@
 package com.thinkerwolf.gamer.netty.concurrent;
 
-
-import io.netty.channel.Channel;
+import java.net.SocketAddress;
 
 public abstract class ChannelRunnable implements Runnable {
 
-	protected Channel channel;
+	protected Object channel;
 	protected Object msg;
 
-	public ChannelRunnable(Channel channel) {
+	public ChannelRunnable(Object channel) {
 		this.channel = channel;
 		this.msg = "";
 	}
 
-	public ChannelRunnable(Channel channel, Object msg) {
+	public ChannelRunnable(Object channel, Object msg) {
 		this.channel = channel;
 		this.msg = msg;
 	}
 
-	public Channel getChannel() {
+	public Object getChannel() {
 		return channel;
 	}
 
-	public void setChannel(Channel channel) {
+	public void setChannel(Object channel) {
 		this.channel = channel;
 	}
 

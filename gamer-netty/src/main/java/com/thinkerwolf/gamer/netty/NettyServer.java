@@ -56,7 +56,7 @@ public class NettyServer {
             }
         }
 
-        ChannelInitializer channelInitializer = ChannelHandlers.createChannelInitializer(url);
+        ChannelInitializer channelInitializer = ChannelHandlers.createChannelInitializer0(url);
         sb.childHandler(channelInitializer);
         ChannelFuture future = sb.bind(new InetSocketAddress(url.getPort()));
 

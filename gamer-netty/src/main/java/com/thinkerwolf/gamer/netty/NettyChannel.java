@@ -5,6 +5,8 @@ import com.thinkerwolf.gamer.core.remoting.Channel;
 import com.thinkerwolf.gamer.core.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.core.remoting.RemotingException;
 import io.netty.channel.ChannelFuture;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.net.SocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +25,7 @@ public class NettyChannel implements Channel {
     public NettyChannel(io.netty.channel.Channel ch, URL url, ChannelHandler handler) {
         this.ch = ch;
         this.url = url;
+        this.handler = handler;
     }
 
     static NettyChannel getOrAddChannel(io.netty.channel.Channel channel, URL url, ChannelHandler handler) {
@@ -63,6 +66,11 @@ public class NettyChannel implements Channel {
     }
 
     @Override
+    public io.netty.channel.Channel innerCh() {
+        return ch;
+    }
+
+    @Override
     public void send(Object message, boolean sent) throws RemotingException {
         boolean success = true;
         try {
@@ -97,5 +105,25 @@ public class NettyChannel implements Channel {
     @Override
     public boolean isClosed() {
         return ch.isOpen();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        NettyChannel that = (NettyChannel) o;
+
+        return new EqualsBuilder()
+                .append(ch, that.ch)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(ch)
+                .toHashCode();
     }
 }

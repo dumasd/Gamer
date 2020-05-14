@@ -30,7 +30,7 @@ public abstract class NettyConfigurator extends ChannelInitializer {
     @Override
     protected void initChannel(Channel ch) throws Exception {
         doInitChannel(ch);
-        ch.pipeline().addLast(new NettyHandler(url, handler));
+        ch.pipeline().addLast(new NettyClientHandler(url, handler));
     }
 
     protected abstract void doInitChannel(Channel ch) throws Exception;

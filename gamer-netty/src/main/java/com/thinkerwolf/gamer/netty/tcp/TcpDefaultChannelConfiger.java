@@ -7,11 +7,11 @@ import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 public class TcpDefaultChannelConfiger extends ChannelHandlerConfiger<Channel> {
     private ServletConfig servletConfig;
-    private Executor executor;
+    private ExecutorService executor;
 
     @Override
     public void init(URL url) throws Exception {

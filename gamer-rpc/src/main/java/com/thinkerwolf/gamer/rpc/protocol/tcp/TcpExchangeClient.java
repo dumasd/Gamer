@@ -48,14 +48,7 @@ public class TcpExchangeClient extends ChannelHandlerAdapter implements Exchange
 
     public TcpExchangeClient(URL url) {
         this.url = url;
-        NettyConfigurator configurator = new NettyConfigurator(url, this) {
-            @Override
-            protected void doInitChannel(io.netty.channel.Channel ch) throws Exception {
-                ch.pipeline().addLast("encoder", new PacketEncoder());
-                ch.pipeline().addLast("decoder", new PacketDecoder());
-            }
-        };
-        this.client = new NettyClient(configurator);
+        this.client = new NettyClient(url, this);
     }
 
     private static Throwable getCause(Object status) {

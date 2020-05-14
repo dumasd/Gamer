@@ -2,9 +2,7 @@ package com.thinkerwolf.gamer.netty.concurrent;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
-import io.netty.channel.Channel;
 
-import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.*;
@@ -37,7 +35,7 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
     }
 
     public CountAwareThreadPoolExecutor(int corePoolSize, int maxPoolSize, ThreadFactory threadFactory, int countPerChannel) {
-        super(corePoolSize, maxPoolSize, 30000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), threadFactory);
+        super(corePoolSize, maxPoolSize, 3000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), threadFactory);
         this.countPerChannel = countPerChannel;
     }
 
@@ -46,9 +44,7 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
         if (command instanceof ChannelRunnable) {
             ChannelRunnable channelRunnable = (ChannelRunnable) command;
             if (needReject(channelRunnable)) {
-                String ip = ((InetSocketAddress) channelRunnable.getChannel().remoteAddress()).getAddress()
-                        .getHostAddress();
-                logger.info("reject ip:{}, msg:{}", ip, channelRunnable.getMsg());
+                logger.info("reject ip:{}, msg:{}", channelRunnable.getChannel(), channelRunnable.getMsg());
                 return;
             }
             getChildExecutor(channelRunnable).execute(command);
@@ -87,11 +83,13 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
      * @return
      */
     private boolean needReject(ChannelRunnable channelRunnable) {
-        Channel channel = channelRunnable.getChannel();
-        if (!channel.isOpen()) {
-            channelCounters.remove(channel);
-            return false;
-        }
+
+        Object channel = channelRunnable.getChannel();
+//        if (!channel.isOpen()) {
+//            channelCounters.remove(channel);
+//            return false;
+//        }
+
 
         AtomicInteger channelCounter = getChannelCounter(channel);
         if (channelCounter == null) {
@@ -105,33 +103,34 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
         return false;
     }
 
-    private AtomicInteger getChannelCounter(Channel channel) {
-        String channelId = channel.id().asLongText();
-        if (!channel.isOpen()) {
-            channelCounters.remove(channelId);
-            return null;
-        }
-        AtomicInteger channelCounter = channelCounters.get(channelId);
+    private AtomicInteger getChannelCounter(Object channel) {
+//        String channelId = channel.id().asLongText();
+//        if (!channel.isOpen()) {
+//            channelCounters.remove(channelId);
+//            return null;
+//        }
+
+        AtomicInteger channelCounter = channelCounters.get(channel);
         if (channelCounter == null) {
             channelCounter = new AtomicInteger(0);
-            channelCounters.putIfAbsent(channelId, channelCounter);
-            channelCounter = channelCounters.get(channelId);
+            channelCounters.putIfAbsent(channel, channelCounter);
+            channelCounter = channelCounters.get(channel);
         }
         return channelCounter;
     }
 
     private ChildExecutor getChildExecutor(ChannelRunnable cr) {
-        Channel channel = cr.getChannel();
-        String channelId = channel.id().asLongText();
-        if (!channel.isOpen()) {
-            childExecutors.remove(channel);
-            return null;
-        }
-        ChildExecutor executor = childExecutors.get(channelId);
+        Object channel = cr.getChannel();
+//        String channelId = channel.id().asLongText();
+//        if (!channel.isOpen()) {
+//            childExecutors.remove(channel);
+//            return null;
+//        }
+        ChildExecutor executor = childExecutors.get(channel);
         if (executor == null) {
             executor = new ChildExecutor();
-            childExecutors.putIfAbsent(channelId, executor);
-            executor = childExecutors.get(channelId);
+            childExecutors.putIfAbsent(channel, executor);
+            executor = childExecutors.get(channel);
         }
         return executor;
     }
@@ -144,18 +143,19 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
         public void run() {
             for (; ; ) {
                 Thread thread = Thread.currentThread();
+                Runnable run;
                 synchronized (tasks) {
-                    Runnable ru = tasks.poll();
-                    if (ru == null) {
+                    run = tasks.poll();
+                    if (run == null) {
                         break;
                     }
-                    beforeExecute(thread, ru);
-                    try {
-                        ru.run();
-                        afterExecute(ru, null);
-                    } catch (Throwable t) {
-                        afterExecute(ru, t);
-                    }
+                }
+                beforeExecute(thread, run);
+                try {
+                    run.run();
+                    afterExecute(run, null);
+                } catch (Throwable t) {
+                    afterExecute(run, t);
                 }
             }
         }
@@ -171,7 +171,6 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
                 doUnOrderedExecute(this);
             }
         }
-
     }
 
 }

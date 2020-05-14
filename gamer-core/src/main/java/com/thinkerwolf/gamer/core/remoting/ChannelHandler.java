@@ -5,6 +5,8 @@ import com.thinkerwolf.gamer.common.SPI;
 @SPI
 public interface ChannelHandler {
 
+    void registered(Channel channel) throws RemotingException;
+
     void connected(Channel channel) throws RemotingException;
 
     void disconnected(Channel channel) throws RemotingException;

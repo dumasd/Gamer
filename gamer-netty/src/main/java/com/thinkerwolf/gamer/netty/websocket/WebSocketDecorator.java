@@ -7,6 +7,7 @@ import com.thinkerwolf.gamer.core.servlet.Response;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.CharsetUtil;
 
 public class WebSocketDecorator implements Decorator {
@@ -18,7 +19,7 @@ public class WebSocketDecorator implements Decorator {
         //WebSocketRequest webSocketRequest = (WebSocketRequest) request;
         //ByteBuf buf = webSocketRequest.getChannel().alloc().buffer();
 
-        ByteBuf buf = Unpooled.directBuffer();
+        ByteBuf buf = Unpooled.buffer();
         buf.writeBytes(content);
 
         //int opcode = (int) response.getContentType();
@@ -30,8 +31,8 @@ public class WebSocketDecorator implements Decorator {
 //        buf.writeInt(content.length);
 //        buf.writeBytes(commandBytes);
 //        buf.writeBytes(content);
-
-        return new BinaryWebSocketFrame(buf);
+        return new TextWebSocketFrame(buf);
+        //return new BinaryWebSocketFrame(buf);
     }
 
 }

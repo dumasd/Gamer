@@ -7,6 +7,7 @@ import com.thinkerwolf.gamer.core.remoting.RemotingException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -25,26 +26,24 @@ public class NettyClient implements Client {
 
     private Bootstrap bootstrap;
 
-    private NettyConfigurator configurator;
-
-    public NettyClient(NettyConfigurator configurator) {
-        this.url = configurator.getUrl();
-        this.configurator = configurator;
-        this.handler = configurator.handler();
+    public NettyClient(URL url, ChannelHandler handler) {
+        this.url = url;
+        this.handler = handler;
         try {
             doOpen();
             doConnect();
-        } catch (RemotingException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    protected void doOpen() {
+    protected void doOpen() throws Exception {
         bootstrap = new Bootstrap();
         bootstrap.group(nioEventLoopGroup);
         bootstrap.channel(NioSocketChannel.class);
-        bootstrap.handler(configurator);
+        ChannelInitializer initializer = ChannelHandlers.createChannelInitializer0(url, handler);
+        bootstrap.handler(initializer);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true).option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
 

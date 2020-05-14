@@ -35,10 +35,10 @@ public class ProtobufServerHandler extends SimpleChannelInboundHandler<Object> i
             public void run() {
                 try {
                     PacketProto.RequestPacket packet = (PacketProto.RequestPacket) msg;
-                    TcpRequest request = new TcpRequest(packet.getRequestId(), packet.getCommand(), channel, servletConfig.getServletContext(), packet.getContent().toByteArray());
+                    TcpRequest request = new TcpRequest(packet.getRequestId(), packet.getCommand(), ctx.channel(), servletConfig.getServletContext(), packet.getContent().toByteArray());
                     request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.TCP_PROTOBUF_DECORATOR);
                     request.getSession(true);
-                    TcpResponse response = new TcpResponse(channel);
+                    TcpResponse response = new TcpResponse(ctx.channel());
                     Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
                     servlet.service(request, response);
                 } catch (Exception e) {

@@ -27,8 +27,8 @@ public class RemotingNettyClientTest {
 
     public static void main(String[] args) {
 
-        URL url = new URL("127.0.0.1", 8090);
-        NettyClient client = new NettyClient(getInitializerGamer(url, getHandler()));
+        URL url = new URL("tcp://127.0.0.1", 8090);
+        NettyClient client = new NettyClient(url, getHandler());
         try {
             client.send(getSendMsgGamer());
         } catch (RemotingException e) {

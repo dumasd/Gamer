@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.stream.ChunkedInput;
+import io.netty.util.ReferenceCountUtil;
 
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -19,6 +20,9 @@ public class PushChunkedInput implements ChunkedInput<ByteBuf> {
 
     @Override
     public void close() throws Exception {
+        for (ByteBuf buf = chunkQueue.poll(); buf != null; buf = chunkQueue.poll()) {
+            ReferenceCountUtil.release(buf);
+        }
         chunkQueue.clear();
     }
 

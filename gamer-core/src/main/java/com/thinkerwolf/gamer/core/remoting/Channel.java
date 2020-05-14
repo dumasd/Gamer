@@ -11,4 +11,6 @@ public interface Channel extends Endpoint {
 
     SocketAddress getRemoteAddress();
 
+    Object innerCh();
+
 }

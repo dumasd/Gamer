@@ -21,10 +21,10 @@ listeners:
 # Netty配置列表
 netty:
   -
-    bossThreads: 3 # boss线程数
+    bossThreads: 1 # boss线程数
     workerThreads: 5 # worker线程数
-    coreThreads: 5 # tcp业务核心线程
-    maxThreads: 10 # tpc业务最大线程
+    coreThreads: 10 # tcp业务核心线程
+    maxThreads: 11 # tpc业务最大线程
     countPerChannel: 100 # 客户端最大并发数量
     protocol: TCP # 协议
     port: 8090 # 段口
@@ -33,8 +33,10 @@ netty:
     childOptions: # netty childOptions
       tcp_nodelay: true
   -
-    bossThreads: 3
+    bossThreads: 1
     workerThreads: 5
+    coreThreads: 10
+    maxThreads: 11
     protocol: HTTP
     ssl:
       enabled: false
