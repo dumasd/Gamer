@@ -32,8 +32,8 @@ public class NettyServer {
 
     @SuppressWarnings("unchecked")
     public void startup() throws Exception {
-        String bossName = "NettyBoss@" + url.getProtocol();
-        String workerName = "NettyWorker@" + url.getProtocol();
+        String bossName = "NettyBoss_" + url.getProtocol();
+        String workerName = "NettyWorker_" + url.getProtocol();
         int workerThreads = MapUtils.getInteger(url.getParameters(), URL.WORKER_THREADS);
 
         this.serverBootstrap = new ServerBootstrap();
