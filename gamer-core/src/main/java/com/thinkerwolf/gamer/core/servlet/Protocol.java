@@ -15,4 +15,14 @@ public enum Protocol {
     public String getName() {
         return name;
     }
+
+    public static Protocol parseOf(String name) {
+        for (Protocol p : Protocol.values()) {
+            if (p.name.equalsIgnoreCase(name)) {
+                return p;
+            }
+        }
+        throw new IllegalArgumentException(name);
+    }
+
 }

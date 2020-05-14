@@ -5,11 +5,12 @@ import com.thinkerwolf.gamer.core.ssl.SslConfig;
 
 import java.util.Map;
 
+@Deprecated
 public class NettyConfig {
     /**
      * netty boss 线程数
      */
-    private int bossThreads = 2;
+    private int bossThreads = 1;
 
     /**
      * netty worker 线程数

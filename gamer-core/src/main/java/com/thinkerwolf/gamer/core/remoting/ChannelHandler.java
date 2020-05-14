@@ -11,7 +11,7 @@ public interface ChannelHandler {
 
     void received(Channel channel, Object message) throws RemotingException;
 
-    void sent(Channel channel, Object message) throws RemotingException;
+    Object sent(Channel channel, Object message) throws RemotingException;
 
     void caught(Channel channel, Throwable e) throws RemotingException;
 

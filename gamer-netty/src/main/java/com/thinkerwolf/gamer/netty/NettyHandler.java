@@ -29,6 +29,13 @@ class NettyHandler extends ChannelDuplexHandler {
     }
 
     @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        Channel ch = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
+        handler.caught(ch, cause);
+        super.exceptionCaught(ctx, cause);
+    }
+
+    @Override
     public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
         Channel ch = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
@@ -46,9 +53,9 @@ class NettyHandler extends ChannelDuplexHandler {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        super.write(ctx, msg, promise);
         Channel ch = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
-        handler.sent(ch, msg);
+        Object sentMessage = handler.sent(ch, msg);
+        super.write(ctx, sentMessage, promise);
     }
 
 }

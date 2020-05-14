@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
+import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
@@ -27,7 +28,7 @@ public class NettyServletBootstrap {
 
     private ServletConfig servletConfig;
 
-    private List<NettyConfig> nettyConfigs;
+    private List<URL> urls;
 
     public NettyServletBootstrap() {
     }
@@ -36,19 +37,19 @@ public class NettyServletBootstrap {
         this.configFile = configFile;
     }
 
-    public NettyServletBootstrap(NettyConfig nettyConfig, ServletConfig servletConfig) {
-        if (nettyConfig == null || servletConfig == null) {
+    public NettyServletBootstrap(URL url, ServletConfig servletConfig) {
+        if (url == null || servletConfig == null) {
             throw new NullPointerException();
         }
-        this.nettyConfigs = Collections.singletonList(nettyConfig);
+        this.urls = Collections.singletonList(url);
         this.servletConfig = servletConfig;
     }
 
-    public NettyServletBootstrap(List<NettyConfig> nettyConfigs, ServletConfig servletConfig) {
-        if (nettyConfigs == null || nettyConfigs.size() == 0 || servletConfig == null) {
+    public NettyServletBootstrap(List<URL> urls, ServletConfig servletConfig) {
+        if (urls == null || urls.size() == 0 || servletConfig == null) {
             throw new NullPointerException();
         }
-        this.nettyConfigs = nettyConfigs;
+        this.urls = urls;
         this.servletConfig = servletConfig;
     }
 
@@ -57,15 +58,16 @@ public class NettyServletBootstrap {
      */
     public void startup() throws Exception {
         loadConfig();
-        for (NettyConfig nettyConfig : nettyConfigs) {
-            NettyServer server = new NettyServer(nettyConfig, servletConfig);
+        for (URL url : urls) {
+            url.getParameters().put(URL.SERVLET_CONFIG, servletConfig);
+            NettyServer server = new NettyServer(url, null);
             server.startup();
         }
     }
 
     @SuppressWarnings("unchecked")
     private void loadConfig() throws Exception {
-        if (servletConfig == null || nettyConfigs == null || nettyConfigs.size() == 0) {
+        if (servletConfig == null || urls == null || urls.size() == 0) {
             Yaml yaml = new Yaml();
             String file = StringUtils.isBlank(configFile) ? "conf.yaml" : configFile;
             InputStream is = ResourceUtils.findInputStream("", file);
@@ -93,7 +95,7 @@ public class NettyServletBootstrap {
                     nettyConfs = Collections.singletonList((Map<String, Object>) nettyConf);
                 }
                 List<String> listenersConf = (List<String>) conf.get("listeners");
-                loadNettyConfig(nettyConfs);
+                loadUrlConfig(nettyConfs);
                 loadServletConfig(servletConf, listenersConf);
             } catch (Exception rethrown) {
                 throw rethrown;
@@ -103,72 +105,60 @@ public class NettyServletBootstrap {
         }
     }
 
-
     @SuppressWarnings("unchecked")
-    private void loadNettyConfig(List<Map<String, Object>> nettyConfs) {
+    private void loadUrlConfig(List<Map<String, Object>> nettyConfs) {
         if (nettyConfs == null || nettyConfs.size() == 0) {
             throw new ConfigurationException("Missing netty config");
         }
-        this.nettyConfigs = new LinkedList<>();
+        this.urls = new ArrayList<>();
         for (Map<String, Object> nettyConf : nettyConfs) {
-            NettyConfig nettyConfig = new NettyConfig();
-            if (nettyConf.containsKey("protocol")) {
-                String proto = nettyConf.get("protocol").toString();
-                Protocol protocol = Protocol.valueOf(proto.toUpperCase());
-                nettyConfig.setProtocol(protocol);
-            } else {
+            URL url = new URL();
+            if (!nettyConf.containsKey(URL.PROTOCOL)) {
                 throw new ConfigurationException("Netty config missing protocol");
             }
-            nettyConfig.setBossThreads(MapUtils.getInteger(nettyConf, "bossThreads", 1));
-            nettyConfig.setWorkThreads(MapUtils.getInteger(nettyConf, "workerThreads", 3));
-            nettyConfig.setCoreThreads(MapUtils.getInteger(nettyConf, "coreThreads", 5));
-            nettyConfig.setMaxThreads(MapUtils.getInteger(nettyConf, "maxThreads", 8));
-            nettyConfig.setCountPerChannel(MapUtils.getInteger(nettyConf, "countPerChannel", 50));
-            nettyConfig.setOptions(MapUtils.getMap(nettyConf, "options", Collections.EMPTY_MAP));
-            nettyConfig.setChildOptions(MapUtils.getMap(nettyConf, "childOptions", Collections.EMPTY_MAP));
-            initSslConfig(nettyConfig, MapUtils.getMap(nettyConf, "ssl", null));
-            if (nettyConf.containsKey("port")) {
-                nettyConfig.setPort((Integer) nettyConf.get("port"));
+            url.setProtocol(MapUtils.getString(nettyConf, URL.PROTOCOL).toLowerCase());
+            if (nettyConf.containsKey(URL.PORT)) {
+                url.setPort(MapUtils.getInteger(nettyConf, URL.PORT));
             } else {
-                if (nettyConfig.getProtocol() == Protocol.TCP) {
-                    nettyConfig.setPort(NettyConstants.DEFAULT_TCP_PORT);
+                if (Protocol.TCP.getName().equals(url.getProtocol())) {
+                    url.setPort(URL.DEFAULT_TCP_PORT);
                 } else {
-                    nettyConfig.setPort(NettyConstants.DEFALT_HTTP_PORT);
+                    url.setPort(URL.DEFAULT_HTTP_PORT);
                 }
             }
+            url.setHost(MapUtils.getString(nettyConf, URL.HOST, "127.0.0.1"));
+            url.setUsername(MapUtils.getString(nettyConf, URL.USERNAME));
+            url.setPassword(MapUtils.getString(nettyConf, URL.PASSWORD));
 
-            nettyConfigs.add(nettyConfig);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put(URL.BOSS_THREADS, MapUtils.getInteger(nettyConf, URL.BOSS_THREADS, 1));
+            parameters.put(URL.WORKER_THREADS, MapUtils.getInteger(nettyConf, URL.WORKER_THREADS, 3));
+            parameters.put(URL.CORE_THREADS, MapUtils.getInteger(nettyConf, URL.CORE_THREADS, 5));
+            parameters.put(URL.MAX_THREADS, MapUtils.getInteger(nettyConf, URL.MAX_THREADS, 8));
+            parameters.put(URL.COUNT_PER_CHANNEL, MapUtils.getInteger(nettyConf, URL.COUNT_PER_CHANNEL, 50));
+            parameters.put(URL.OPTIONS, MapUtils.getMap(nettyConf, URL.OPTIONS, Collections.EMPTY_MAP));
+            parameters.put(URL.CHILD_OPTIONS, MapUtils.getMap(nettyConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
+            url.setParameters(parameters);
+            initSslConfig(url, MapUtils.getMap(nettyConf, "ssl", null));
+            this.urls.add(url);
         }
     }
 
-    private void initSslConfig(NettyConfig nettyConfig, Map<String, Object> sslConf) {
-        SslConfig sslConfig = nettyConfig.getSslConfig();
-        if (sslConf != null) {
-            sslConfig.setEnabled(MapUtils.getBoolean(sslConf, "enabled", false));
-            if (!sslConfig.isEnabled()) {
-                return;
-            }
-            sslConfig.setKeyStore(MapUtils.getString(sslConf, "keyStore"));
-            sslConfig.setKeyStorePassword(MapUtils.getString(sslConf, "keyStorePassword"));
-            sslConfig.setTrustStore(MapUtils.getString(sslConf, "trustStore"));
+    private void initSslConfig(URL url, Map<String, Object> sslConf) {
+        SslConfig sslConfig = new SslConfig();
+        url.getParameters().put(URL.SSL, sslConfig);
+        if (sslConf == null) {
+            return;
         }
+        sslConfig.setEnabled(MapUtils.getBoolean(sslConf, SslConfig.ENABLED, false));
+        if (!sslConfig.isEnabled()) {
+            return;
+        }
+        sslConfig.setKeyStore(MapUtils.getString(sslConf, "keyStore"));
+        sslConfig.setKeyStorePassword(MapUtils.getString(sslConf, "keyStorePassword"));
+        sslConfig.setTrustStore(MapUtils.getString(sslConf, "trustStore"));
     }
 
-
-    private void loadListeners(List<String> listenersConf) throws Exception {
-        List<Object> listeners = new ArrayList<>();
-        ServletContextEvent event = new ServletContextEvent(servletConfig.getServletContext());
-        if (listenersConf != null && listenersConf.size() > 0) {
-            for (String s : listenersConf) {
-                Object listener = ClassUtils.newInstance(s.trim());
-                if (listener instanceof ServletContextListener) {
-                    ((ServletContextListener) listener).contextInitialized(event);
-                }
-                listeners.add(listener);
-            }
-        }
-        servletConfig.getServletContext().setListeners(listeners);
-    }
 
     @SuppressWarnings("unchecked")
     private void loadServletConfig(Map<String, Object> servletConf, List<String> listenersConf) throws Exception {
@@ -223,5 +213,19 @@ public class NettyServletBootstrap {
         loadListeners(listenersConf);
     }
 
+    private void loadListeners(List<String> listenersConf) throws Exception {
+        List<Object> listeners = new ArrayList<>();
+        ServletContextEvent event = new ServletContextEvent(servletConfig.getServletContext());
+        if (listenersConf != null && listenersConf.size() > 0) {
+            for (String s : listenersConf) {
+                Object listener = ClassUtils.newInstance(s.trim());
+                if (listener instanceof ServletContextListener) {
+                    ((ServletContextListener) listener).contextInitialized(event);
+                }
+                listeners.add(listener);
+            }
+        }
+        servletConfig.getServletContext().setListeners(listeners);
+    }
 
 }

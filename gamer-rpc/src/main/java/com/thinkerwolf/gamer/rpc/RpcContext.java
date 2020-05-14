@@ -20,7 +20,7 @@ public class RpcContext {
         return current;
     }
 
-    void setCurrent(Promise promise) {
+    public void setCurrent(Promise promise) {
         this.current = promise;
     }
 

@@ -1,9 +1,8 @@
 package com.thinkerwolf.gamer.netty.protobuf;
 
-import com.thinkerwolf.gamer.netty.concurrent.CountAwareThreadPoolExecutor;
-import com.thinkerwolf.gamer.common.DefaultThreadFactory;
+import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.netty.concurrent.ConcurrentUtil;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
-import com.thinkerwolf.gamer.netty.NettyConfig;
 import com.thinkerwolf.gamer.netty.ChannelHandlerConfiger;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
@@ -22,21 +21,19 @@ import java.util.concurrent.Executor;
  */
 public class TcpProtobufChannelConfiger extends ChannelHandlerConfiger<Channel> {
 
-    private NettyConfig nettyConfig;
     private ServletConfig servletConfig;
     private Executor executor;
 
     @Override
-    public void init(NettyConfig nettyConfig, ServletConfig servletConfig) throws Exception {
-        this.nettyConfig = nettyConfig;
-        this.servletConfig = servletConfig;
-        this.executor = new CountAwareThreadPoolExecutor(nettyConfig.getCoreThreads(), nettyConfig.getMaxThreads(), new DefaultThreadFactory("Tcp-user"), nettyConfig.getCountPerChannel());
+    public void init(URL url) throws Exception {
+        this.executor = ConcurrentUtil.newExecutor(url);
+        this.servletConfig = (ServletConfig) url.getParameters().get(URL.SERVLET_CONFIG);
     }
 
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipe = ch.pipeline();
         ProtobufServerHandler tcpHandler = new ProtobufServerHandler();
-        tcpHandler.init(executor, nettyConfig, servletConfig);
+        tcpHandler.init(executor, servletConfig);
 
         pipe.addLast(new ProtobufVarint32FrameDecoder());
         pipe.addLast("decoder", new ProtobufDecoder(PacketProto.RequestPacket.getDefaultInstance()));

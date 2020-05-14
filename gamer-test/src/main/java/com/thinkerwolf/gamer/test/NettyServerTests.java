@@ -1,11 +1,11 @@
 package com.thinkerwolf.gamer.test;
 
+import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.slf4j.Slf4jLoggerFactory;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
-import com.thinkerwolf.gamer.netty.NettyConfig;
 import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
 
 import java.util.*;
@@ -24,18 +24,18 @@ public class NettyServerTests {
     }
 
     private static void startupTcp(ServletConfig servletConfig) throws Exception {
-        NettyConfig nettyConfig = new NettyConfig();
-        nettyConfig.setProtocol(Protocol.TCP);
-        nettyConfig.setPort(8090);
-        NettyServletBootstrap bootstrap = new NettyServletBootstrap(nettyConfig, servletConfig);
+        URL url = new URL();
+        url.setPort(8090);
+        url.setProtocol(Protocol.TCP.getName());
+        NettyServletBootstrap bootstrap = new NettyServletBootstrap(url, servletConfig);
         bootstrap.startup();
     }
 
     private static void startupHttp(ServletConfig servletConfig) throws Exception {
-        NettyConfig nettyConfig = new NettyConfig();
-        nettyConfig.setPort(8080);
-        nettyConfig.setProtocol(Protocol.HTTP);
-        NettyServletBootstrap bootstrap = new NettyServletBootstrap(nettyConfig, servletConfig);
+        URL url = new URL();
+        url.setPort(8080);
+        url.setProtocol(Protocol.HTTP.getName());
+        NettyServletBootstrap bootstrap = new NettyServletBootstrap(url, servletConfig);
         bootstrap.startup();
     }
 

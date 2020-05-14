@@ -18,12 +18,10 @@ public class DefaultServerHandler extends SimpleChannelInboundHandler<Object> im
     private static final Logger LOG = InternalLoggerFactory.getLogger(DefaultServerHandler.class);
 
     private Executor executor;
-    private NettyConfig nettyConfig;
     private ServletConfig servletConfig;
 
-    public void init(Executor executor, NettyConfig nettyConfig, ServletConfig servletConfig) {
+    public void init(Executor executor, ServletConfig servletConfig) {
         this.executor = executor;
-        this.nettyConfig = nettyConfig;
         this.servletConfig = servletConfig;
     }
 

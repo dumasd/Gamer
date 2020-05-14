@@ -5,6 +5,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 public class SslConfig {
 
+    public static final String ENABLED = "enabled";
+
     private boolean enabled;
 
     private String keyStore;

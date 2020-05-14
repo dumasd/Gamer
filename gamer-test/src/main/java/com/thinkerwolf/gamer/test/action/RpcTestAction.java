@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.test;
+package com.thinkerwolf.gamer.test.action;
 
 import java.util.ArrayList;
 import java.util.List;

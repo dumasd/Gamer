@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
+import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import com.thinkerwolf.gamer.netty.tcp.TcpDefaultChannelConfiger;
@@ -9,8 +10,8 @@ import io.netty.channel.ChannelInitializer;
 
 public class ChannelHandlers {
 
-    public static ChannelInitializer<Channel> createChannelInitializer(NettyConfig config, ServletConfig servletConfig) throws Exception {
-        Protocol protocol = config.getProtocol();
+    public static ChannelInitializer<Channel> createChannelInitializer(URL url) throws Exception {
+        Protocol protocol = Protocol.parseOf(url.getProtocol());
         ChannelHandlerConfiger<Channel> initializer = null;
         switch (protocol) {
             case TCP:
@@ -21,7 +22,7 @@ public class ChannelHandlers {
                 break;
         }
         if (initializer != null) {
-            initializer.init(config, servletConfig);
+            initializer.init(url);
         }
         return initializer;
     }

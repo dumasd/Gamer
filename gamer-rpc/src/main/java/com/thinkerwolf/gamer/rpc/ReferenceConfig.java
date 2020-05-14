@@ -1,9 +1,13 @@
 package com.thinkerwolf.gamer.rpc;
 
 import com.thinkerwolf.gamer.common.Constants;
+import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.rpc.cluster.FailfastInvoker;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
+import com.thinkerwolf.gamer.rpc.protocol.Protocol;
+import com.thinkerwolf.gamer.rpc.proxy.RpcProxy;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -11,7 +15,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * RPC接口配置
+ *
+ * @author wukai
+ * @date 2020/5/14 11:49
+ */
 public class ReferenceConfig<T> extends InterfaceConfig<T> {
+
+    private static final RpcProxy rpcProxy = ServiceLoader.getDefaultService(RpcProxy.class);
 
     private Class<T> interfaceClass;
 
@@ -20,6 +32,10 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
     private String url;
 
     private List<URL> urls;
+    /**
+     * 注册中心
+     */
+    private String registry;
 
     private volatile boolean initialized;
 
@@ -57,13 +73,14 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
         return ref;
     }
 
+    @SuppressWarnings("unchecked")
     private void init() {
         if (initialized) {
             return;
         }
 
         initialized = true;
-        Map<String, String> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         if (interfaceClass == null) {
             if (StringUtils.isEmpty(interfaceName)) {
                 throw new RpcException("Reference interface is null");
@@ -80,12 +97,23 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
             if (en != null && en.length > 0) {
                 for (String e : en) {
                     URL url = URL.parse(e);
+                    url.setParameters(map);
                     urls.add(url);
                 }
             }
         }
-        if (urls.size() <= 0) {
 
+        if (urls.size() > 0) {
+            // 1.urls 直连
+            final List<Invoker<T>> invokers = new ArrayList<>();
+            for (URL url : urls) {
+                Protocol protocol = ServiceLoader.getService(url.getProtocol(), Protocol.class);
+                invokers.add(protocol.invoker(interfaceClass, url));
+            }
+            ref = rpcProxy.newProxy(interfaceClass, new FailfastInvoker<>(invokers));
+        } else {
+            // TODO 2.注册中心获取
+            throw new UnsupportedOperationException("注册中心集群模式开发中...");
         }
     }
 

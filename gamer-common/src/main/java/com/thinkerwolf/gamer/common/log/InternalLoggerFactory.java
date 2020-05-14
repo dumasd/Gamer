@@ -2,11 +2,17 @@ package com.thinkerwolf.gamer.common.log;
 
 import com.thinkerwolf.gamer.common.log.jdk.JdkLoggerFactory;
 
+/**
+ * 内部LoggerFactory
+ *
+ * @author wukai
+ * @date 2020/5/14 13:44
+ */
 public abstract class InternalLoggerFactory {
 
     public static final String DEFAULT_LOGGER_FACTORY_CLASS_NAME = "com.thinkerwolf.log.slf4j.Slf4jLoggerFactory";
 
-    static InternalLoggerFactory defaultLoggerFactory;
+    private static InternalLoggerFactory defaultLoggerFactory;
 
     public static InternalLoggerFactory getDefaultLoggerFactory() {
         if (defaultLoggerFactory == null) {
@@ -31,17 +37,16 @@ public abstract class InternalLoggerFactory {
         InternalLoggerFactory.defaultLoggerFactory = defaultLoggerFactory;
     }
 
-    public abstract Logger createLogger(String name);
-
-    public abstract Logger createLogger(Class<?> clazz);
-
-
     public static Logger getLogger(String name) {
-        return   getDefaultLoggerFactory().createLogger(name);
+        return getDefaultLoggerFactory().createLogger(name);
     }
 
     public static Logger getLogger(Class<?> clazz) {
         return getDefaultLoggerFactory().createLogger(clazz);
     }
+
+    public abstract Logger createLogger(String name);
+
+    public abstract Logger createLogger(Class<?> clazz);
 
 }

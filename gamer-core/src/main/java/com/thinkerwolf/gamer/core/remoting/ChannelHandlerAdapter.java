@@ -17,8 +17,8 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
     }
 
     @Override
-    public void sent(Channel channel, Object message) throws RemotingException {
-
+    public Object sent(Channel channel, Object message) throws RemotingException {
+        return message;
     }
 
     @Override

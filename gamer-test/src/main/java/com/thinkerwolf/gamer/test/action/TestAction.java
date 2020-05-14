@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.test;
+package com.thinkerwolf.gamer.test.action;
 
 import com.thinkerwolf.gamer.core.annotation.Action;
 import com.thinkerwolf.gamer.core.annotation.Command;

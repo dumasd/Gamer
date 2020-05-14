@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.rpc.annotation.RpcClient;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
+import com.thinkerwolf.gamer.rpc.protocol.tcp.TcpExchangeClient;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

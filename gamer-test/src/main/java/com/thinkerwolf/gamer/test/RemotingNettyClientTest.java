@@ -16,6 +16,7 @@ import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
 import com.thinkerwolf.gamer.rpc.Request;
 import com.thinkerwolf.gamer.rpc.Response;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
+import com.thinkerwolf.gamer.test.action.IRpcAction;
 import io.netty.channel.Channel;
 
 import java.io.ByteArrayInputStream;
@@ -76,8 +77,8 @@ public class RemotingNettyClientTest {
             }
 
             @Override
-            public void sent(com.thinkerwolf.gamer.core.remoting.Channel channel, Object msg) throws RemotingException {
-
+            public Object sent(com.thinkerwolf.gamer.core.remoting.Channel channel, Object msg) throws RemotingException {
+                return msg;
             }
         } ;
 

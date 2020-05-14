@@ -174,7 +174,7 @@ public class DispatcherServlet implements Servlet {
         }
         Class<?> returnType = method.getReturnType();
         if (!Model.class.isAssignableFrom(returnType)) {
-            throw new UnsupportedOperationException("Action class return type must by Model.class");
+            throw new UnsupportedOperationException("Action method return type must be Model.class");
         }
         String comm = command.value();
         com.thinkerwolf.gamer.core.annotation.View view = method.getAnnotation(com.thinkerwolf.gamer.core.annotation.View.class);
@@ -213,7 +213,7 @@ public class DispatcherServlet implements Servlet {
         }
 
         if (invocation == null) {
-            LOG.warn("Can't find command in server. command:[" + command + "]");
+            LOG.info("Can't find command in server. command:[" + command + "]");
             response.setStatus(ResponseStatus.NOT_FOUND);
             ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, null);
             return;
@@ -224,5 +224,8 @@ public class DispatcherServlet implements Servlet {
 
     }
 
-
+    @Override
+    public List<Filter> getFilters() {
+        return filters;
+    }
 }

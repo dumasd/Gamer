@@ -162,7 +162,7 @@ public class ServiceLoader<T> {
     public static <T> T getDefaultService(Class<T> service) {
         SPI SPI = service.getAnnotation(SPI.class);
         if (SPI.value().length() <= 0) {
-            return null;
+            throw new ServiceConfigurationError(service.getName() + " has no default service");
         }
         return getService(SPI.value(), service);
     }

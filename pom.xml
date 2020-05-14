@@ -18,6 +18,7 @@
         <module>gamer-test</module>
         <module>gamer-all</module>
         <module>gamer-rpc</module>
+        <module>gamer-registry</module>
     </modules>
 
     <properties>

@@ -21,12 +21,10 @@ public class ProtobufServerHandler extends SimpleChannelInboundHandler<Object> i
     private static final Logger LOG = InternalLoggerFactory.getLogger(ProtobufServerHandler.class);
 
     private Executor executor;
-    private NettyConfig nettyConfig;
     private ServletConfig servletConfig;
 
-    public void init(Executor executor, NettyConfig nettyConfig, ServletConfig servletConfig) {
+    public void init(Executor executor, ServletConfig servletConfig) {
         this.executor = executor;
-        this.nettyConfig = nettyConfig;
         this.servletConfig = servletConfig;
     }
 

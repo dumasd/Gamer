@@ -3,6 +3,12 @@ package com.thinkerwolf.gamer.common.log.slf4j;
 
 import org.slf4j.Logger;
 
+/**
+ * Slf4j Logger
+ *
+ * @author wukai
+ * @date 2020/5/14 13:45
+ */
 class Slf4jLogger implements com.thinkerwolf.gamer.common.log.Logger {
 
     private Logger logger;

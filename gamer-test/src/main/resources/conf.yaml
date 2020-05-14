@@ -23,9 +23,9 @@ netty:
   -
     bossThreads: 3 # boss线程数
     workerThreads: 5 # worker线程数
-    coreThreads: 5 # tcp业务核心线程 (目前仅限tcp协议)
-    maxThreads: 10 # tpc业务最大线程 (目前仅限tcp协议)
-    countPerChannel: 100 # 客户端最大并发数量 (目前仅限tcp协议)
+    coreThreads: 5 # tcp业务核心线程
+    maxThreads: 10 # tpc业务最大线程
+    countPerChannel: 100 # 客户端最大并发数量
     protocol: TCP # 协议
     port: 8090 # 段口
     options: # netty option
@@ -35,11 +35,11 @@ netty:
   -
     bossThreads: 3
     workerThreads: 5
+    protocol: HTTP
     ssl:
       enabled: false
       keyStore: C:\Users\wukai\.keystore
       keyStorePassword: 123456
-    protocol: HTTP
     port: 8080
     options:
       so_keepalive: true

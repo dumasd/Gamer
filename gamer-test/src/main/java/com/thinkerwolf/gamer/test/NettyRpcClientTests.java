@@ -11,6 +11,7 @@ import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
 import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
 import com.thinkerwolf.gamer.netty.protobuf.PacketProto;
 import com.thinkerwolf.gamer.rpc.*;
+import com.thinkerwolf.gamer.test.action.IRpcAction;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;

@@ -3,6 +3,12 @@ package com.thinkerwolf.gamer.common.log.jdk;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+/**
+ * JDK Logger
+ *
+ * @author wukai
+ * @date 2020/5/14 13:45
+ */
 public class JdkLogger implements com.thinkerwolf.gamer.common.log.Logger {
 
     private Logger logger;

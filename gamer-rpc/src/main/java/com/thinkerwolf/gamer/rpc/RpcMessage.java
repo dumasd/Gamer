@@ -12,12 +12,14 @@ public class RpcMessage implements Message {
 
     private int requestId;
 
+    private RpcClient rpcClient;
 
     public RpcMessage(Class<?> interfaceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) {
         this.interfaceClass = interfaceClass;
         this.methodName = methodName;
         this.parameterTypes = parameterTypes;
         this.parameters = parameters;
+        this.rpcClient = ClassUtils.getAnnotation(interfaceClass, RpcClient.class);
     }
 
     public int getRequestId() {
@@ -45,8 +47,11 @@ public class RpcMessage implements Message {
     }
 
     public String getSerial() {
-        RpcClient rpcClient = ClassUtils.getAnnotation(interfaceClass, RpcClient.class);
         return rpcClient.serialize();
+    }
+
+    public RpcClient getRpcClient() {
+        return rpcClient;
     }
 
 }

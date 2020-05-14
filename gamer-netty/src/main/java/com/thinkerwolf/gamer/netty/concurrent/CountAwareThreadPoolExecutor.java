@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import io.netty.channel.Channel;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -137,23 +138,23 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
 
     private class ChildExecutor implements Executor, Runnable {
 
-        private Queue<Runnable> tasks = new LinkedBlockingQueue<>();
+        private final Queue<Runnable> tasks = new LinkedList<>();
 
         @Override
         public void run() {
             for (; ; ) {
                 Thread thread = Thread.currentThread();
-                Runnable ru = tasks.peek();
-                beforeExecute(thread, ru);
-                try {
-                    ru.run();
-                    afterExecute(ru, null);
-                } catch (Throwable t) {
-                    afterExecute(ru, t);
-                } finally {
-                    tasks.poll();
-                    if (tasks.isEmpty()) {
+                synchronized (tasks) {
+                    Runnable ru = tasks.poll();
+                    if (ru == null) {
                         break;
+                    }
+                    beforeExecute(thread, ru);
+                    try {
+                        ru.run();
+                        afterExecute(ru, null);
+                    } catch (Throwable t) {
+                        afterExecute(ru, t);
                     }
                 }
             }
@@ -161,8 +162,11 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
 
         @Override
         public void execute(Runnable command) {
-            boolean exe = tasks.isEmpty();
-            tasks.offer(command);
+            boolean exe;
+            synchronized (tasks) {
+                exe = tasks.isEmpty();
+                tasks.offer(command);
+            }
             if (exe) {
                 doUnOrderedExecute(this);
             }

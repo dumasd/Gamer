@@ -1,5 +1,8 @@
 package com.thinkerwolf.gamer.core.servlet;
 
+import java.util.Collections;
+import java.util.List;
+
 public interface Servlet {
 
     void init(ServletConfig servletConfig) throws Exception;
@@ -9,4 +12,8 @@ public interface Servlet {
     ServletConfig getServletConfig();
 
     void destroy() throws Exception;
+
+    default List<Filter> getFilters() {
+        return Collections.emptyList();
+    }
 }

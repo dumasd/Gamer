@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.rpc.mvc;
 import com.thinkerwolf.gamer.common.DefaultObjectFactory;
 import com.thinkerwolf.gamer.common.ObjectFactory;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.core.mvc.ApplicationFilterChain;
 import com.thinkerwolf.gamer.core.mvc.Invocation;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.spring.SpringObjectFactory;
@@ -12,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,7 +89,8 @@ public class RpcDispatchServlet implements Servlet {
     public void service(Request request, Response response) throws Exception {
         Invocation invocation = rpcInvocationMap.get(request.getCommand());
         if (invocation != null) {
-            invocation.handle(request, response);
+            ApplicationFilterChain filterChain = new ApplicationFilterChain(getFilters());
+            filterChain.doFilter(invocation, request, response);
             return;
         }
 
@@ -107,5 +110,10 @@ public class RpcDispatchServlet implements Servlet {
         if (delegate != null) {
             delegate.destroy();
         }
+    }
+
+    @Override
+    public List<Filter> getFilters() {
+        return delegate.getFilters();
     }
 }
