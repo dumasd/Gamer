@@ -34,7 +34,7 @@ public class TcpServletHandler extends ChannelHandlerAdapter {
     }
 
     void init(URL url) {
-        this.executor = ConcurrentUtil.newExecutor(url);
+        this.executor = ConcurrentUtil.newExecutor(url, "Tcp-user");
         this.servletConfig = (ServletConfig) MapUtils.getObject(url.getParameters(), URL.SERVLET_CONFIG);
         if (servletConfig != null) {
             this.servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);

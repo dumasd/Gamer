@@ -26,7 +26,7 @@ public class TcpProtobufChannelConfiger extends ChannelHandlerConfiger<Channel> 
 
     @Override
     public void init(URL url) throws Exception {
-        this.executor = ConcurrentUtil.newExecutor(url);
+        this.executor = ConcurrentUtil.newExecutor(url, "Protobuf-user");
         this.servletConfig = (ServletConfig) url.getParameters().get(URL.SERVLET_CONFIG);
     }
 

@@ -7,11 +7,16 @@ import org.apache.commons.collections.MapUtils;
 
 public class ConcurrentUtil {
 
-    public static CountAwareThreadPoolExecutor newExecutor(URL url) {
+    public static CountAwareThreadPoolExecutor newExecutor(URL url, String poolName) {
         int coreThreads = MapUtils.getInteger(url.getParameters(), URL.CORE_THREADS, URL.DEFAULT_CORE_THREADS);
         int maxThreads = MapUtils.getInteger(url.getParameters(), URL.MAX_THREADS, URL.DEFAULT_MAX_THREADS);
         int countPerChannel = MapUtils.getInteger(url.getParameters(), URL.COUNT_PER_CHANNEL, URL.DEFAULT_COUNT_PERCHANNEL);
-        return new CountAwareThreadPoolExecutor(coreThreads, maxThreads, new DefaultThreadFactory("Tcp-user"), countPerChannel);
+        return new CountAwareThreadPoolExecutor(coreThreads, maxThreads, new DefaultThreadFactory(poolName), countPerChannel);
+    }
+
+    public static CountAwareThreadPoolExecutor newExecutor(URL url) {
+        String p = url.getProtocol();
+        return newExecutor(url, p + "-user");
     }
 
     public static boolean isClosed(Object channel) {
