@@ -6,6 +6,12 @@ import com.thinkerwolf.gamer.core.servlet.ServletContextEvent;
 import com.thinkerwolf.gamer.core.servlet.ServletContextListener;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
 
+/**
+ * 用来加载RPC服务端服务接口实现
+ *
+ * @author wukai
+ * @date 2020/5/15 16:15
+ */
 public class RpcServiceLoadListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {

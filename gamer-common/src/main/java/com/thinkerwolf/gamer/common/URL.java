@@ -184,6 +184,10 @@ public class URL {
         this.parameters = parameters;
     }
 
+    public String getHostPort() {
+        return String.format("%s://%s:%d", protocol, host, port);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

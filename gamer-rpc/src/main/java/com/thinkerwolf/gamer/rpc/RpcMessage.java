@@ -54,4 +54,8 @@ public class RpcMessage implements Message {
         return rpcClient;
     }
 
+    public boolean isAsync() {
+        return rpcClient.async();
+    }
+
 }

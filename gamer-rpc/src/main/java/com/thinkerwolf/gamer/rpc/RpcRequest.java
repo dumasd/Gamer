@@ -3,12 +3,12 @@ package com.thinkerwolf.gamer.rpc;
 import java.io.Serializable;
 
 /**
- * Rpc请求
+ * RPC请求参数
  *
  * @author wukai
  * @date 2020/5/11 17:01
  */
-public class Request implements Serializable {
+public class RpcRequest implements Serializable {
 
     private Object[] args;
 

@@ -112,10 +112,10 @@ public class NettyRpcClientTests {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutput oo = serializer.serialize(baos);
 
-            Request request = new Request();
-            request.setArgs(new Object[]{"wukai"});
+            RpcRequest rpcRequest = new RpcRequest();
+            rpcRequest.setArgs(new Object[]{"wukai"});
 
-            oo.writeObject(request);
+            oo.writeObject(rpcRequest);
             packet.setContent(baos.toByteArray());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -160,7 +160,7 @@ public class NettyRpcClientTests {
                         ByteArrayInputStream bais = new ByteArrayInputStream(packet.getContent());
                         ObjectInput oi = serializer.deserialize(bais);
 
-                        System.err.println(oi.readObject(Response.class));
+                        System.err.println(oi.readObject(RpcResponse.class));
                     }
                 });
             }

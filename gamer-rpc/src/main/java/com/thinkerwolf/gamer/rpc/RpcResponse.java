@@ -2,7 +2,13 @@ package com.thinkerwolf.gamer.rpc;
 
 import java.io.Serializable;
 
-public class Response implements Serializable {
+/**
+ * RPC响应
+ *
+ * @author wukai
+ * @date 2020/5/15 16:13
+ */
+public class RpcResponse implements Serializable {
 
     private Object result;
 

@@ -13,8 +13,8 @@ import com.thinkerwolf.gamer.netty.NettyConfigurator;
 import com.thinkerwolf.gamer.netty.tcp.Packet;
 import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
 import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
-import com.thinkerwolf.gamer.rpc.Request;
-import com.thinkerwolf.gamer.rpc.Response;
+import com.thinkerwolf.gamer.rpc.RpcRequest;
+import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
 import com.thinkerwolf.gamer.test.action.IRpcAction;
 import io.netty.channel.Channel;
@@ -48,10 +48,10 @@ public class RemotingNettyClientTest {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutput oo = serializer.serialize(baos);
 
-            Request request = new Request();
-            request.setArgs(new Object[]{"wukai"});
+            RpcRequest rpcRequest = new RpcRequest();
+            rpcRequest.setArgs(new Object[]{"wukai"});
 
-            oo.writeObject(request);
+            oo.writeObject(rpcRequest);
             packet.setContent(baos.toByteArray());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -70,7 +70,7 @@ public class RemotingNettyClientTest {
                     ByteArrayInputStream bais = new ByteArrayInputStream(packet.getContent());
                     ObjectInput oi = serializer.deserialize(bais);
 
-                    System.err.println(oi.readObject(Response.class));
+                    System.err.println(oi.readObject(RpcResponse.class));
                 } catch (Exception e) {
                     throw new RemotingException(e);
                 }

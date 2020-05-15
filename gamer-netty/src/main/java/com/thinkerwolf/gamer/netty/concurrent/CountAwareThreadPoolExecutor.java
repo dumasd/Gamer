@@ -47,7 +47,13 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
                 logger.info("reject ip:{}, msg:{}", channelRunnable.getChannel(), channelRunnable.getMsg());
                 return;
             }
-            getChildExecutor(channelRunnable).execute(command);
+            ChildExecutor childExe = getChildExecutor(channelRunnable);
+            if (childExe != null) {
+                childExe.execute(command);
+            } else {
+                // 不应该有这种状态，产生说明框架有bug
+                throw new IllegalStateException("... Serious Error Framework has bug ...");
+            }
         } else {
             doUnOrderedExecute(command);
         }
@@ -83,19 +89,17 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
      * @return
      */
     private boolean needReject(ChannelRunnable channelRunnable) {
-
         Object channel = channelRunnable.getChannel();
-//        if (!channel.isOpen()) {
-//            channelCounters.remove(channel);
-//            return false;
-//        }
-
+        if (ConcurrentUtil.isClosed(channel)) {
+            childExecutors.remove(channel);
+            channelCounters.remove(channel);
+            return true;
+        }
 
         AtomicInteger channelCounter = getChannelCounter(channel);
         if (channelCounter == null) {
             return false;
         }
-
         if (channelCounter.get() > countPerChannel) {
             return true;
         }
@@ -104,11 +108,9 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
     }
 
     private AtomicInteger getChannelCounter(Object channel) {
-//        String channelId = channel.id().asLongText();
-//        if (!channel.isOpen()) {
-//            channelCounters.remove(channelId);
-//            return null;
-//        }
+        if (ConcurrentUtil.isClosed(channel)) {
+            return channelCounters.remove(channel);
+        }
 
         AtomicInteger channelCounter = channelCounters.get(channel);
         if (channelCounter == null) {
@@ -121,11 +123,12 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
 
     private ChildExecutor getChildExecutor(ChannelRunnable cr) {
         Object channel = cr.getChannel();
-//        String channelId = channel.id().asLongText();
-//        if (!channel.isOpen()) {
-//            childExecutors.remove(channel);
-//            return null;
-//        }
+
+        if (ConcurrentUtil.isClosed(channel)) {
+            childExecutors.remove(channel);
+            return null;
+        }
+
         ChildExecutor executor = childExecutors.get(channel);
         if (executor == null) {
             executor = new ChildExecutor();

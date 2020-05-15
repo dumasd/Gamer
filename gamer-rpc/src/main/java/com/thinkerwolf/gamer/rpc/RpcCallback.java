@@ -4,18 +4,18 @@ import com.thinkerwolf.gamer.common.concurrent.Future;
 import com.thinkerwolf.gamer.common.concurrent.FutureListener;
 
 /**
- * Rpc回调函数
+ * RPC异步调用回调函数
  *
  * @author wukai
  * @date 2020/5/11 16:29
  */
-public abstract class RpcCallback<V> implements FutureListener<Future<Response>> {
+public abstract class RpcCallback<V> implements FutureListener<Future<RpcResponse>> {
 
     @Override
-    public void operationComplete(Future<Response> future) throws Throwable {
+    public void operationComplete(Future<RpcResponse> future) throws Throwable {
         if (future.isSuccess()) {
-            Response response = future.getNow();
-            onSuccess((V) response.getResult());
+            RpcResponse rpcResponse = future.getNow();
+            onSuccess((V) rpcResponse.getResult());
         } else {
             onError(future.cause());
         }

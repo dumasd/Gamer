@@ -58,6 +58,8 @@ public class ClassUtilTests {
         String url = "default://wukai:123@127.0.0.1:8080/fdadt?useUnicode=true";
         URL u = URL.parse(url);
         System.out.println(u);
+
+        System.out.println(url.getBytes().length);
     }
 
 

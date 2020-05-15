@@ -15,6 +15,7 @@ import org.apache.commons.collections.MapUtils;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 @ChannelHandler.Sharable
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
@@ -109,10 +110,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         WebSocketResponse response = new WebSocketResponse(ctx.channel());
 
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.WEBSOCKET_DECORATOR);
-        try {
-            servlet.service(request, response);
-        } catch (Exception e) {
-            ctx.writeAndFlush(new CloseWebSocketFrame());
+
+        if (executor != null) {
+            executor.execute(new ChannelRunnable(ctx.channel()) {
+                @Override
+                public void run() {
+                    service(servlet, request, response, ctx);
+                }
+            });
+        } else {
+            service(servlet, request, response, ctx);
         }
     }
 

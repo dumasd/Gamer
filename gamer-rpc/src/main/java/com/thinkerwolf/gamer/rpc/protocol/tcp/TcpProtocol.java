@@ -17,6 +17,9 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class TcpProtocol implements Protocol {
 
+    /**
+     * 共享的client
+     */
     private ConcurrentMap<URL, ExchangeClient> sharedClients = new ConcurrentHashMap<>();
 
     @Override

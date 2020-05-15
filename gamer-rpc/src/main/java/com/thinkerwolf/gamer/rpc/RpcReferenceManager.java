@@ -40,14 +40,14 @@ public class RpcReferenceManager {
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 RpcMessage rpcMessage = new RpcMessage(interfaceClass, method.getName(), method.getParameterTypes(), args);
                 Promise promise = client.request(rpcMessage);
-                Response response;
+                RpcResponse rpcResponse;
                 if (!rpcClient.async()) {
-                    response = (Response) promise.get();
-                    return response.getResult();
+                    rpcResponse = (RpcResponse) promise.get();
+                    return rpcResponse.getResult();
                 }
                 RpcContext.getContext().setCurrent(promise);
-                response = (Response) promise.getNow();
-                return response == null ? null : response.getResult();
+                rpcResponse = (RpcResponse) promise.getNow();
+                return rpcResponse == null ? null : rpcResponse.getResult();
             }
         });
     }

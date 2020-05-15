@@ -16,9 +16,12 @@ public class ReferenceConfigTests {
 
     public static void main(String[] args) {
 
+        String url = "http://127.0.0.1:8080";
+//        String url = "tcp://127.0.0.1:8090";
+
         ReferenceConfig<IRpcAction> ref = new ReferenceConfig<>();
         ref.setInterfaceClass(IRpcAction.class);
-        ref.setUrl("tcp://127.0.0.1:8090");
+        ref.setUrl(url);
 
         IRpcAction rpcAction = ref.get();
         System.err.println(rpcAction.sayHello("wukai"));
@@ -27,7 +30,7 @@ public class ReferenceConfigTests {
         testConcurrency(rpcAction, 60);
 
         try {
-            Thread.sleep(2000);
+            Thread.sleep(4000);
         } catch (InterruptedException e) {
         }
 

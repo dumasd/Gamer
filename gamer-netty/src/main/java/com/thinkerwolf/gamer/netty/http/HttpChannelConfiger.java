@@ -1,18 +1,19 @@
 package com.thinkerwolf.gamer.netty.http;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.core.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import com.thinkerwolf.gamer.core.ssl.SocketSslContextFactory;
 import com.thinkerwolf.gamer.core.ssl.SslConfig;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.netty.ChannelHandlerConfiger;
+import com.thinkerwolf.gamer.netty.NettyClientHandler;
 import com.thinkerwolf.gamer.netty.concurrent.ConcurrentUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.channel.ServerChannel;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
@@ -30,6 +31,10 @@ public class HttpChannelConfiger extends ChannelHandlerConfiger<Channel> {
     private HttpDefaultHandler httpDefaultHandler;
     private SSLContext context;
     private SslContext sslContext;
+
+    private URL url;
+
+    private ChannelHandler handler;
 
     @Override
     public void init(URL url) throws Exception {
@@ -50,7 +55,6 @@ public class HttpChannelConfiger extends ChannelHandlerConfiger<Channel> {
         if (sslContext != null) {
             pipeline.addLast("http-ssl", sslContext.newHandler(ch.alloc()));
         }
-
         pipeline.addLast("http-decoder", new HttpRequestDecoder());
         pipeline.addLast("http-aggregator", new HttpObjectAggregator(65536));
         pipeline.addLast("http-encoder", new HttpResponseEncoder());

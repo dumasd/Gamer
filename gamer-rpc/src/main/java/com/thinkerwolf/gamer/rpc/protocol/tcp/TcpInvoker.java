@@ -41,18 +41,18 @@ public class TcpInvoker<T> implements Invoker<T> {
         int idx = getIdx(round, clients.length);
         ExchangeClient client = clients[idx];
         Promise promise = client.request(args);
-        Response response;
+        RpcResponse rpcResponse;
         if (!invocation.getRpcClient().async()) {
             promise.await();
             if (promise.cause() != null) {
                 return new Result(promise.cause());
             }
-            response = (Response) promise.getNow();
-            return new Result(response.getResult());
+            rpcResponse = (RpcResponse) promise.getNow();
+            return new Result(rpcResponse.getResult());
         }
         RpcContext.getContext().setCurrent(promise);
-        response = (Response) promise.getNow();
-        return response == null ? new Result(null) : new Result(response.getResult());
+        rpcResponse = (RpcResponse) promise.getNow();
+        return rpcResponse == null ? new Result(null) : new Result(rpcResponse.getResult());
     }
 
     @Override

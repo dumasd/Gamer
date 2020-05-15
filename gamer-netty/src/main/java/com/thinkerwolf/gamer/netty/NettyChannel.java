@@ -104,7 +104,7 @@ public class NettyChannel implements Channel {
 
     @Override
     public boolean isClosed() {
-        return ch.isOpen();
+        return !ch.isOpen();
     }
 
     @Override

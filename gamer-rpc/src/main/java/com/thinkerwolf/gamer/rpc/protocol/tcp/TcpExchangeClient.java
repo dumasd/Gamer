@@ -9,10 +9,7 @@ import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.core.remoting.*;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.netty.NettyClient;
-import com.thinkerwolf.gamer.netty.NettyConfigurator;
 import com.thinkerwolf.gamer.netty.tcp.Packet;
-import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
-import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
 import com.thinkerwolf.gamer.rpc.*;
 
 import java.io.IOException;
@@ -79,11 +76,11 @@ public class TcpExchangeClient extends ChannelHandlerAdapter implements Exchange
             packet.setCommand(command);
             packet.setRequestId(id);
 
-            Request request = new Request();
-            request.setArgs(msg.getParameters());
+            RpcRequest rpcRequest = new RpcRequest();
+            rpcRequest.setArgs(msg.getParameters());
 
             Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
-            packet.setContent(Serializations.getBytes(serializer, request));
+            packet.setContent(Serializations.getBytes(serializer, rpcRequest));
         } catch (IOException e) {
             promise.setFailure(e);
             return promise;
@@ -120,8 +117,8 @@ public class TcpExchangeClient extends ChannelHandlerAdapter implements Exchange
         RpcMessage rpcMsg = (RpcMessage) promise.getAttachment();
         Serializer serializer = ServiceLoader.getService(rpcMsg.getSerial(), Serializer.class);
         try {
-            Response response = Serializations.getObject(serializer, packet.getContent(), Response.class);
-            promise.setSuccess(response);
+            RpcResponse rpcResponse = Serializations.getObject(serializer, packet.getContent(), RpcResponse.class);
+            promise.setSuccess(rpcResponse);
         } catch (IOException | ClassNotFoundException e) {
             promise.setFailure(e);
             throw new RemotingException(e);

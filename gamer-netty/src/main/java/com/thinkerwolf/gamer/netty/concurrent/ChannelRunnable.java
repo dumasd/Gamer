@@ -1,7 +1,5 @@
 package com.thinkerwolf.gamer.netty.concurrent;
 
-import java.net.SocketAddress;
-
 public abstract class ChannelRunnable implements Runnable {
 
 	protected Object channel;
