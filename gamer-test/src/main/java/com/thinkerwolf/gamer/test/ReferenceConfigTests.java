@@ -16,9 +16,9 @@ public class ReferenceConfigTests {
 
     public static void main(String[] args) {
 
-        String url = "http://127.0.0.1:8080";
+//        String url = "http://127.0.0.1:8080";
 //        String url = "tcp://127.0.0.1:8090";
-
+        String url = "tcp://106.13.146.85:8090";
         ReferenceConfig<IRpcAction> ref = new ReferenceConfig<>();
         ref.setInterfaceClass(IRpcAction.class);
         ref.setUrl(url);
