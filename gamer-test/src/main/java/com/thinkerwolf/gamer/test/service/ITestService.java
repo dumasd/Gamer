@@ -12,4 +12,6 @@ public interface ITestService {
 
     Map<String, Object> getUser(int userId);
 
+    String tpush(String msg);
+
 }

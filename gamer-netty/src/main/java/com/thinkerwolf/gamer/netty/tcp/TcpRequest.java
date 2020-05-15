@@ -23,11 +23,13 @@ public class TcpRequest extends AbstractRequest {
 
     private String sessionId;
 
+    private Channel channel;
+
     public TcpRequest(int requestId, String command, Channel channel, ServletContext servletContext, byte[] content) {
         super(requestId, command, channel);
         this.servletContext = servletContext;
         this.content = content;
-
+        this.channel = channel;
         RequestUtil.parseParams(this, getContent());
 
         if (channel.hasAttr(InternalHttpUtil.CHANNEL_JSESSIONID)) {
@@ -59,6 +61,7 @@ public class TcpRequest extends AbstractRequest {
         if (create && session != null && !session.getId().equals(sessionId)) {
             // session create or update
             this.sessionId = session.getId();
+            session.setPush(new TcpPush(channel));
             getChannel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(sessionId);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Create new session " + session);

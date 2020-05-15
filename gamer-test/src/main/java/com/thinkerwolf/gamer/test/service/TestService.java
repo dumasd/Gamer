@@ -39,4 +39,11 @@ public class TestService implements ITestService {
         map.put("lastLogin", new Date());
         return map;
     }
+
+    @Override
+    public String tpush(String msg) {
+
+
+        return "success";
+    }
 }

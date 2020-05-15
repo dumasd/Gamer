@@ -52,6 +52,7 @@ public class WebSocketRequest extends AbstractRequest {
         if (create && session != null && !session.getId().equals(sessionId)) {
             // 过期或者创建新session
             this.sessionId = session.getId();
+            session.setPush(new WebSocketPush(ctx.channel()));
             ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(sessionId);
         }
         if (session != null) {
