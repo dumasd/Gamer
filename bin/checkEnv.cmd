@@ -1,6 +1,6 @@
 set LOG_DIR=%~dp0%logs
 
-set CLASSPATH=%~dp0*;%~dp0lib\*;%CLASSPATH%
+SET CLASSPATH=%~dp0..\*;%~dp0..\lib\*;%CLASSPATH%
 
 @REM setup java environment variables
 

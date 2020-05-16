@@ -13,6 +13,7 @@ import java.util.*;
 public class NettyServerTests {
 
     public static void main(String[] args) throws Exception {
+        System.out.println(System.getenv("GOROOT"));
         System.out.println("Command args : " + Arrays.toString(args));
         InternalLoggerFactory.setDefaultLoggerFactory(new Slf4jLoggerFactory());
         startFromConfig(args);

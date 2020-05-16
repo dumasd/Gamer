@@ -8,6 +8,23 @@ import java.util.regex.Pattern;
  * @author wukai
  */
 public final class Constants {
+
+    /**
+     * LOG配置文件
+     */
+    public static final String GAMER_LOG_CONFIG_FILE = "gamer.log.configFile";
+
+    /**
+     * LOG配置等级 INFO,CONSOLE
+     */
+    public static final String GAMER_LOG_PROP = "gamer.root.logger";
+
+    /**
+     * 日志路径
+     */
+    public static final String GAMER_LOG_DIR = "gamer.log.dir";
+
+
     /**
      * 框架名称
      */

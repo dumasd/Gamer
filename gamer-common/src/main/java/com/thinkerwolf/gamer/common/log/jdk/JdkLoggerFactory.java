@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.common.log.jdk;
 
+import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.io.Resource;
 import com.thinkerwolf.gamer.common.io.Resources;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
@@ -11,6 +12,12 @@ import java.util.logging.LogManager;
 public class JdkLoggerFactory extends InternalLoggerFactory {
 
     private static final String DEFAULT_CONFIG_FILE_LOCATION = "classpath:logging.properties";
+
+    private static final String ENV_CONFIG_FILE;
+
+    static {
+        ENV_CONFIG_FILE = System.getenv(Constants.GAMER_LOG_CONFIG_FILE);
+    }
 
     private String configFileLocation;
 
@@ -25,7 +32,10 @@ public class JdkLoggerFactory extends InternalLoggerFactory {
 
     private void loadConfig() {
         String location = configFileLocation;
-        if (StringUtils.isEmpty(location)) {
+        if (StringUtils.isBlank(location)) {
+            location = ENV_CONFIG_FILE;
+        }
+        if (StringUtils.isBlank(location)) {
             location = DEFAULT_CONFIG_FILE_LOCATION;
         }
         Resource resource = Resources.getResource(location);
@@ -34,7 +44,7 @@ public class JdkLoggerFactory extends InternalLoggerFactory {
                 LogManager.getLogManager().readConfiguration(resource.getInputStream());
                 System.out.println("LOGGING:Load configuration from " + location);
             } else {
-                System.out.println("LOGGING:Can't find file " + location + ", use default configuration.");
+                throw new NullPointerException(location);
             }
         } catch (Exception e) {
             System.err.println("LOGGING:Load configuration error:");

@@ -5,7 +5,7 @@
         debug="false" scan="true" scanPeriod="30 second">
 
     <property name="PROJECT" value="GamerTest"/>
-    <property name="ROOT" value="logs/${PROJECT}/"/>
+    <property name="ROOT" value="/opt/logs/${PROJECT}/"/>
     <property name="FILESIZE" value="50MB"/>
     <property name="MAXHISTORY" value="100"/>
     <property name="myspecial" value=""/>
