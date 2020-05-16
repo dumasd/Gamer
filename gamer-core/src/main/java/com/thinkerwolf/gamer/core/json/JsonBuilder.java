@@ -57,6 +57,7 @@ public final class JsonBuilder {
      */
     public static Map<String, Object> getPushJson(String cmd, Object data) {
         Map<String, Object> m = new LinkedHashMap<>();
+        m.put("state", State.PUSH.getId());
         m.put("cmd", cmd);
         m.put("data", data);
         return m;
