@@ -18,7 +18,7 @@ public class GamerProperties {
     }
 
     public static class GamerConstants {
-        public static final String GAMER_PREFIX = "gamer";
+        public static final String GAMER_PREFIX = "spring.gamer";
     }
 
 }

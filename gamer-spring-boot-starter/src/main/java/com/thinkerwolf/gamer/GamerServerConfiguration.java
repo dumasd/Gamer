@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer;
 
 import com.thinkerwolf.gamer.core.servlet.ServletContext;
 import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
+import com.thinkerwolf.gamer.properties.GamerProperties;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -20,8 +21,13 @@ public class GamerServerConfiguration implements ApplicationContextAware {
     }
 
     @Bean
-    public NettyServletBootstrap bootstrap() throws Exception {
-        NettyServletBootstrap bootstrap = new NettyServletBootstrap();
+    public NettyServletBootstrap bootstrap(GamerProperties properties) throws Exception {
+        NettyServletBootstrap bootstrap;
+        if (properties.getConfigFile() != null) {
+            bootstrap = new NettyServletBootstrap(properties.getConfigFile());
+        } else {
+            bootstrap = new NettyServletBootstrap();
+        }
         bootstrap.getServletConfig().getServletContext().setAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE, applicationContext);
         bootstrap.startup();
         return bootstrap;
