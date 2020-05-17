@@ -20,7 +20,7 @@ public class ExceptionFilter implements Filter {
             LOG.info("Invoke command [" + invocation.getCommand() + "]");
             filterChain.doFilter(invocation, request, response);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Exception when invoke command", e);
         }
     }
 
