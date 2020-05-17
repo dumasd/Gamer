@@ -22,6 +22,11 @@ public enum State {
      * 推送
      */
     PUSH(3),
+    /**
+     * 未登录或者session过期
+     */
+    NO_LOGIN(4),
+
     ;
     int id;
 

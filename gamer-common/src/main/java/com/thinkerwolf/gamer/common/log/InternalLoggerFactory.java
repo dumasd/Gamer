@@ -10,7 +10,7 @@ import com.thinkerwolf.gamer.common.log.jdk.JdkLoggerFactory;
  */
 public abstract class InternalLoggerFactory {
 
-    public static final String DEFAULT_LOGGER_FACTORY_CLASS_NAME = "com.thinkerwolf.log.slf4j.Slf4jLoggerFactory";
+    public static final String DEFAULT_LOGGER_FACTORY_CLASS_NAME = "com.thinkerwolf.gamer.common.log.slf4j.Slf4jLoggerFactory";
 
     private static InternalLoggerFactory defaultLoggerFactory;
 
