@@ -4,12 +4,14 @@ import com.thinkerwolf.gamer.core.servlet.ServletContext;
 import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
 import com.thinkerwolf.gamer.properties.GamerProperties;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@EnableConfigurationProperties(GamerProperties.class)
 public class GamerServerConfiguration implements ApplicationContextAware {
 
 

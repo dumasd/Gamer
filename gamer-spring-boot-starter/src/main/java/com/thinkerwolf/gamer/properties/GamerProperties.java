@@ -3,8 +3,10 @@ package com.thinkerwolf.gamer.properties;
 import static com.thinkerwolf.gamer.properties.GamerProperties.GamerConstants.GAMER_PREFIX;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 @ConfigurationProperties(prefix = GAMER_PREFIX)
+@Component
 public class GamerProperties {
 
     private String configFile = null;
