@@ -31,10 +31,12 @@ public class NettyServletBootstrap {
     private List<URL> urls;
 
     public NettyServletBootstrap() {
+        init();
     }
 
     public NettyServletBootstrap(String configFile) {
         this.configFile = configFile;
+        init();
     }
 
     public NettyServletBootstrap(URL url, ServletConfig servletConfig) {
@@ -43,6 +45,7 @@ public class NettyServletBootstrap {
         }
         this.urls = Collections.singletonList(url);
         this.servletConfig = servletConfig;
+        init();
     }
 
     public NettyServletBootstrap(List<URL> urls, ServletConfig servletConfig) {
@@ -51,13 +54,28 @@ public class NettyServletBootstrap {
         }
         this.urls = urls;
         this.servletConfig = servletConfig;
+        init();
+    }
+
+    private void init() {
+        try {
+            loadConfig();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ServletConfig getServletConfig() {
+        return servletConfig;
     }
 
     /**
      * 启动
      */
     public void startup() throws Exception {
-        loadConfig();
+        Servlet servlet = ClassUtils.newInstance(servletConfig.servletClass());
+        servlet.init(servletConfig);
+        notifyServletContextListener();
         for (URL url : urls) {
             url.getParameters().put(URL.SERVLET_CONFIG, servletConfig);
             NettyServer server = new NettyServer(url, null);
@@ -208,24 +226,29 @@ public class NettyServletBootstrap {
                 return servletContext;
             }
         };
-        Servlet servlet = ClassUtils.newInstance(servletConfig.servletClass());
-        servlet.init(servletConfig);
         loadListeners(listenersConf);
     }
 
     private void loadListeners(List<String> listenersConf) throws Exception {
         List<Object> listeners = new ArrayList<>();
-        ServletContextEvent event = new ServletContextEvent(servletConfig.getServletContext());
+
         if (listenersConf != null && listenersConf.size() > 0) {
             for (String s : listenersConf) {
                 Object listener = ClassUtils.newInstance(s.trim());
-                if (listener instanceof ServletContextListener) {
-                    ((ServletContextListener) listener).contextInitialized(event);
-                }
                 listeners.add(listener);
             }
         }
         servletConfig.getServletContext().setListeners(listeners);
     }
+
+    private void notifyServletContextListener() {
+        ServletContextEvent event = new ServletContextEvent(servletConfig.getServletContext());
+        for (Object listener : servletConfig.getServletContext().getListeners()) {
+            if (listener instanceof ServletContextListener) {
+                ((ServletContextListener) listener).contextInitialized(event);
+            }
+        }
+    }
+
 
 }

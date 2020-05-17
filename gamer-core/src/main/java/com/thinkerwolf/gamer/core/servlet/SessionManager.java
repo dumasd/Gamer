@@ -22,6 +22,8 @@ public interface SessionManager {
 
     void removeSession(String sessionId);
 
+    void expireSession(String sessionId);
+
     void addSessionListener(SessionListener listener);
 
     void addSessionAttributeListener(SessionAttributeListener listener);

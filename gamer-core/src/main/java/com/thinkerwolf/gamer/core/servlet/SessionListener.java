@@ -6,6 +6,8 @@ public interface SessionListener extends EventListener {
 
     void sessionCreated(SessionEvent se);
 
+    void sessionExpired(SessionEvent se);
+
     void sessionDestroyed(SessionEvent se);
 
 }

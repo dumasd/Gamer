@@ -168,6 +168,20 @@ public class StandardSessionManager implements SessionManager {
     }
 
     @Override
+    public void expireSession(String sessionId) {
+        Session session = sessionMap.get(sessionId);
+        if (session != null) {
+            for (SessionListener sessionListener : sessionListeners) {
+                try {
+                    sessionListener.sessionExpired(new SessionEvent(session));
+                } catch (Exception e) {
+                    LOG.warn("Exception when notify sessionDestroy.", e);
+                }
+            }
+        }
+    }
+
+    @Override
     public void addSessionListener(SessionListener listener) {
         sessionListeners.add(listener);
     }

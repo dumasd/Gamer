@@ -24,6 +24,11 @@ public class LocalSessionListener implements SessionListener {
     }
 
     @Override
+    public void sessionExpired(SessionEvent se) {
+
+    }
+
+    @Override
     public void sessionDestroyed(SessionEvent se) {
         synchronized (lock) {
             sessions.remove(se.getSource());
