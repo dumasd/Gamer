@@ -8,9 +8,6 @@ import com.thinkerwolf.gamer.core.servlet.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ResponseUtil {
 
@@ -24,7 +21,7 @@ public class ResponseUtil {
 
     public static ByteModel EXCEPTION_MODEL = new ByteModel("E0010".getBytes());
 
-
+    public static View JSON_VIEW = new JsonView();
 
     public static View ERROR_VIEW = new StringView();
 
@@ -55,7 +52,7 @@ public class ResponseUtil {
             NULL_VIEW.render(exceptionStackBytes == null ? EXCEPTION_MODEL : new ByteModel(exceptionStackBytes), request, response);
         } else if (protocol == Protocol.HTTP) {
             if (type == ServletErrorType.COMMAND_NOT_FOUND) {
-                response.setStatus(ResponseStatus.NOT_FOUND) ;
+                response.setStatus(ResponseStatus.NOT_FOUND);
             } else {
                 response.setStatus(ResponseStatus.INTERNAL_SERVER_ERROR);
             }
@@ -64,8 +61,18 @@ public class ResponseUtil {
 
     }
 
-
-
+    /**
+     * 追加视图
+     *
+     * @param view
+     * @param model
+     * @param request
+     * @param response
+     * @throws Exception
+     */
+    public static void render(View view, Model<?> model, Request request, Response response) throws Exception {
+        view.render(model, request, response);
+    }
 
 
 }

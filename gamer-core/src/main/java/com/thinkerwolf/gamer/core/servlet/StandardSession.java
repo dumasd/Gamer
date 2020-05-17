@@ -20,7 +20,7 @@ public class StandardSession implements Session {
     private SessionManager sessionManager;
     private String sessionId;
     private volatile long createTime;
-    private Map<String, Object> attributes;
+    private Map<Object, Object> attributes;
     private volatile long timeout;
     private List<SessionAttributeListener> sessionAttributeListeners;
     private volatile long lastTouchTime;
@@ -74,7 +74,7 @@ public class StandardSession implements Session {
     }
 
     @Override
-    public void setAttribute(String key, Object att) {
+    public void setAttribute(Object key, Object att) {
         attributes.put(key, att);
         // notify
         for (SessionAttributeListener attributeListener : sessionAttributeListeners) {
@@ -87,12 +87,12 @@ public class StandardSession implements Session {
     }
 
     @Override
-    public Object getAttribute(String key) {
+    public Object getAttribute(Object key) {
         return attributes.get(key);
     }
 
     @Override
-    public Object removeAttribute(String key) {
+    public Object removeAttribute(Object key) {
         Object att = attributes.remove(key);
         if (att != null) {
             // notify

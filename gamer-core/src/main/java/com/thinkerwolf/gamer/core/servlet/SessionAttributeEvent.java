@@ -4,11 +4,11 @@ import java.util.EventObject;
 
 public class SessionAttributeEvent extends EventObject {
 
-    private String key;
+    private Object key;
 
     private Object value;
 
-    public SessionAttributeEvent(Session source, String key, Object att) {
+    public SessionAttributeEvent(Session source, Object key, Object att) {
         super(source);
         this.key = key;
         this.value = att;
@@ -19,7 +19,7 @@ public class SessionAttributeEvent extends EventObject {
         return (Session) super.getSource();
     }
 
-    public String getKey() {
+    public Object getKey() {
         return key;
     }
 

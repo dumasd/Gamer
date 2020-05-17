@@ -49,7 +49,7 @@ public interface Session {
      * @param key
      * @param att
      */
-    void setAttribute(String key, Object att);
+    void setAttribute(Object key, Object att);
 
     /**
      * 获取属性
@@ -57,7 +57,7 @@ public interface Session {
      * @param key
      * @return
      */
-    Object getAttribute(String key);
+    Object getAttribute(Object key);
 
     /**
      * 移除属性
@@ -65,7 +65,7 @@ public interface Session {
      * @param key
      * @return
      */
-    Object removeAttribute(String key);
+    Object removeAttribute(Object key);
 
     /**
      * session超时时间
