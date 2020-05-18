@@ -48,7 +48,8 @@ public class ResourceInvocation implements Invocation {
                 throw new MvcException("Resource [" + command + "] not found");
             }
             ResponseUtil.render(resourceView, resourceModel, request, response);
+        } else {
+            throw new MvcException("Resource path is blank");
         }
-        throw new MvcException("Resource path is blank");
     }
 }
