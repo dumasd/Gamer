@@ -3,8 +3,7 @@ package com.thinkerwolf.gamer.netty.concurrent;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,14 +14,48 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author wukai
  */
 public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
+    /**
+     * 创建Executor列表
+     */
+    private static final List<CountAwareThreadPoolExecutor> poolExecutors = new LinkedList<>();
 
     private static Logger logger = InternalLoggerFactory.getLogger(CountAwareThreadPoolExecutor.class);
+
+    private static int CLEAR_CHECK_INTERVAL = 2000;
     /**
-     * 每个Channel的请求数量计数
+     * CountAwareThreadPool清理线程
+     */
+    private static Thread clearThread = new Thread(() -> {
+        for (; ; ) {
+            synchronized (poolExecutors) {
+                while (poolExecutors.size() == 0) {
+                    try {
+                        poolExecutors.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+                for (CountAwareThreadPoolExecutor executor : poolExecutors) {
+                    executor.check();
+                }
+                try {
+                    Thread.sleep(CLEAR_CHECK_INTERVAL);
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+    }, "CountAware-clear");
+
+    static {
+        clearThread.setDaemon(true);
+        clearThread.start();
+    }
+
+    /**
+     * 每个Channel的请求数量计数，需要清理
      */
     private ConcurrentMap<Object, AtomicInteger> channelCounters = new ConcurrentHashMap<>();
     /**
-     * 每个Channel的Executor
+     * 每个Channel的Executor，需要清理
      */
     private ConcurrentMap<Object, ChildExecutor> childExecutors = new ConcurrentHashMap<>();
     /**
@@ -37,6 +70,10 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
     public CountAwareThreadPoolExecutor(int corePoolSize, int maxPoolSize, ThreadFactory threadFactory, int countPerChannel) {
         super(corePoolSize, maxPoolSize, 3000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), threadFactory);
         this.countPerChannel = countPerChannel;
+        synchronized (poolExecutors) {
+            poolExecutors.add(this);
+            poolExecutors.notify();
+        }
     }
 
     @Override
@@ -121,6 +158,10 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
         return channelCounter;
     }
 
+//    private class ClearTask implements Runnable {
+//
+//    }
+
     private ChildExecutor getChildExecutor(ChannelRunnable cr) {
         Object channel = cr.getChannel();
 
@@ -136,6 +177,35 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
             executor = childExecutors.get(channel);
         }
         return executor;
+    }
+
+    public void check() {
+        Iterator<Object> iter = childExecutors.keySet().iterator();
+        for (; iter.hasNext(); ) {
+            if (ConcurrentUtil.isClosed(iter.next())) {
+                iter.remove();
+            }
+        }
+        iter = channelCounters.keySet().iterator();
+        for (; iter.hasNext(); ) {
+            if (ConcurrentUtil.isClosed(iter.next())) {
+                iter.remove();
+            }
+        }
+    }
+
+    @Override
+    protected void terminated() {
+        super.terminated();
+        synchronized (poolExecutors) {
+            poolExecutors.remove(this);
+            destroy();
+        }
+    }
+
+    private void destroy() {
+        channelCounters.clear();
+        childExecutors.clear();
     }
 
     private class ChildExecutor implements Executor, Runnable {
@@ -175,5 +245,4 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
             }
         }
     }
-
 }
