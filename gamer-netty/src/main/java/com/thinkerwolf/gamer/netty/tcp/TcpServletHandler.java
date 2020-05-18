@@ -11,9 +11,11 @@ import com.thinkerwolf.gamer.netty.NettyChannel;
 import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
 import com.thinkerwolf.gamer.netty.concurrent.ConcurrentUtil;
+import com.thinkerwolf.gamer.netty.concurrent.CountAwareThreadPoolExecutor;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import org.apache.commons.collections.MapUtils;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -80,10 +82,27 @@ public class TcpServletHandler extends ChannelHandlerAdapter {
     @Override
     public void caught(Channel ch, Throwable e) throws RemotingException {
         io.netty.channel.Channel channel = ((NettyChannel) ch).innerCh();
-        LOG.debug("Channel error. channel:" + channel.id()
+        LOG.debug("Channel Exception. channel:" + channel.id()
                 + ", isWritable:" + channel.isWritable()
                 + ", isOpen:" + channel.isOpen()
                 + ", isActive:" + channel.isActive()
                 + ", isRegistered:" + channel.isRegistered(), e);
+        if (e instanceof IOException) {
+            ch.close();
+            if (executor instanceof CountAwareThreadPoolExecutor) {
+                ((CountAwareThreadPoolExecutor) executor).check(channel);
+            }
+        }
+    }
+
+    @Override
+    public void disconnected(Channel channel) throws RemotingException {
+        super.disconnected(channel);
+        LOG.debug("Channel Inactive. channel:" + channel.id()
+                + ", isOpen:" + (!channel.isClosed())
+        );
+        if (executor instanceof CountAwareThreadPoolExecutor) {
+            ((CountAwareThreadPoolExecutor) executor).check(channel);
+        }
     }
 }

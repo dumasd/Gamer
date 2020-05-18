@@ -51,6 +51,11 @@ public class NettyChannel implements Channel {
 
 
     @Override
+    public Object id() {
+        return ch.id();
+    }
+
+    @Override
     public SocketAddress getLocalAddress() {
         return ch.localAddress();
     }

@@ -7,6 +7,8 @@ import java.net.SocketAddress;
  */
 public interface Channel extends Endpoint {
 
+    Object id();
+
     SocketAddress getLocalAddress();
 
     SocketAddress getRemoteAddress();

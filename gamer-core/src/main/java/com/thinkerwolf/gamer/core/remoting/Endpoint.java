@@ -7,6 +7,8 @@ import com.thinkerwolf.gamer.common.URL;
  */
 public interface Endpoint {
 
+
+
     /**
      * 获取地址
      *

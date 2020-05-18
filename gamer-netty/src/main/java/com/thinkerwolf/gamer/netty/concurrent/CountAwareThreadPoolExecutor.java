@@ -17,38 +17,7 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
     /**
      * 创建Executor列表
      */
-    private static final List<CountAwareThreadPoolExecutor> poolExecutors = new LinkedList<>();
-
     private static Logger logger = InternalLoggerFactory.getLogger(CountAwareThreadPoolExecutor.class);
-
-    private static int CLEAR_CHECK_INTERVAL = 2000;
-    /**
-     * CountAwareThreadPool清理线程
-     */
-    private static Thread clearThread = new Thread(() -> {
-        for (; ; ) {
-            synchronized (poolExecutors) {
-                while (poolExecutors.size() == 0) {
-                    try {
-                        poolExecutors.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-                for (CountAwareThreadPoolExecutor executor : poolExecutors) {
-                    executor.check();
-                }
-                try {
-                    Thread.sleep(CLEAR_CHECK_INTERVAL);
-                } catch (InterruptedException e) {
-                }
-            }
-        }
-    }, "CountAware-clear");
-
-    static {
-        clearThread.setDaemon(true);
-        clearThread.start();
-    }
 
     /**
      * 每个Channel的请求数量计数，需要清理
@@ -70,10 +39,6 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
     public CountAwareThreadPoolExecutor(int corePoolSize, int maxPoolSize, ThreadFactory threadFactory, int countPerChannel) {
         super(corePoolSize, maxPoolSize, 3000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), threadFactory);
         this.countPerChannel = countPerChannel;
-        synchronized (poolExecutors) {
-            poolExecutors.add(this);
-            poolExecutors.notify();
-        }
     }
 
     @Override
@@ -194,13 +159,18 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
         }
     }
 
+    public void check(Object channel) {
+        if (ConcurrentUtil.isClosed(channel)) {
+            childExecutors.remove(channel);
+            channelCounters.remove(channel);
+        }
+    }
+
+
     @Override
     protected void terminated() {
         super.terminated();
-        synchronized (poolExecutors) {
-            poolExecutors.remove(this);
-            destroy();
-        }
+        destroy();
     }
 
     private void destroy() {

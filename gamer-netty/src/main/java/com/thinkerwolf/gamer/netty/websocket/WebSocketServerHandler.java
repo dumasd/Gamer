@@ -7,6 +7,7 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
+import com.thinkerwolf.gamer.netty.concurrent.CountAwareThreadPoolExecutor;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.websocketx.*;
@@ -134,5 +135,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 + ", isOpen:" + channel.isOpen()
                 + ", isActive:" + channel.isActive()
                 + ", isRegistered:" + channel.isRegistered(), cause);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        Channel channel = ctx.channel();
+        LOG.debug("Channel Inactive. channel:" + channel.id()
+                + ", isOpen:" + channel.isOpen());
+        if (executor instanceof CountAwareThreadPoolExecutor) {
+            ((CountAwareThreadPoolExecutor) executor).check(ctx.channel());
+        }
     }
 }

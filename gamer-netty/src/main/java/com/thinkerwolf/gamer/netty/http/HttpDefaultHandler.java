@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.netty.IServerHandler;
 import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
+import com.thinkerwolf.gamer.netty.concurrent.CountAwareThreadPoolExecutor;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.netty.websocket.WebSocketServerHandler;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
@@ -16,6 +17,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
+import io.netty.handler.timeout.TimeoutException;
 import io.netty.util.AttributeKey;
 
 import java.util.concurrent.Executor;
@@ -111,11 +113,21 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel channel = ctx.channel();
-        LOG.debug("Channel error. channel:" + channel.id()
+        LOG.debug("Channel Exception. channel:" + channel.id()
                 + ", isWritable:" + channel.isWritable()
                 + ", isOpen:" + channel.isOpen()
                 + ", isActive:" + channel.isActive()
                 + ", isRegistered:" + channel.isRegistered(), cause);
     }
 
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        Channel channel = ctx.channel();
+        LOG.debug("Channel Inactive. channel:" + channel.id()
+                + ", isOpen:" + channel.isOpen());
+        if (executor instanceof CountAwareThreadPoolExecutor) {
+            ((CountAwareThreadPoolExecutor) executor).check(ctx.channel());
+        }
+    }
 }

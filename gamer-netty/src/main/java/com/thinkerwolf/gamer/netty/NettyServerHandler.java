@@ -61,7 +61,7 @@ public class NettyServerHandler extends ChannelDuplexHandler {
             if (ch != null) {
                 InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
                 channelMap.remove(address.getHostString() + ":" + address.getPort());
-                handler.connected(ch);
+                handler.disconnected(ch);
             }
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
