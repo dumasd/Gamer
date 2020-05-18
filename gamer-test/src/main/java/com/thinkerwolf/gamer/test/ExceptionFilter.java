@@ -3,11 +3,21 @@ package com.thinkerwolf.gamer.test;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.mvc.Invocation;
+import com.thinkerwolf.gamer.core.mvc.model.JsonModel;
 import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.util.ResponseUtil;
 
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author wukai
+ * @date 2020/5/18 14:12
+ */
 public class ExceptionFilter implements Filter {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(ExceptionFilter.class);
+
 
     @Override
     public void init(ServletConfig servletConfig) throws Exception {
@@ -21,6 +31,12 @@ public class ExceptionFilter implements Filter {
             filterChain.doFilter(invocation, request, response);
         } catch (Exception e) {
             LOG.error("Exception when invoke command", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("exception", e);
+            try {
+                ResponseUtil.render(ResponseUtil.JSON_VIEW, new JsonModel(error), request, response);
+            } catch (Exception ignored) {
+            }
         }
     }
 
