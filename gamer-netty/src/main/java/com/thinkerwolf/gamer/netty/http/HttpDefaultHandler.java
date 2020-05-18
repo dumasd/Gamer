@@ -1,7 +1,6 @@
 package com.thinkerwolf.gamer.netty.http;
 
 import com.thinkerwolf.gamer.netty.IServerHandler;
-import com.thinkerwolf.gamer.netty.NettyConfig;
 import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
@@ -20,7 +19,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.AttributeKey;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicLong;
 
 @ChannelHandler.Sharable
 public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
@@ -33,6 +31,23 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
     public HttpDefaultHandler(Executor executor, ServletConfig servletConfig) {
         this.executor = executor;
         this.servletConfig = servletConfig;
+    }
+
+    private static void service(Servlet servlet, Request request, Response response) {
+        try {
+            servlet.service(request, response);
+        } catch (Exception e) {
+            // 捕捉到非业务层异常，异常很严重
+            LOG.error("Serious error happen", e);
+            DefaultFullHttpResponse errorResp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            byte[] data = e.toString().getBytes();
+            errorResp.content().writeBytes(data);
+            errorResp.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN);
+            try {
+                response.write(errorResp);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Override
@@ -80,23 +95,16 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
         if (longHttp) {
             return;
         }
-
+        Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
         if (executor != null) {
             executor.execute(new ChannelRunnable(ctx.channel(), null) {
                 @Override
                 public void run() {
-                    Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
-                    try {
-                        servlet.service(request, response);
-                    } catch (Exception e) {
-                        // FIXME 如何处理???
-                        LOG.error("Servlet service error", e);
-                    }
+                    service(servlet, request, response);
                 }
             });
         } else {
-            Servlet servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
-            servlet.service(request, response);
+            service(servlet, request, response);
         }
     }
 
@@ -110,13 +118,4 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
                 + ", isRegistered:" + channel.isRegistered(), cause);
     }
 
-    static class RequestResponsePair {
-        RequestResponsePair(Request request, Response response) {
-            this.request = request;
-            this.response = response;
-        }
-
-        Request request;
-        Response response;
-    }
 }

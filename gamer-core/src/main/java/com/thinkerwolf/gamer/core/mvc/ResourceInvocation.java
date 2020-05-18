@@ -1,11 +1,12 @@
 package com.thinkerwolf.gamer.core.mvc;
 
+import com.thinkerwolf.gamer.core.exception.MvcException;
 import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
-import com.thinkerwolf.gamer.core.servlet.ServletErrorType;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.core.mvc.view.View;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 静态资源
@@ -36,7 +37,7 @@ public class ResourceInvocation implements Invocation {
     @Override
     public void handle(Request request, Response response) throws Exception {
         String command = request.getCommand();
-        if (command != null && !command.isEmpty()) {
+        if (StringUtils.isNotBlank(command)) {
             ResourceModel resourceModel;
             if (request.getEncoding() != null && request.getEncoding().length() > 0) {
                 resourceModel = resourceManager.getResource(command, request.getEncoding());
@@ -44,14 +45,10 @@ public class ResourceInvocation implements Invocation {
                 resourceModel = resourceManager.getResource(command);
             }
             if (resourceModel == null) {
-                ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, new Exception("Not found"));
-            } else {
-                resourceView.render(resourceModel, request, response);
+                throw new MvcException("Resource [" + command + "] not found");
             }
-        } else {
-            // 跳转到默认主页
-            ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, new Exception("Not found"));
-
+            ResponseUtil.render(resourceView, resourceModel, request, response);
         }
+        throw new MvcException("Resource path is blank");
     }
 }

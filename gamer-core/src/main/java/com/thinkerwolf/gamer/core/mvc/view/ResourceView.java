@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.core.mvc.view;
 
 import com.thinkerwolf.gamer.common.ServiceLoader;
+import com.thinkerwolf.gamer.core.exception.MvcException;
 import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
@@ -56,8 +57,7 @@ public class ResourceView extends AbstractView {
         String mime = findMimeType(protocol, resourceModel.getExtension());
         if (mime == null) {
             response.setStatus(ResponseStatus.NOT_IMPLEMENTED);
-            ResponseUtil.renderError("Request resource type : " + resourceModel.getExtension() + " is not supported", request, response);
-            return;
+            throw new MvcException("Unsupported mime type [" + resourceModel.getExtension() +"]");
         }
         response.setContentType(mime);
         response.setStatus(ResponseStatus.OK);

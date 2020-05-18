@@ -90,6 +90,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         try {
             servlet.service(request, response);
         } catch (Exception e) {
+            // 捕捉到非业务层异常，异常很严重
+            LOG.error("Serious error happen", e);
             ctx.writeAndFlush(new CloseWebSocketFrame());
         }
     }

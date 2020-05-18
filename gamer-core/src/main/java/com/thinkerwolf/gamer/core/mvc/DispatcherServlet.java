@@ -7,6 +7,7 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.annotation.Action;
 import com.thinkerwolf.gamer.core.annotation.Command;
+import com.thinkerwolf.gamer.core.exception.ServletException;
 import com.thinkerwolf.gamer.core.listener.SpringContextLoadListener;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.*;
@@ -51,16 +52,12 @@ public class DispatcherServlet implements Servlet {
     public void init(ServletConfig config) throws Exception {
         this.servletConfig = config;
         this.invocationMap = new HashMap<>();
-        try {
-            initSpringContext(config);
-            initObjectFactory(config);
-            initFilters(config);
-            initAction(config);
-            initSessionManager(config);
-            FreemarkerHelper.init(config);
-        } catch (Exception e) {
-            throw new ServletException(e);
-        }
+        initSpringContext(config);
+        initObjectFactory(config);
+        initFilters(config);
+        initAction(config);
+        initSessionManager(config);
+        FreemarkerHelper.init(config);
         this.servletConfig.getServletContext().setAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE, this);
     }
 
@@ -115,7 +112,7 @@ public class DispatcherServlet implements Servlet {
         }
     }
 
-    private void initFilters(ServletConfig config) {
+    private void initFilters(ServletConfig config) throws Exception {
         this.filters = new ArrayList<>();
         String filterParam = config.getInitParam("filters");
         String[] fs = StringUtils.split(filterParam, ";");
@@ -129,7 +126,7 @@ public class DispatcherServlet implements Servlet {
                             this.filters.add(filter);
                         }
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new ServletException(e);
                     }
                 }
             }
@@ -153,7 +150,7 @@ public class DispatcherServlet implements Servlet {
                 Invocation invocation = createInvocation(config, urlPrefix, method, obj, viewManager);
                 if (invocation != null) {
                     if (invocationMap.containsKey(invocation.getCommand())) {
-                        throw new RuntimeException("Duplicate action command :" + invocation.getCommand());
+                        throw new ServletException("Duplicate action command :" + invocation.getCommand());
                     }
                     invocationMap.put(invocation.getCommand(), invocation);
                 }

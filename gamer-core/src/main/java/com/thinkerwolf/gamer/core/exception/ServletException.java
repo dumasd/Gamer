@@ -1,5 +1,11 @@
-package com.thinkerwolf.gamer.core.servlet;
+package com.thinkerwolf.gamer.core.exception;
 
+/**
+ * Servlet异常
+ *
+ * @author wukai
+ * @date 2020/5/18 13:46
+ */
 public class ServletException extends Exception {
     public ServletException() {
     }

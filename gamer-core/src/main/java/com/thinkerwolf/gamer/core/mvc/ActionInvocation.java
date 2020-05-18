@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer.core.mvc;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
+import com.thinkerwolf.gamer.core.exception.MvcException;
 import com.thinkerwolf.gamer.core.mvc.adaptor.DefaultParamAdaptor;
 import com.thinkerwolf.gamer.core.mvc.adaptor.ParamAdaptor;
 import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
@@ -10,7 +11,6 @@ import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.CompressUtil;
 import com.thinkerwolf.gamer.core.mvc.view.View;
 import com.thinkerwolf.gamer.core.mvc.view.ViewManager;
-import com.thinkerwolf.gamer.core.util.ResponseUtil;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -65,45 +65,39 @@ public class ActionInvocation implements Invocation {
     @Override
     public void handle(Request request, Response response) throws Exception {
         Object[] params = this.paramAdaptor.convert(request, response);
-        try {
-            Model model = (Model) method.invoke(obj, params);
-            View responseView;
+        Model model = (Model) method.invoke(obj, params);
+        View responseView;
 
-            if (view != null) {
-                responseView = view;
-            } else {
-                responseView = viewManager.getView(model.name());
-            }
-
-            if (responseView == null) {
-                ResponseUtil.renderError(ServletErrorType.EXCEPTION, request, response, new NullPointerException());
-                return;
-            }
-
-            // 压缩判断
-            Model result = model;
-            if (request.getProtocol() == Protocol.HTTP) {
-                if (request.getEncoding() != null && request.getEncoding().length() > 0) {
-                    byte[] data = model.getBytes();
-                    try {
-                        byte[] compressedData = CompressUtil.compress(data, request.getEncoding());
-                        if (Arrays.equals(compressedData, data)) {
-                            result = new ByteModel(compressedData);
-                        } else {
-                            result = new ByteModel(compressedData, request.getEncoding());
-                        }
-                    } catch (IOException e) {
-                        LOG.info("Error in compress", e);
-                    }
-                }
-            }
-            responseView.render(result, request, response);
-        } catch (Exception e) {
-            LOG.error("Internal error", e);
-            ResponseUtil.renderError(ServletErrorType.EXCEPTION, request, response, e);
+        if (view != null) {
+            responseView = view;
+        } else {
+            responseView = viewManager.getView(model.name());
         }
 
+        if (responseView == null) {
+            throw new MvcException("Can't find view by model name [" + model.name() + "]");
+        }
 
+        // 压缩判断
+        Model result = model;
+        if (request.getProtocol() == Protocol.HTTP) {
+            if (request.getEncoding() != null && request.getEncoding().length() > 0) {
+                byte[] data = model.getBytes();
+                byte[] compressedData;
+                try {
+                    compressedData = CompressUtil.compress(data, request.getEncoding());
+                } catch (IOException e) {
+                    LOG.info("Error in compress", e);
+                    compressedData = data;
+                }
+                if (Arrays.equals(compressedData, data)) {
+                    result = new ByteModel(compressedData);
+                } else {
+                    result = new ByteModel(compressedData, request.getEncoding());
+                }
+            }
+        }
+        responseView.render(result, request, response);
     }
 
 }
