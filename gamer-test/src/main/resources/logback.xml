@@ -8,7 +8,7 @@
     <property name="ROOT" value="/opt/logs/${PROJECT}/"/>
     <property name="FILESIZE" value="50MB"/>
     <property name="MAXHISTORY" value="100"/>
-    <property name="myspecial" value=""/>
+    <property name="myspecial" value="myspecial"/>
 
     <timestamp key="DATETIME" datePattern="yyyy-MM-dd HH:mm:ss"/>
 

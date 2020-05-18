@@ -11,7 +11,6 @@ import com.thinkerwolf.gamer.core.listener.SpringContextLoadListener;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.spring.SpringObjectFactory;
-import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.core.util.ServletUtil;
 import com.thinkerwolf.gamer.core.mvc.view.ResourceView;
 import com.thinkerwolf.gamer.core.mvc.view.View;
@@ -212,12 +211,13 @@ public class DispatcherServlet implements Servlet {
             invocation = resourceInvocation;
         }
 
-        if (invocation == null) {
-            LOG.info("Can't find command in server. command:[" + command + "]");
-            response.setStatus(ResponseStatus.NOT_FOUND);
-            ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, null);
-            return;
-        }
+        // invocation为空的问题交给具体业务层处理
+//        if (invocation == null) {
+//            LOG.info("Can't find command in server. command:[" + command + "]");
+//            response.setStatus(ResponseStatus.NOT_FOUND);
+//            ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, null);
+//            return;
+//        }
 
         FilterChain filterChain = new ApplicationFilterChain(filters);
         filterChain.doFilter(invocation, request, response);

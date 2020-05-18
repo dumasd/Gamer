@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>gamer-spring-boot-starter</artifactId>
+    <name>Gamer/SpringBootStarter</name>
     <properties>
         <spring_boot_version>2.0.3.RELEASE</spring_boot_version>
     </properties>
@@ -28,7 +29,7 @@
         <dependency>
             <groupId>com.thinkerwolf</groupId>
             <artifactId>gamer-netty</artifactId>
-            <version>1.0.0</version>
+            <version>${parent.version}</version>
         </dependency>
     </dependencies>
 

@@ -22,9 +22,9 @@ import java.util.jar.JarFile;
 public class ResourceUtils {
 
     public static final Set<URL> classPathURLs = new HashSet<>();
-    public static final String CLASS_PATH_LOCATION;
     public static final String PROTOCOL_FILE = "file";
     public static final String PROTOCOL_JAR = "jar";
+    public static final String PROTOCOL_CLASS = "class";
     private static final Logger LOG = InternalLoggerFactory.getLogger(ResourceUtils.class);
     private static ThreadLocal<byte[]> threadBuffer = new ThreadLocal<byte[]>() {
         @Override
@@ -35,7 +35,6 @@ public class ResourceUtils {
     };
 
     static {
-        CLASS_PATH_LOCATION = ClassUtils.getDefaultClassLoader().getResource("").getPath();
         try {
             Enumeration<URL> classpathUrls = ClassUtils.getDefaultClassLoader().getResources("");
             while (classpathUrls.hasMoreElements()) {
@@ -73,7 +72,7 @@ public class ResourceUtils {
                     }
                 }
                 String protocol = url.getProtocol();
-                if ("file".equals(protocol)) {
+                if (PROTOCOL_FILE.equals(protocol)) {
 
                     for (String p : findFilePaths(url.getPath())) {
                         if (p.endsWith(suffix)) {
@@ -81,7 +80,7 @@ public class ResourceUtils {
                         }
                     }
 
-                } else if ("jar".equals(protocol)) {
+                } else if (PROTOCOL_JAR.equals(protocol)) {
                     JarFile jar;
                     try {
                         jar = ((JarURLConnection) url.openConnection()).getJarFile();
@@ -92,17 +91,17 @@ public class ResourceUtils {
                                 paths.add(jarEntry.getName());
                             }
                         }
-                    } catch (IOException e) {
+                    } catch (IOException ignored) {
                         //
                     }
 
-                } else if ("class".equals(protocol)) {
+                } else if (PROTOCOL_CLASS.equals(protocol)) {
                     if (url.getPath().endsWith(suffix)) {
                         paths.add(url.getPath());
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
         return paths;
     }
