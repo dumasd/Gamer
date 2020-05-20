@@ -18,7 +18,7 @@ public final class PropertiesUtil {
 
     public static String getString(Class<?> clazz, String key, Locale locale) {
         ResourceBundle bundle = getBundle(clazz, locale);
-        if (bundle == null) {
+        if (bundle == null || !bundle.containsKey(key)) {
             return "";
         }
         return bundle.getString(key);
