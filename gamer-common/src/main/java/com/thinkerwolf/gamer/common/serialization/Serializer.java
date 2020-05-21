@@ -12,7 +12,7 @@ import java.io.OutputStream;
  *
  * @author wukai
  */
-@SPI("jdk")
+@SPI("hessian2")
 public interface Serializer {
 
     ObjectOutput serialize(OutputStream os) throws IOException;

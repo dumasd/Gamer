@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.common;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,11 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * @param <T>
  * @author wukai
  */
+@SuppressWarnings("unchecked")
 public class ServiceLoader<T> {
 
     public static final String SERVICES_FOLDER = "META-INF/services/";
@@ -32,9 +35,9 @@ public class ServiceLoader<T> {
 
     private Class<?> baseClass;
 
-    private Map<String, Class<?>> cachedClasses;
+    private volatile Map<String, Class<?>> cachedClasses;
 
-    private Map<String, Object> cachedActives;
+    private volatile Map<String, Object> cachedActives;
 
     public ServiceLoader(Class<?> baseClass) {
         this.baseClass = baseClass;
@@ -44,7 +47,7 @@ public class ServiceLoader<T> {
         if (cachedActives == null) {
             synchronized (this) {
                 if (cachedActives == null) {
-                    cachedActives = new ConcurrentHashMap<>();
+                    cachedActives = new ConcurrentSkipListMap<>();
                 }
             }
         }
@@ -73,12 +76,34 @@ public class ServiceLoader<T> {
         return obj;
     }
 
+    void loadClasses() {
+        if (cachedClasses == null) {
+            synchronized (this) {
+                if (cachedClasses == null) {
+                    this.cachedClasses = loadServiceClasses();
+                }
+            }
+        }
+    }
+
     private Map<String, Class<?>> loadServiceClasses() {
         Map<String, Class<?>> serviceClasses = new HashMap<String, Class<?>>();
         load(this, serviceClasses, SERVICES_FOLDER);
         load(this, serviceClasses, GAMER_FOLDER);
         return serviceClasses;
     }
+
+    public Object getAdaptiveService() {
+        SPI SPI = baseClass.getAnnotation(SPI.class);
+        if (SPI.value().length() > 0) {
+            return this.getService(SPI.value());
+        }
+        for (String name : cachedClasses.keySet()) {
+            return getService(name);
+        }
+        throw new ServiceConfigurationError(baseClass.getName() + " have no implements");
+    }
+
 
     @SuppressWarnings("unchecked")
     private static <T> void load(ServiceLoader<T> loader, Map<String, Class<?>> serviceClasses, String pos) {
@@ -93,23 +118,31 @@ public class ServiceLoader<T> {
             for (; urls.hasMoreElements(); ) {
                 URL url = urls.nextElement();
                 BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-                String line;
-                for (line = br.readLine(); line != null; line = br.readLine()) {
-                    line = line.trim();
-                    if (line.startsWith("#")) {
-                        continue;
+                try {
+                    String line;
+                    for (line = br.readLine(); line != null; line = br.readLine()) {
+                        line = line.trim();
+                        if (line.startsWith("#")) {
+                            continue;
+                        }
+                        String name;
+                        String value;
+                        if (line.contains("=")) {
+                            String[] nameValue = line.split("=");
+                            name = nameValue[0].trim();
+                            value = nameValue[1].trim();
+                        } else {
+                            name = line;
+                            value = line;
+                        }
+                        try {
+                            Class<?> clazz = ClassUtils.forName(value);
+                            serviceClasses.put(name, clazz);
+                        } catch (Exception ignored) {
+                        }
                     }
-                    String name;
-                    String value;
-                    if (line.contains("=")) {
-                        String[] nameValue = line.split("=");
-                        name = nameValue[0].trim();
-                        value = nameValue[1].trim();
-                    } else {
-                        name = line;
-                        value = line;
-                    }
-                    serviceClasses.put(name, ClassUtils.forName(value));
+                } finally {
+                    IOUtils.closeQuietly(br);
                 }
             }
 
@@ -139,7 +172,6 @@ public class ServiceLoader<T> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> ServiceLoader<T> getServiceLoader(Class<T> service) {
         checkClassSpi(service);
         ServiceLoader<T> loader = (ServiceLoader<T>) serviceLoaderMap.get(service);
@@ -151,7 +183,6 @@ public class ServiceLoader<T> {
         return loader;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T getService(String name, Class<T> service) {
         // name = name.toUpperCase();
         checkClassSpi(service);
@@ -171,6 +202,19 @@ public class ServiceLoader<T> {
         if (service == null || !service.isInterface() || service.getAnnotation(SPI.class) == null) {
             throw new ServiceConfigurationError(service.getName() + " is not a service!");
         }
+    }
+
+    /**
+     * 获取自适应Service
+     *
+     * @param service
+     * @param <T>
+     * @return
+     */
+    public static <T> T getAdaptiveService(Class<T> service) {
+        checkClassSpi(service);
+        ServiceLoader<T> loader = getServiceLoader(service);
+        return (T) loader.getAdaptiveService();
     }
 
 

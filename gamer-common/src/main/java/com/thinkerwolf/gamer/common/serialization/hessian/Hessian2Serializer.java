@@ -12,6 +12,8 @@ import java.io.OutputStream;
 
 public class Hessian2Serializer implements Serializer {
 
+    public static final String NAME = "hessian2";
+
     @Override
     public ObjectOutput serialize(OutputStream os) throws IOException {
         Hessian2Output ho = new Hessian2Output(os);

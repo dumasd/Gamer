@@ -44,7 +44,7 @@ public class HttpRequest extends AbstractRequest {
         if (compress) {
             this.encoding = CompressUtil.getCompress(InternalHttpUtil.getAcceptEncodings(nettyRequest));
         }
-        RequestUtil.parseParams(this, getContent());
+        RequestUtil.parseParams(this, contents.get(0));
         if (RequestUtil.isLongHttp(getCommand())) {
             Session session = getSession(false);
             if (session != null) {
@@ -55,9 +55,8 @@ public class HttpRequest extends AbstractRequest {
 
     @Override
     public byte[] getContent() {
-        byte[] gd = contents.get(0);
-        if (gd != null && gd.length > 1) {
-            return gd;
+        if (contents.size() < 2) {
+            return contents.get(0);
         }
         return contents.get(1);
     }

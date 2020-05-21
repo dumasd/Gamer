@@ -34,7 +34,7 @@ public class HttpInvoker<T> implements Invoker<T> {
         Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
 
         RequestBody requestBody = RequestBody.create(Serializations.getBytes(serializer, rpcArgs), BYTES);
-        Request request = new Request.Builder().url(url.getHostPort() + "/" + command)
+        Request request = new Request.Builder().url(url.getProtocolHostPort() + "/" + command)
                 .post(requestBody).build();
         DefaultPromise promise = new DefaultPromise();
 

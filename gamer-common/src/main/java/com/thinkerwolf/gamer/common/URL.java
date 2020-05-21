@@ -3,13 +3,14 @@ package com.thinkerwolf.gamer.common;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * rpc连接地址
  */
-public class URL {
+public class URL implements Serializable {
 
     public static final String PROTOCOL = "protocol";
     public static final String HOST = "host";
@@ -27,6 +28,10 @@ public class URL {
     public static final String OPTIONS = "options";
     public static final String CHILD_OPTIONS = "childOptions";
     public static final String SERVLET_CONFIG = "servletConfig";
+    public static final String CONNECTION_TIMEOUT = "connectionTimeout";
+    public static final String SESSION_TIMEOUT = "sessionTimeout";
+    public static final String BACKUP = "backup";
+    public static final String NODE_EPHEMERAL = "nodeEphemeral";
     // ========================= parameter keys end  =============================== //
 
     public static final int DEFAULT_TCP_PORT = 8777;
@@ -42,7 +47,7 @@ public class URL {
     private String host;
     private int port;
     private String path;
-    private Map<String, Object> parameters;
+    private transient Map<String, Object> parameters;
 
     public URL() {
     }
@@ -136,6 +141,14 @@ public class URL {
         return new URL(protocol, username, password, host, port, path, parameters);
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     public String getProtocol() {
         return protocol;
     }
@@ -184,9 +197,15 @@ public class URL {
         this.parameters = parameters;
     }
 
-    public String getHostPort() {
+    public String getProtocolHostPort() {
         return String.format("%s://%s:%d", protocol, host, port);
     }
+
+    public String toHostPort() {
+        return String.format("%s:%d", host, port);
+    }
+
+
 
     @Override
     public boolean equals(Object o) {

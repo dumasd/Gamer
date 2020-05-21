@@ -26,6 +26,7 @@ public class HttpDecorator implements Decorator {
         }
         httpResponse.headers().add(HttpHeaderNames.DATE, new Date());
         httpResponse.headers().add(HttpHeaderNames.SERVER, Constants.FRAMEWORK_NAME_VERSION);
+        httpResponse.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         httpResponse.content().writeBytes(bytes);
         return httpResponse;
     }
