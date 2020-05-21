@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer.core.util;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
+import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,6 +10,12 @@ import java.util.Collection;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * 压缩工具，支持gzip和deflate
+ *
+ * @author wukai
+ * @data 2020-03-21
+ */
 public class CompressUtil {
 
     public static final String GZIP = "gzip";
@@ -52,16 +59,8 @@ public class CompressUtil {
         } catch (IOException e) {
             throw e;
         } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-                if (gzip != null) {
-                    gzip.close();
-                }
-            } catch (IOException e) {
-
-            }
+            IOUtils.closeQuietly(out);
+            IOUtils.closeQuietly(gzip);
         }
     }
 
@@ -76,16 +75,8 @@ public class CompressUtil {
         } catch (IOException e) {
             throw e;
         } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-                if (deflater != null) {
-                    deflater.close();
-                }
-            } catch (IOException e) {
-
-            }
+            IOUtils.closeQuietly(out);
+            IOUtils.closeQuietly(deflater);
         }
     }
 
