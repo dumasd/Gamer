@@ -20,7 +20,7 @@ public class WebSocketChannelConfiger extends ChannelHandlerConfiger<Channel> {
 
     @Override
     public void init(URL url) throws Exception {
-        this.servletConfig = (ServletConfig) MapUtils.getObject(url.getParameters(), URL.SERVLET_CONFIG);
+        this.servletConfig = url.getAttach(URL.SERVLET_CONFIG);
         this.handler = new WebSocketServerHandler(ConcurrentUtil.newExecutor(url, "Websocket-user"), servletConfig);
     }
 

@@ -98,10 +98,18 @@ public class ServiceLoader<T> {
         if (SPI.value().length() > 0) {
             return this.getService(SPI.value());
         }
+        Object obj = null;
         for (String name : cachedClasses.keySet()) {
-            return getService(name);
+            try {
+                obj = getService(name);
+            } catch (Exception e) {
+                logger.debug(e.getMessage(), e);
+            }
         }
-        throw new ServiceConfigurationError(baseClass.getName() + " have no implements");
+        if (obj == null) {
+            throw new ServiceConfigurationError(baseClass.getName() + " have no implements");
+        }
+        return obj;
     }
 
 

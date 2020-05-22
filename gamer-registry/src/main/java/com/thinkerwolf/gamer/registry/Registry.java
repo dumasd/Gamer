@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.registry;
 
-import com.thinkerwolf.gamer.common.SPI;
 import com.thinkerwolf.gamer.common.URL;
 
 import java.util.List;
@@ -40,5 +39,9 @@ public interface Registry {
 
 
     List<URL> lookup(URL url);
+
+    void subscribe(URL url, INotifyListener listener);
+
+    void unsubscribe(URL url, INotifyListener listener);
 
 }

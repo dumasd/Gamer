@@ -1,14 +1,22 @@
 package com.thinkerwolf.gamer.common;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * rpc连接地址
+ * 连接地址
+ *
+ * @author wukai
+ * @since 2020-05-07
  */
 public class URL implements Serializable {
 
@@ -32,6 +40,7 @@ public class URL implements Serializable {
     public static final String SESSION_TIMEOUT = "sessionTimeout";
     public static final String BACKUP = "backup";
     public static final String NODE_EPHEMERAL = "nodeEphemeral";
+    public static final String NODE_NAME = "nodeName";
     // ========================= parameter keys end  =============================== //
 
     public static final int DEFAULT_TCP_PORT = 8777;
@@ -47,7 +56,15 @@ public class URL implements Serializable {
     private String host;
     private int port;
     private String path;
-    private transient Map<String, Object> parameters;
+    /**
+     * 传输参数。Value值必须为String
+     */
+    private volatile Map<String, Object> parameters;
+
+    /**
+     * 附加对象，不参与序列化
+     */
+    private transient Map<String, Object> attachs;
 
     public URL() {
     }
@@ -206,6 +223,70 @@ public class URL implements Serializable {
     }
 
 
+    public String getString(String key, String defaultValue) {
+        return MapUtils.getString(parameters, key, defaultValue);
+    }
+
+    public String getString(String key) {
+        return getString(key, null);
+    }
+
+    public Integer getInteger(String key, Integer defaultValue) {
+        return MapUtils.getInteger(parameters, key, defaultValue);
+    }
+
+    public Integer getInteger(String key) {
+        return getInteger(key, null);
+    }
+
+    public Long getLong(String key, Long defaultValue) {
+        return MapUtils.getLong(parameters, key, defaultValue);
+    }
+
+    public Long getLong(String key) {
+        return getLong(key, null);
+    }
+
+    public Boolean getBoolean(String key, Boolean defaultValue) {
+        return MapUtils.getBoolean(parameters, key, defaultValue);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getObject(String key) {
+        return (T) MapUtils.getObject(parameters, key);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getAttach(String key) {
+        synchronized (this) {
+            return (T) MapUtils.getObject(attachs, key);
+        }
+    }
+
+    public void setAttach(String key, Object value) {
+        synchronized (this) {
+            if (attachs == null) {
+                attachs = new HashMap<>();
+            }
+            attachs.put(key, value);
+        }
+    }
+
+    public static String encode(String s) {
+        try {
+            return URLEncoder.encode(s, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public static String decode(String s) {
+        try {
+            return URLDecoder.decode(s, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -237,5 +318,43 @@ public class URL implements Serializable {
                 .append(path)
                 .append(parameters)
                 .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(protocol).append("://");
+        if (username != null) {
+            sb.append(username);
+            if (password != null) {
+                sb.append(":").append(password);
+            }
+            sb.append("@");
+        }
+
+        if (host != null) {
+            sb.append(host);
+            if (port > 0) {
+                sb.append(":").append(port);
+            }
+        }
+
+        if (path != null) {
+            sb.append("/").append(path);
+        }
+        if (parameters != null && parameters.size() > 0) {
+            final int size = parameters.size();
+            int pos = 0;
+            sb.append("?");
+            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                sb.append(entry.getKey()).append("=").append(entry.getValue());
+                if (pos >= size - 1) {
+                    break;
+                }
+                sb.append("&");
+                pos++;
+            }
+        }
+        return sb.toString();
     }
 }

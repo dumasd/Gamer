@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.registry.zookeeper;
 
-import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.commons.lang.StringUtils;
@@ -53,4 +52,22 @@ public class ZkUtils {
         }
     }
 
+    public static String toPath(URL url) {
+        String path = URL.decode(url.getPath());
+        if (StringUtils.isBlank(path)) {
+            return "/";
+        } else {
+            StringBuilder sb = new StringBuilder();
+            if (path.charAt(0) != '/') {
+                sb.append('/');
+            }
+            int len = path.length();
+            if (path.lastIndexOf('/') == len - 1) {
+                sb.append(path, 0, len - 1);
+            } else {
+                sb.append(path);
+            }
+            return sb.toString();
+        }
+    }
 }

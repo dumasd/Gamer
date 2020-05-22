@@ -39,7 +39,7 @@ public class HttpChannelConfiger extends ChannelHandlerConfiger<Channel> {
     @Override
     public void init(URL url) throws Exception {
         Executor executor = ConcurrentUtil.newExecutor(url, "Http-user");
-        this.httpDefaultHandler = new HttpDefaultHandler(executor, (ServletConfig) url.getParameters().get(URL.SERVLET_CONFIG));
+        this.httpDefaultHandler = new HttpDefaultHandler(executor, url.getAttach(URL.SERVLET_CONFIG));
 
         SslConfig sslConfig = (SslConfig) MapUtils.getObject(url.getParameters(), URL.SSL);
         if (sslConfig != null && sslConfig.isEnabled()) {

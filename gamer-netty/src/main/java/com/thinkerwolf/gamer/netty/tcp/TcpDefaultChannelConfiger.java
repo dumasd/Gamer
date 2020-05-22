@@ -15,7 +15,7 @@ public class TcpDefaultChannelConfiger extends ChannelHandlerConfiger<Channel> {
 
     @Override
     public void init(URL url) throws Exception {
-        this.servletConfig = (ServletConfig) url.getParameters().get(URL.SERVLET_CONFIG);
+        this.servletConfig = url.getAttach(URL.SERVLET_CONFIG);
         this.executor = ConcurrentUtil.newExecutor(url, "Tcp-user");
     }
 

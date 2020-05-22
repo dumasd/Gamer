@@ -11,6 +11,7 @@ import com.thinkerwolf.gamer.common.URL;
  */
 @SPI("zookeeper")
 public interface RegistryFactory {
+    // com.thinkerwolf.gamer.registry.RegistryFactory
 
     /**
      * 创建注册中心

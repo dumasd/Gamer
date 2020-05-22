@@ -77,7 +77,7 @@ public class NettyServletBootstrap {
         servlet.init(servletConfig);
         notifyServletContextListener();
         for (URL url : urls) {
-            url.getParameters().put(URL.SERVLET_CONFIG, servletConfig);
+            url.setAttach(URL.SERVLET_CONFIG, servletConfig);
             NettyServer server = new NettyServer(url, null);
             server.startup();
         }
