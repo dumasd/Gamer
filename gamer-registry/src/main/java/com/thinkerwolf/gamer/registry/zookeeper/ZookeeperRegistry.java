@@ -8,7 +8,6 @@ import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.IZkStateListener;
 import org.I0Itec.zkclient.ZkClient;
-import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
 
@@ -120,11 +119,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     @Override
     public void handleStateChanged(Watcher.Event.KeeperState state) throws Exception {
-        switch (state) {
-            case SyncConnected:
-                notifyConnected();
-                break;
-        }
+
     }
 
     @Override

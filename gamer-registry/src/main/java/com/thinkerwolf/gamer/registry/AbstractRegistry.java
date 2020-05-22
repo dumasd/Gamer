@@ -79,7 +79,6 @@ public abstract class AbstractRegistry implements Registry {
             }
             listeners.add(listener);
         }
-
     }
 
     protected abstract void doSubscribe(URL url);
@@ -181,14 +180,6 @@ public abstract class AbstractRegistry implements Registry {
                 }
             }
         }
-    }
-
-    /**
-     * 连接上注册中心
-     */
-    protected void notifyConnected() {
-        properties.clear();
-        // 获取所有的URL
     }
 
 }

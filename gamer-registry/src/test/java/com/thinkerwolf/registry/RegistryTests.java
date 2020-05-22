@@ -6,6 +6,7 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.slf4j.Slf4jLoggerFactory;
 import com.thinkerwolf.gamer.registry.*;
 import com.thinkerwolf.gamer.registry.zookeeper.ZookeeperRegistry;
+import org.I0Itec.zkclient.util.ZkPathUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,11 +36,9 @@ public class RegistryTests {
 
     // @Test
     public void testRegistryFactory() {
-        InternalLoggerFactory.setDefaultLoggerFactory(new Slf4jLoggerFactory());
-        RegistryFactory factory = ServiceLoader.getAdaptiveService(RegistryFactory.class);
         URL url = URL.parse("zookeeper://127.0.0.1:2181/eliminate");
         try {
-            Registry registry = factory.create(url);
+            Registry registry = new ZookeeperRegistry(url);
 
             Map<String, Object> map = new HashMap<>();
             map.put(URL.NODE_EPHEMERAL, false);
@@ -82,11 +81,15 @@ public class RegistryTests {
             System.out.println(registry.lookup(url2));
 
             latch.await();
-
             //registry.unregister(u);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    public void testZkClient() {
+
 
     }
 

@@ -9,6 +9,7 @@ import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,4 +71,27 @@ public class ZkUtils {
             return sb.toString();
         }
     }
+
+    public static List<String> getAllChildren(ZkClient client, String startPath) {
+        List<String> children = new ArrayList<>();
+        addChildrenPath(client, startPath, children);
+        return children;
+    }
+
+    private static void addChildrenPath(ZkClient client, String startPath, List<String> paths) {
+        if (!client.exists(startPath)) {
+            return;
+        }
+        List<String> children = client.getChildren(startPath);
+        if (children.size() == 0) {
+            return;
+        }
+        for (String child : children) {
+            String childPath = startPath + "/" + child;
+            paths.add(childPath);
+            addChildrenPath(client, childPath, paths);
+        }
+    }
+
+
 }
