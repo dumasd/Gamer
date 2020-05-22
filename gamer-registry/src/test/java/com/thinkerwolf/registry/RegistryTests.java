@@ -6,7 +6,6 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.slf4j.Slf4jLoggerFactory;
 import com.thinkerwolf.gamer.registry.*;
 import com.thinkerwolf.gamer.registry.zookeeper.ZookeeperRegistry;
-import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +72,12 @@ public class RegistryTests {
                 }
             });
 
+            URL url2 = URL.parse("http://127.0.0.1:80/game");
+            registry.lookup(url2);
+            System.out.println(registry.lookup(url2));
+
+
+
             registry.unregister(u);
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,5 +92,12 @@ public class RegistryTests {
 
     }
 
+    public static void main(String[] args) {
+        RegistryTests tests = new RegistryTests();
+
+        tests.testRegistryFactory();
+
+
+    }
 
 }

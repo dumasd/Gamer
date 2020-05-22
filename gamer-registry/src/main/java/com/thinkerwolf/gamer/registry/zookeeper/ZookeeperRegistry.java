@@ -54,13 +54,11 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
     private String toDataPath(URL url) {
         String p = ZkUtils.toPath(url);
         String nodeName = url.getString(URL.NODE_NAME);
-        if (StringUtils.isBlank(nodeName)) {
-            throw new RuntimeException("Node name is blank");
-        }
+        String append = nodeName == null ? "" : ("/" + nodeName);
         if ("/".equals(p)) {
-            return root + "/" + nodeName;
+            return root + append;
         }
-        return root + p + "/" + nodeName;
+        return root + p + append;
     }
 
     @Override
@@ -82,6 +80,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     @Override
     public void doUnRegister(URL url) {
+
         String path = toDataPath(url);
         zkClient.delete(path);
     }
@@ -108,7 +107,9 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
         List<URL> urls = new ArrayList<>();
         for (String cp : childrenPaths) {
             URL u = zkClient.readData(path + "/" + cp, false);
-            urls.add(u);
+            if (u != null) {
+                urls.add(u);
+            }
         }
         return urls;
     }
@@ -152,7 +153,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
     }
 
     @Override
-    protected String toPathKey(URL url) {
+    protected String createCacheKey(URL url) {
         return internalToKey(toDataPath(url));
     }
 

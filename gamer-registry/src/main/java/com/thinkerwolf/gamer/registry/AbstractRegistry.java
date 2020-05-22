@@ -34,7 +34,8 @@ public abstract class AbstractRegistry implements Registry {
 
     @Override
     public void register(URL url) {
-        String key = toPathKey(url);
+        checkRegisterUrl(url);
+        String key = createCacheKey(url);
         properties.remove(key);
         try {
             doRegister(url);
@@ -48,7 +49,8 @@ public abstract class AbstractRegistry implements Registry {
 
     @Override
     public void unregister(URL url) {
-        String key = toPathKey(url);
+        checkRegisterUrl(url);
+        String key = createCacheKey(url);
         try {
             doUnRegister(url);
         } finally {
@@ -56,11 +58,17 @@ public abstract class AbstractRegistry implements Registry {
         }
     }
 
+    private static void checkRegisterUrl(URL url) {
+        if (url.getString(URL.NODE_NAME) == null) {
+            throw new RuntimeException("Node name is blank");
+        }
+    }
+
     protected abstract void doUnRegister(URL url);
 
     @Override
     public void subscribe(URL url, INotifyListener listener) {
-        String key = toPathKey(url);
+        String key = createCacheKey(url);
         synchronized (listenerMap) {
             Set<INotifyListener> listeners = listenerMap.get(key);
             if (listeners == null) {
@@ -77,7 +85,7 @@ public abstract class AbstractRegistry implements Registry {
 
     @Override
     public void unsubscribe(URL url, INotifyListener listener) {
-        String key = toPathKey(url);
+        String key = createCacheKey(url);
         synchronized (listenerMap) {
             Set<INotifyListener> listeners = listenerMap.get(key);
             if (listeners != null) {
@@ -93,13 +101,13 @@ public abstract class AbstractRegistry implements Registry {
 
     @Override
     public List<URL> lookup(URL url) {
-        String lk = toPathKey(url);
+        String lk = createCacheKey(url);
         List<URL> urls = null;
         // 1.Find from cache
         for (Map.Entry entry : properties.entrySet()) {
             String k = entry.getKey().toString();
             int idx = k.indexOf(lk);
-            if (idx == 0 && k.indexOf('.', lk.length()) < 0) {
+            if (idx == 0 && k.indexOf('.', lk.length() + 1) < 0) {
                 if (urls == null) {
                     urls = new ArrayList<>();
                 }
@@ -111,7 +119,7 @@ public abstract class AbstractRegistry implements Registry {
             urls = doLookup(url);
             if (urls != null && urls.size() > 0) {
                 for (URL u : urls) {
-                    properties.setProperty(toPathKey(u), u.toString());
+                    properties.setProperty(createCacheKey(u), u.toString());
                 }
             }
         }
@@ -121,7 +129,7 @@ public abstract class AbstractRegistry implements Registry {
     protected abstract List<URL> doLookup(URL url);
 
 
-    protected abstract String toPathKey(URL url);
+    protected abstract String createCacheKey(URL url);
 
     protected void notifyData(final DataEvent event) {
         synchronized (listenerMap) {

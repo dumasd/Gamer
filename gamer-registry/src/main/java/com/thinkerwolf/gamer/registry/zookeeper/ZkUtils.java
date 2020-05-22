@@ -53,10 +53,10 @@ public class ZkUtils {
     }
 
     public static String toPath(URL url) {
-        String path = URL.decode(url.getPath());
-        if (StringUtils.isBlank(path)) {
+        if (StringUtils.isBlank(url.getPath())) {
             return "/";
         } else {
+            String path = URL.decode(url.getPath());
             StringBuilder sb = new StringBuilder();
             if (path.charAt(0) != '/') {
                 sb.append('/');
