@@ -80,7 +80,6 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     @Override
     public void doUnRegister(URL url) {
-
         String path = toDataPath(url);
         zkClient.delete(path);
     }
@@ -121,6 +120,11 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     @Override
     public void handleStateChanged(Watcher.Event.KeeperState state) throws Exception {
+        switch (state) {
+            case SyncConnected:
+                notifyConnected();
+                break;
+        }
     }
 
     @Override
@@ -135,8 +139,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     @Override
     public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
-        List<Object> childPaths = new ArrayList<>(currentChilds);
-        ChildEvent event = new ChildEvent(internalToKey(parentPath), childPaths);
+        ChildEvent event = new ChildEvent(internalToKey(parentPath), currentChilds);
         notifyChild(event);
     }
 
@@ -155,6 +158,12 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
     @Override
     protected String createCacheKey(URL url) {
         return internalToKey(toDataPath(url));
+    }
+
+    @Override
+    protected List<String> getChildren(URL url) {
+        String path = toDataPath(url);
+        return zkClient.getChildren(path);
     }
 
     private String internalToKey(String path) {

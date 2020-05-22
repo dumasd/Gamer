@@ -5,13 +5,13 @@ import java.util.List;
 
 public class ChildEvent extends EventObject {
 
-    private List<Object> childPaths;
+    private List<String> childPaths;
 
-    public ChildEvent(Object path, List<Object> childPaths) {
+    public ChildEvent(Object path, List<String> childPaths) {
         super(path);
     }
 
-    public List<Object> getChildPaths() {
+    public List<String> getChildPaths() {
         return childPaths;
     }
 

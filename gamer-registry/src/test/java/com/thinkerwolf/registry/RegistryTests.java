@@ -9,6 +9,7 @@ import com.thinkerwolf.gamer.registry.zookeeper.ZookeeperRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class RegistryTests {
 
@@ -41,17 +42,20 @@ public class RegistryTests {
             Registry registry = factory.create(url);
 
             Map<String, Object> map = new HashMap<>();
-            map.put(URL.NODE_EPHEMERAL, true);
+            map.put(URL.NODE_EPHEMERAL, false);
             map.put(URL.NODE_NAME, "aoshitang_10001");
 
             URL u = URL.parse("http://127.0.0.1:80/game");
             u.setParameters(map);
             registry.register(u);
 
+            CountDownLatch latch = new CountDownLatch(2);
+
             registry.subscribe(u, new INotifyListener() {
                 @Override
                 public void notifyDataChange(DataEvent event) throws Exception {
                     System.out.println("listener1 -- " + event);
+                    latch.countDown();
                 }
 
                 @Override
@@ -64,6 +68,7 @@ public class RegistryTests {
                 @Override
                 public void notifyDataChange(DataEvent event) throws Exception {
                     System.out.println("listener2 -- " + event);
+                    latch.countDown();
                 }
 
                 @Override
@@ -76,18 +81,11 @@ public class RegistryTests {
             registry.lookup(url2);
             System.out.println(registry.lookup(url2));
 
+            latch.await();
 
-
-            registry.unregister(u);
+            //registry.unregister(u);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-
         }
 
     }

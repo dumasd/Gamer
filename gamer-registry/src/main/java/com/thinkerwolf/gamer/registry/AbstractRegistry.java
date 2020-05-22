@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.registry;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
+import com.thinkerwolf.gamer.registry.zookeeper.ZkUtils;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -131,21 +132,42 @@ public abstract class AbstractRegistry implements Registry {
 
     protected abstract String createCacheKey(URL url);
 
+    protected abstract List<String> getChildren(URL url);
+
+    /**
+     * 节点数据改变
+     *
+     * @param event
+     */
     protected void notifyData(final DataEvent event) {
-        synchronized (listenerMap) {
-            Set<INotifyListener> listeners = listenerMap.get(event.getSource());
-            if (listeners != null) {
-                for (INotifyListener listener : listeners) {
-                    try {
-                        listener.notifyDataChange(event);
-                    } catch (Exception e) {
-                        LOG.error(e.getMessage(), e);
+        try {
+            synchronized (listenerMap) {
+                Set<INotifyListener> listeners = listenerMap.get(event.getSource());
+                if (listeners != null) {
+                    for (INotifyListener listener : listeners) {
+                        try {
+                            listener.notifyDataChange(event);
+                        } catch (Exception e) {
+                            LOG.error(e.getMessage(), e);
+                        }
                     }
                 }
             }
+        } finally {
+            if (event.getUrl() == null) {
+                properties.remove(event.getSource());
+            } else {
+                properties.put(event.getSource(), event.getUrl().toString());
+            }
         }
+
     }
 
+    /**
+     * 节点的子节点改变
+     *
+     * @param event
+     */
     protected void notifyChild(final ChildEvent event) {
         synchronized (listenerMap) {
             Set<INotifyListener> listeners = listenerMap.get(event.getSource());
@@ -159,6 +181,14 @@ public abstract class AbstractRegistry implements Registry {
                 }
             }
         }
+    }
+
+    /**
+     * 连接上注册中心
+     */
+    protected void notifyConnected() {
+        properties.clear();
+        // 获取所有的URL
     }
 
 }
