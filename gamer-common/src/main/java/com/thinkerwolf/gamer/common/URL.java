@@ -41,6 +41,7 @@ public class URL implements Serializable {
     public static final String BACKUP = "backup";
     public static final String NODE_EPHEMERAL = "nodeEphemeral";
     public static final String NODE_NAME = "nodeName";
+    public static final String REGISTRY_TIMEOUT = "registryTimeout";
     // ========================= parameter keys end  =============================== //
 
     public static final int DEFAULT_TCP_PORT = 8777;

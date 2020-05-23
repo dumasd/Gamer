@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListener, IZkDataListener, IZkChildListener {
 
-    private ZkClient zkClient;
+    private ZkClient client;
     private String root;
 
     public ZookeeperRegistry(URL url) {
@@ -44,10 +44,17 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
         if (backup != null) {
             zkServers = zkServers + ";" + backup;
         }
-        this.zkClient = new ZkClient(zkServers, sessionTimeout, connectionTimeout, new AdaptiveZkSerializer());
-        this.zkClient.subscribeStateChanges(this);
+        this.client = new ZkClient(zkServers, sessionTimeout, connectionTimeout, new AdaptiveZkSerializer());
+        this.client.subscribeStateChanges(this);
         this.root = ZkUtils.toPath(url);
-
+        List<String> childs = ZkUtils.getAllChildren(client, root);
+        for (String c : childs) {
+            URL url = client.readData(c);
+            if (url != null) {
+                saveToCache(url);
+                doSubscribe(url);
+            }
+        }
     }
 
     private String toDataPath(URL url) {
@@ -64,47 +71,47 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
     protected void doRegister(URL url) {
         String path = toDataPath(url);
         boolean ephemeral = url.getBoolean(URL.NODE_EPHEMERAL, true);
-        ZkUtils.createRecursive(zkClient, path);
-        if (!zkClient.exists(path)) {
+        ZkUtils.createRecursive(client, path);
+        if (!client.exists(path)) {
             List<ACL> acls = ZkUtils.createACLs(url);
             if (ephemeral) {
-                zkClient.createEphemeral(path, url, acls);
+                client.createEphemeral(path, url, acls);
             } else {
-                zkClient.createPersistent(path, url, acls);
+                client.createPersistent(path, url, acls);
             }
         } else {
-            zkClient.writeData(path, url);
+            client.writeData(path, url);
         }
     }
 
     @Override
     public void doUnRegister(URL url) {
         String path = toDataPath(url);
-        zkClient.delete(path);
+        client.delete(path);
     }
 
     @Override
     protected void doSubscribe(URL url) {
         String path = toDataPath(url);
-        zkClient.subscribeDataChanges(path, this);
-        zkClient.subscribeChildChanges(path, this);
+        client.subscribeDataChanges(path, this);
+        client.subscribeChildChanges(path, this);
     }
 
     @Override
     protected void doUnSubscribe(URL url) {
         String path = toDataPath(url);
-        zkClient.unsubscribeChildChanges(path, this);
-        zkClient.unsubscribeDataChanges(path, this);
+        client.unsubscribeChildChanges(path, this);
+        client.unsubscribeDataChanges(path, this);
     }
 
 
     @Override
     protected List<URL> doLookup(URL url) {
         String path = toDataPath(url);
-        List<String> childrenPaths = zkClient.getChildren(path);
+        List<String> childrenPaths = client.getChildren(path);
         List<URL> urls = new ArrayList<>();
         for (String cp : childrenPaths) {
-            URL u = zkClient.readData(path + "/" + cp, false);
+            URL u = client.readData(path + "/" + cp, false);
             if (u != null) {
                 urls.add(u);
             }
@@ -114,7 +121,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     @Override
     public void close() {
-        zkClient.close();
+        client.close();
     }
 
     @Override
@@ -153,12 +160,6 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
     @Override
     protected String createCacheKey(URL url) {
         return internalToKey(toDataPath(url));
-    }
-
-    @Override
-    protected List<String> getChildren(URL url) {
-        String path = toDataPath(url);
-        return zkClient.getChildren(path);
     }
 
     private String internalToKey(String path) {
