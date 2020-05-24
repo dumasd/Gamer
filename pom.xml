@@ -48,7 +48,7 @@
         <hessian_version>4.0.38</hessian_version>
         <kryo_version>4.0.0</kryo_version>
         <slf4j_version>1.7.25</slf4j_version>
-        <freemarker_version>2.3.9</freemarker_version>
+        <freemarker_version>2.3.28</freemarker_version>
     </properties>
 
     <dependencies>
@@ -92,7 +92,7 @@
                 <version>1.25</version>
             </dependency>
             <dependency>
-                <groupId>freemarker</groupId>
+                <groupId>org.freemarker</groupId>
                 <artifactId>freemarker</artifactId>
                 <version>${freemarker_version}</version>
             </dependency>

@@ -38,8 +38,21 @@ public final class Constants {
      */
     public static final String FRAMEWORK_NAME_VERSION = String.format("%s/%s", FRAMEWORK_NAME, VERSION);
 
+    /**
+     * ;
+     */
     public static final Pattern SEMICOLON_SPLIT_PATTERN = Pattern.compile("\\s*[;]+\\s*");
-
+    /**
+     * /
+     */
     public static final Pattern PATH_SPLIT_PATTERN = Pattern.compile("\\s*[/]+\\s*");
+    /**
+     * :
+     */
+    public static final Pattern COLON_SPLIT_PATTERN = Pattern.compile("\\s*[:]+\\s*");
+    /**
+     * ,
+     */
+    public static final Pattern COMMA_SPLIT_PATTERN = Pattern.compile("\\s*[,]+\\s*");
 
 }

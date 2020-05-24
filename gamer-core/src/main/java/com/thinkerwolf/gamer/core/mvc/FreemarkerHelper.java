@@ -3,7 +3,6 @@ package com.thinkerwolf.gamer.core.mvc;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
-import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
@@ -25,7 +24,7 @@ public class FreemarkerHelper {
     private static Configuration configuration;
 
     public static void init(ServletConfig servletConfig) throws Exception {
-        configuration = new Configuration();
+        configuration = new Configuration(Configuration.VERSION_2_3_20);
         configuration.setSetting(Configuration.LOCALIZED_LOOKUP_KEY, "false");
 
         List<TemplateLoader> loaderList = new ArrayList<>();
