@@ -10,7 +10,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 连接地址
@@ -256,6 +255,12 @@ public class URL implements Serializable {
     public <T> T getObject(String key) {
         return (T) MapUtils.getObject(parameters, key);
     }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getObject(String key, T defaultValue) {
+        return (T) MapUtils.getObject(parameters, key, defaultValue);
+    }
+
 
     @SuppressWarnings("unchecked")
     public <T> T getAttach(String key) {

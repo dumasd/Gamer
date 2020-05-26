@@ -5,6 +5,5 @@ package com.thinkerwolf.gamer.core.remoting;
  */
 public interface Server extends Endpoint {
 
-    boolean isBound();
 
 }
