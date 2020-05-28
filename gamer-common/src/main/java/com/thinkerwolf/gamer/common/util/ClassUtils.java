@@ -239,6 +239,25 @@ public class ClassUtils {
         return null;
     }
 
+    public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationClass) {
+        if (method == null) {
+            return null;
+        }
+        return method.getAnnotation(annotationClass);
+    }
+
+    public static <A> A getAnnotation(Annotation[] annotations, Class<A> annotationClass) {
+        if (annotations == null || annotations.length == 0) {
+            return null;
+        }
+        for (Annotation annotation : annotations) {
+            if (annotation.annotationType().equals(annotationClass)) {
+                return (A) annotation;
+            }
+        }
+        return null;
+    }
+
     public static Set<Class> scanClasses(String basePackage) {
         basePackage = basePackage.replace('.', '/');
         Set<String> set = ResourceUtils.findClasspathFilePaths(basePackage, "class");

@@ -8,6 +8,7 @@ servlet:
     compress: true # 传输压缩(仅http生效)
     sessionTimeout: 3600 # session超时时间(s)
     sessionTickTime: 5 # session检查tick(s)
+    resourceLocation: META-INF/resources
     filters: com.thinkerwolf.gamer.test.ExceptionFilter;
     # com.thinkerwolf.gamer.test.LoginSessionFilter
 
@@ -17,6 +18,7 @@ listeners:
   - com.thinkerwolf.gamer.test.LocalSessionListener
   - com.thinkerwolf.gamer.test.LocalSessionAttributeListener
   - com.thinkerwolf.gamer.rpc.mvc.RpcServiceLoadListener
+  - com.thinkerwolf.gamer.swagger.SwaggerEnableListener
 
 # Netty配置列表
 netty:

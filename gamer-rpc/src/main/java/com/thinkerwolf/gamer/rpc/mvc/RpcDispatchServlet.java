@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.common.ObjectFactory;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.mvc.ApplicationFilterChain;
 import com.thinkerwolf.gamer.core.mvc.Invocation;
+import com.thinkerwolf.gamer.core.mvc.MvcServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.spring.SpringObjectFactory;
 import com.thinkerwolf.gamer.rpc.annotation.RpcClient;
@@ -13,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * RPC Server servlet
  */
-public class RpcDispatchServlet implements Servlet {
+public class RpcDispatchServlet implements MvcServlet {
 
     private Servlet delegate;
 
@@ -115,5 +117,20 @@ public class RpcDispatchServlet implements Servlet {
     @Override
     public List<Filter> getFilters() {
         return delegate.getFilters();
+    }
+
+    @Override
+    public Map<String, Invocation> getInvocations() {
+        if (delegate instanceof MvcServlet) {
+            return ((MvcServlet) delegate).getInvocations();
+        }
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public void addInvocation(Invocation invocation) {
+        if (delegate instanceof MvcServlet) {
+            ((MvcServlet) delegate).addInvocation(invocation);
+        }
     }
 }

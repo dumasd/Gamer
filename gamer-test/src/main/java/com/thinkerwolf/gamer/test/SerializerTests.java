@@ -6,6 +6,7 @@ import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
+import com.thinkerwolf.gamer.swagger.dto.SwaggerResource;
 import com.thinkerwolf.gamer.test.action.IRpcAction;
 
 import java.io.ByteArrayOutputStream;
@@ -26,6 +27,9 @@ public class SerializerTests {
         System.out.println(JSON.toJSONString(rpcRequest));
 
         System.out.println(Arrays.toString(baos.toByteArray()));
+
+        SwaggerResource sr = new SwaggerResource();
+        System.out.println(JSON.toJSONString(sr));
 
 
         testRpc();

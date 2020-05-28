@@ -10,4 +10,6 @@ public @interface RequestParam {
 
     String value();
 
+    boolean required() default true;
+
 }

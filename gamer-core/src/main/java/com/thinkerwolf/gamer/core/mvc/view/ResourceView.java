@@ -6,16 +6,15 @@ import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.*;
-import com.thinkerwolf.gamer.core.util.ResponseUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ResourceView extends AbstractView {
 
-    private Map<String, String> mimeMappings;
+    private static Map<String, String>  mimeMappings;
 
-    public ResourceView() {
+    static {
         mimeMappings = new HashMap<>();
 
         Map<String, String> httpMimeMappings = mimeMappings;
@@ -25,7 +24,11 @@ public class ResourceView extends AbstractView {
         httpMimeMappings.put("css", "text/css");
 
         httpMimeMappings.put("json", "application/json");
+        httpMimeMappings.put("map", "application/json");
         httpMimeMappings.put("js", "application/x-javascript");
+        httpMimeMappings.put("ttf", "application/x-font-truetype");
+        httpMimeMappings.put("otf", "application/x-font-opentype");
+        httpMimeMappings.put("eot", "application/vnd.ms-fontobject");
         httpMimeMappings.put("woff", "application/x-font-woff");
         httpMimeMappings.put("woff2", "application/font-woff2");
         httpMimeMappings.put("pdf", "application/pdf");
@@ -36,8 +39,11 @@ public class ResourceView extends AbstractView {
         httpMimeMappings.put("jpeg", "image/jpeg");
         httpMimeMappings.put("ico", "image/x-icon");
         httpMimeMappings.put("tff", "image/tiff");
-        httpMimeMappings.put("svg", "image/svg");
+        httpMimeMappings.put("svg", "image/svg+xml");
         httpMimeMappings.put("tif", "image/tiff");
+
+        httpMimeMappings.put("zip", "application/zip");
+
     }
 
     @Override

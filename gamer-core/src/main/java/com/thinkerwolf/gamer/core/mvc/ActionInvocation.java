@@ -56,6 +56,14 @@ public class ActionInvocation implements Invocation {
         return matcher.matcher(command).matches();
     }
 
+    public Method getMethod() {
+        return method;
+    }
+
+    public Object getObj() {
+        return obj;
+    }
+
     private void init() {
         this.paramAdaptor = new DefaultParamAdaptor(method);
         String regex = command.replace("?", "[0-9a-z]").replace("*", "[0-9a-z]{0,}");

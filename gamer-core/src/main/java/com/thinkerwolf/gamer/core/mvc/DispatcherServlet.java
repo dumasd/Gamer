@@ -22,12 +22,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class DispatcherServlet implements Servlet {
+public class DispatcherServlet extends AbstractServlet implements MvcServlet {
 
     private static final String DEFAULT_SESSION_MANAGER_CLASS = "com.thinkerwolf.gamer.core.servlet.StandardSessionManager";
 
@@ -37,33 +34,21 @@ public class DispatcherServlet implements Servlet {
 
     private List<Filter> filters;
 
-    private ServletConfig servletConfig;
-
     private Map<String, Invocation> invocationMap;
 
     private Invocation resourceInvocation;
 
-    /**
-     * 初始化servlet
-     *
-     * @param config
-     */
-    @Override
-    public void init(ServletConfig config) throws Exception {
-        this.servletConfig = config;
-        this.invocationMap = new HashMap<>();
-        initSpringContext(config);
-        initObjectFactory(config);
-        initFilters(config);
-        initAction(config);
-        initSessionManager(config);
-        FreemarkerHelper.init(config);
-        this.servletConfig.getServletContext().setAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE, this);
-    }
 
     @Override
-    public ServletConfig getServletConfig() {
-        return servletConfig;
+    protected void doInit(ServletConfig servletConfig) throws Exception {
+        this.invocationMap = new HashMap<>();
+        initSpringContext(servletConfig);
+        initObjectFactory(servletConfig);
+        initFilters(servletConfig);
+        initAction(servletConfig);
+        initSessionManager(servletConfig);
+        FreemarkerHelper.init(servletConfig);
+        servletConfig.getServletContext().setAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE, this);
     }
 
     @Override
@@ -92,6 +77,7 @@ public class DispatcherServlet implements Servlet {
             } else {
                 this.objectFactory = new DefaultObjectFactory();
             }
+            config.getServletContext().setAttribute(ServletContext.ROOT_OBJECT_FACTORY, objectFactory);
         }
     }
 
@@ -107,7 +93,7 @@ public class DispatcherServlet implements Servlet {
                 throw new IllegalArgumentException(smclass);
             }
             SessionManager sessionManager = (SessionManager) this.objectFactory.buildObject(clazz);
-            sessionManager.init(servletConfig);
+            sessionManager.init(getServletConfig());
             config.getServletContext().setAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE, sessionManager);
         }
     }
@@ -224,5 +210,18 @@ public class DispatcherServlet implements Servlet {
     @Override
     public List<Filter> getFilters() {
         return filters;
+    }
+
+    @Override
+    public Map<String, Invocation> getInvocations() {
+        return Collections.unmodifiableMap(invocationMap);
+    }
+
+    @Override
+    public void addInvocation(Invocation invocation) {
+        if (invocationMap.containsKey(invocation.getCommand())) {
+            throw new RuntimeException("Duplicate action command :" + invocation.getCommand());
+        }
+        invocationMap.put(invocation.getCommand(), invocation);
     }
 }
