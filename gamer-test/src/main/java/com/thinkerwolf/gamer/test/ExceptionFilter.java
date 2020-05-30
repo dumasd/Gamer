@@ -27,7 +27,7 @@ public class ExceptionFilter implements Filter {
     @Override
     public void doFilter(Invocation invocation, Request request, Response response, FilterChain filterChain) {
         try {
-            LOG.info("Invoke command [" + invocation.getCommand() + "]");
+            LOG.info("Invoke command [command#" + invocation.getCommand() + ", params#" + request.getAttributes() + "]");
             filterChain.doFilter(invocation, request, response);
         } catch (Exception e) {
             LOG.error("Exception when invoke command", e);

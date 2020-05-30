@@ -9,6 +9,7 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.RefModel;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.Property;
 
 import static com.thinkerwolf.gamer.swagger.mapper.Properties.*;
@@ -21,13 +22,18 @@ public class ParameterMapper {
     }
 
     private Parameter bodyParameter(com.thinkerwolf.gamer.swagger.dto.Parameter source) {
+        Model model = fromModelRef(source.getModelRef());
         BodyParameter parameter = new BodyParameter()
                 .description(source.getDescription())
                 .name(source.getName())
-                .schema(fromModelRef(source.getModelRef()));
+                .schema(model);
         parameter.setAccess(source.getAccess());
         parameter.setRequired(source.isRequired());
-        return parameter;
+
+        QueryParameter query = new QueryParameter().description(source.getDescription())
+                .name(source.getName()).type(source.getModelRef().getType());
+
+        return query;
     }
 
     Model fromModelRef(ModelReference modelRef) {

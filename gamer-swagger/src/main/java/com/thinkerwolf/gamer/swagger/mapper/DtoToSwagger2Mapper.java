@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.swagger.mapper;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.thinkerwolf.gamer.swagger.Document;
@@ -9,7 +10,6 @@ import io.swagger.models.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -49,7 +49,7 @@ public class DtoToSwagger2Mapper {
 
     protected Path mapOperations(Path path, List<com.thinkerwolf.gamer.swagger.dto.Operation> operations) {
         for (com.thinkerwolf.gamer.swagger.dto.Operation operation : operations) {
-            path.set(Optional.ofNullable(operation.getMethod()).orElse("get"), mapOperation(operation));
+            path.set(Optional.fromNullable(operation.getMethod()).or("post"), mapOperation(operation));
         }
         return path;
     }
