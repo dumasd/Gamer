@@ -30,8 +30,9 @@ public class ParameterMapper {
         parameter.setAccess(source.getAccess());
         parameter.setRequired(source.isRequired());
 
+        Property property = property(source.getModelRef());
         QueryParameter query = new QueryParameter().description(source.getDescription())
-                .name(source.getName()).type(source.getModelRef().getType());
+                .name(source.getName()).type(source.getModelRef().getType()).property(property);
 
         return query;
     }
