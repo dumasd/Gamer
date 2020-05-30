@@ -7,7 +7,7 @@ import com.thinkerwolf.gamer.core.mvc.model.JsonModel;
 import com.thinkerwolf.gamer.core.mvc.view.JsonView;
 import com.thinkerwolf.gamer.swagger.Docket;
 import com.thinkerwolf.gamer.swagger.UiConfiguration;
-import com.thinkerwolf.gamer.swagger.dto.SwaggerResource;
+import com.thinkerwolf.gamer.swagger.SwaggerResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 

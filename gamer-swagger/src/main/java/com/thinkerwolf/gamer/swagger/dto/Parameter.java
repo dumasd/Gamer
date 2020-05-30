@@ -1,5 +1,8 @@
 package com.thinkerwolf.gamer.swagger.dto;
 
+import com.thinkerwolf.gamer.swagger.schema.ModelRef;
+import com.thinkerwolf.gamer.swagger.schema.ModelReference;
+
 import java.io.Serializable;
 
 /**
@@ -22,6 +25,8 @@ public class Parameter implements Serializable {
     private String description = "";
 
     private String access = "";
+
+    private ModelReference modelRef;
 
     public String getName() {
         return name;
@@ -85,5 +90,13 @@ public class Parameter implements Serializable {
 
     public void setAccess(String access) {
         this.access = access;
+    }
+
+    public ModelReference getModelRef() {
+        return modelRef;
+    }
+
+    public void setModelRef(ModelReference modelRef) {
+        this.modelRef = modelRef;
     }
 }

@@ -23,7 +23,7 @@ import java.util.Map;
         @View(name = "freemarker", type = HtmlView.class),
         @View(name = "json", type = JsonView.class),
 })
-@Api(value = "API - TestAction", description = "测试Action")
+@Api(value = "API - TestAction", tags = {"TestAction"}, description = "测试Action")
 public class TestAction {
 
     @Autowired

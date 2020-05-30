@@ -5,7 +5,7 @@ import com.thinkerwolf.gamer.core.mvc.model.JsonModel;
 import com.thinkerwolf.gamer.core.mvc.view.JsonView;
 import com.thinkerwolf.gamer.swagger.Docket;
 import com.thinkerwolf.gamer.swagger.Document;
-import com.thinkerwolf.gamer.swagger.DtoToSwagger2Mapper;
+import com.thinkerwolf.gamer.swagger.mapper.DtoToSwagger2Mapper;
 import com.thinkerwolf.gamer.swagger.SwaggerContext;
 import io.swagger.models.Swagger;
 import org.apache.commons.lang.StringUtils;

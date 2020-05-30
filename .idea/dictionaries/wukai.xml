@@ -1,13 +1,25 @@
 <component name="ProjectDictionaryState">
   <dictionary name="wukai">
     <words>
+      <w>aoshitang</w>
+      <w>autoconfigure</w>
+      <w>bindir</w>
+      <w>childs</w>
+      <w>confdir</w>
       <w>configer</w>
       <w>deflater</w>
+      <w>dgamer</w>
+      <w>envs</w>
       <w>fastjson</w>
+      <w>gamerpidfile</w>
+      <w>perchannel</w>
       <w>protobuf</w>
+      <w>springframework</w>
       <w>thinkerwolf</w>
       <w>websocket</w>
       <w>woff</w>
+      <w>zoobin</w>
+      <w>zoobindir</w>
     </words>
   </dictionary>
 </component>

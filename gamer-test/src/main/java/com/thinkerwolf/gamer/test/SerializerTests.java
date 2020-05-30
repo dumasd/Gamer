@@ -6,7 +6,7 @@ import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
-import com.thinkerwolf.gamer.swagger.dto.SwaggerResource;
+import com.thinkerwolf.gamer.swagger.SwaggerResource;
 import com.thinkerwolf.gamer.test.action.IRpcAction;
 
 import java.io.ByteArrayOutputStream;

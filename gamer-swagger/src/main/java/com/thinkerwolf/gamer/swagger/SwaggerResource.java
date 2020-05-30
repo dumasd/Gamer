@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.swagger.dto;
+package com.thinkerwolf.gamer.swagger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ComparisonChain;

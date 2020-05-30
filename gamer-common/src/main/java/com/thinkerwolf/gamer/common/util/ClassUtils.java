@@ -178,6 +178,15 @@ public class ClassUtils {
         return getDefaultValue(clazz);
     }
 
+    public static boolean isPrimitiveWrapper(Class<?> clazz) {
+        for (Class c : PRIMITIVE_WRAPPER.values()) {
+            if (c == clazz) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static <T> T castTo(Object obj, Class<T> toClass) {
         if (obj == null) {
             return getDefaultValue(toClass);

@@ -57,6 +57,13 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.thinkerwolf</groupId>
+            <artifactId>gamer-swagger</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
@@ -105,6 +112,7 @@
                                     <include>com.thinkerwolf:gamer-rpc</include>
                                     <include>com.thinkerwolf:gamer-registry</include>
                                     <include>com.thinkerwolf:gamer-spring-boot-starter</include>
+                                    <include>com.thinkerwolf:gamer-swagger</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

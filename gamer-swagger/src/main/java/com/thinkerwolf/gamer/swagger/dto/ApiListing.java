@@ -17,20 +17,22 @@ public class ApiListing {
     private List<ApiDescriptor> apis;
     private Set<String> tags;
 
-    private String description = "apilisting";
+    private String description;
 
     public ApiListing(String apiVersion,
                       String basePath,
                       boolean hidden,
                       Set<String> protocols,
                       List<ApiDescriptor> apis,
-                      Set<String> tags) {
+                      Set<String> tags,
+                      String description) {
         this.apiVersion = apiVersion;
         this.basePath = basePath;
         this.hidden = hidden;
         this.protocols = protocols;
         this.apis = apis;
         this.tags = tags;
+        this.description = description;
     }
 
     public String getApiVersion() {

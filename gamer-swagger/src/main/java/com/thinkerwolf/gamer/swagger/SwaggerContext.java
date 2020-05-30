@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.swagger;
 
+import com.fasterxml.classmate.TypeResolver;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -10,10 +11,11 @@ import com.thinkerwolf.gamer.core.annotation.SessionParam;
 import com.thinkerwolf.gamer.core.mvc.ActionInvocation;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
+import com.thinkerwolf.gamer.swagger.dto.ApiDescriptor;
 import com.thinkerwolf.gamer.swagger.dto.ApiListing;
 import com.thinkerwolf.gamer.swagger.dto.Operation;
-import com.thinkerwolf.gamer.swagger.dto.ApiDescriptor;
 import com.thinkerwolf.gamer.swagger.dto.Parameter;
+import com.thinkerwolf.gamer.swagger.schema.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -31,6 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author wukai
  */
 public final class SwaggerContext {
+
+    private static TypeResolver typeResolver = new TypeResolver();
 
     private static DocumentCache documentCache = new DocumentCache();
 
@@ -53,19 +57,22 @@ public final class SwaggerContext {
                 String apiVersion = "2.0";
                 Set<String> tags;
                 Set<String> protocols = Sets.newHashSet();
+                String description;
                 boolean hidden = false;
                 if (api != null) {
                     hidden = api.hidden();
-                    if (api.tags().length > 0) {
-                        tags = Sets.newHashSet(api.tags());
-                    } else {
+                    if (Annotations.isBlank(api.tags())) {
                         tags = Sets.newHashSet(api.value());
+                    } else {
+                        tags = Sets.newHashSet(api.tags());
                     }
+                    description = api.description();
                     parseProtocols(api.protocols(), protocols);
                 } else {
+                    description = clazz.getSimpleName();
                     tags = new HashSet<>();
                 }
-                return new ApiListing(apiVersion, "/", hidden, protocols, Lists.newArrayList(), tags);
+                return new ApiListing(apiVersion, "/", hidden, protocols, Lists.newArrayList(), tags, description);
             });
             for (ActionInvocation invocation : entry.getValue()) {
                 createApi(apiListing, invocation);
@@ -79,24 +86,26 @@ public final class SwaggerContext {
 
     public static ApiDescriptor createApi(ApiListing listing, ActionInvocation actionInv) {
         Method method = actionInv.getMethod();
-        ApiDescriptor apiDescriptor = new ApiDescriptor(actionInv.getCommand(), Lists.newArrayList());
+        ApiDescriptor apiDescriptor = new ApiDescriptor("/" + actionInv.getCommand(), Lists.newArrayList());
         ApiOperation aop = method.getAnnotation(ApiOperation.class);
         Operation operation = new Operation();
         Set<String> protocols = Sets.newHashSet();
         if (aop != null) {
             operation.setHidden(aop.hidden());
-            operation.setValue(aop.value());
             operation.setCode(aop.code());
-            if (aop.tags().length > 0) {
-                operation.setTags(Sets.newHashSet(aop.tags()));
-            } else {
+            operation.setSummary(aop.value());
+            operation.setNotes(aop.notes());
+            if (Annotations.isBlank(aop.tags())) {
                 operation.setTags(listing.getTags());
+            } else {
+                operation.setTags(Sets.newHashSet(aop.tags()));
             }
             parseProtocols(aop.protocols(), protocols);
         } else {
-            operation.setValue(actionInv.getCommand());
             operation.setCode(200);
             operation.setTags(listing.getTags());
+            operation.setNotes(method.getName());
+            operation.setSummary(method.getName());
         }
         operation.setProtocols(protocols);
         List<Parameter> parameters = Lists.newArrayList();
@@ -136,8 +145,11 @@ public final class SwaggerContext {
                 }
                 Parameter parameter = new Parameter();
                 parameter.setName(rp.value());
+                parameter.setDescription(rp.value());
                 parameter.setDataType(paramType.getSimpleName());
-                parameter.setRequired(true);
+                parameter.setDataTypeClass(paramType);
+                parameter.setRequired(rp.required());
+                parameter.setModelRef(createModel(parameter));
                 parameters.add(parameter);
             }
         } else {
@@ -149,9 +161,25 @@ public final class SwaggerContext {
                 parameter.setDataType(a.dataType());
                 parameter.setDefaultValue(a.defaultValue());
                 parameter.setDataTypeClass(a.dataTypeClass());
+                parameter.setDescription(a.value());
+                parameter.setModelRef(createModel(parameter));
                 parameters.add(parameter);
             }
         }
+    }
+
+
+    private static ModelReference createModel(Parameter parameter) {
+        Class<?> clazz = parameter.getDataTypeClass();
+        if (clazz == null) {
+            try {
+                clazz = ClassUtils.forName(parameter.getDataType());
+            } catch (Exception e) {
+                return new ModelRef(parameter.getDataType());
+            }
+        }
+        return Models.create(typeResolver.resolve(clazz));
+
     }
 
 

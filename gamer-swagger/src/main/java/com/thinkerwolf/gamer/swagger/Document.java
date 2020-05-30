@@ -13,11 +13,10 @@ import java.util.Set;
  * @author wukai
  */
 public class Document {
-
     private String groupName;
-
+    private String basePath = "/";
+    private String host = "";
     private Map<String, ApiListing> apiListingMap;
-
     private Set<Tag> tags;
 
     public Document(String groupName, Map<String, ApiListing> apiListingMap) {
@@ -41,5 +40,13 @@ public class Document {
 
     public Set<Tag> getTags() {
         return tags;
+    }
+
+    public String getBasePath() {
+        return basePath;
+    }
+
+    public String getHost() {
+        return host;
     }
 }

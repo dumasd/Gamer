@@ -1,12 +1,11 @@
-package com.thinkerwolf.gamer.swagger;
+package com.thinkerwolf.gamer.swagger.mapper;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.thinkerwolf.gamer.swagger.Document;
 import com.thinkerwolf.gamer.swagger.dto.ApiDescriptor;
 import com.thinkerwolf.gamer.swagger.dto.ApiListing;
 import io.swagger.models.*;
-import io.swagger.models.parameters.BodyParameter;
-import io.swagger.models.parameters.Parameter;
 
 import java.util.List;
 import java.util.Map;
@@ -21,16 +20,17 @@ import java.util.Set;
 public class DtoToSwagger2Mapper {
 
 
+    private ParameterMapper parameterMapper = new ParameterMapper();
+
     public Swagger mapDocument(Document document) {
         Swagger swagger = new Swagger();
         swagger.setPaths(mapApiListing(document.getApiListingMap()));
-        swagger.setBasePath("/");
-        swagger.setHost("127.0.0.1");
+        swagger.setBasePath(document.getBasePath());
+        swagger.setHost(document.getHost());
         swagger.setInfo(new Info());
         swagger.setTags(tags(document.getTags()));
         return swagger;
     }
-
 
     protected Map<String, Path> mapApiListing(Map<String, ApiListing> listingMap) {
         Map<String, Path> paths = Maps.newHashMap();
@@ -62,18 +62,10 @@ public class DtoToSwagger2Mapper {
         for (String p : operation.getProtocols()) {
             op.addScheme(Scheme.forValue(p));
         }
-        for (com.thinkerwolf.gamer.swagger.dto.Parameter parameter : operation.getParameters()) {
-            op.addParameter(mapParameter(parameter));
+        for (com.thinkerwolf.gamer.swagger.dto.Parameter source : operation.getParameters()) {
+            op.addParameter(parameterMapper.mapParameter(source));
         }
         return op;
-    }
-
-    protected Parameter mapParameter(com.thinkerwolf.gamer.swagger.dto.Parameter p) {
-        Parameter parameter = new BodyParameter()
-                .name(p.getName()).description(p.getDescription());
-        parameter.setRequired(p.isRequired());
-        parameter.setAccess(p.getAccess());
-        return parameter;
     }
 
     protected List<Tag> tags(Set<com.thinkerwolf.gamer.swagger.dto.Tag> tagSet) {

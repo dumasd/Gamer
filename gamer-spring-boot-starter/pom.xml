@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.thinkerwolf</groupId>
             <artifactId>gamer-netty</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 

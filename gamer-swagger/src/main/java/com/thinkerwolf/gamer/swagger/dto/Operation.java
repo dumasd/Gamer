@@ -11,8 +11,6 @@ import java.util.Set;
  */
 public class Operation implements Serializable {
 
-    private String value = "";
-
     private Set<String> tags;
 
     private int code;
@@ -35,14 +33,6 @@ public class Operation implements Serializable {
 
     public void setParameters(List<Parameter> parameters) {
         this.parameters = parameters;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
     }
 
     public Set<String> getTags() {
