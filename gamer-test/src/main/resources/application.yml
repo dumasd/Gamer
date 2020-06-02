@@ -1,0 +1,3 @@
+spring:
+  gamer:
+    config-file: conf.yml

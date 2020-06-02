@@ -1,5 +1,7 @@
 package com.thinkerwolf.gamer.netty.util;
 
+import com.thinkerwolf.gamer.common.Constants;
+import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.util.CharsetUtil;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.servlet.Session;
@@ -14,10 +16,7 @@ import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.handler.stream.ChunkedInput;
 import io.netty.util.AttributeKey;
-import org.apache.commons.lang.CharSetUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.*;
 
 public class InternalHttpUtil {
@@ -33,12 +32,7 @@ public class InternalHttpUtil {
         byte[] pathData;
         int i = request.uri().indexOf("?");
         if (i >= 0) {
-            String getData = request.uri().substring(i + 1);
-            try {
-                getData = URLDecoder.decode(getData, "utf-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
+            String getData = URL.decode(request.uri().substring(i + 1));
             pathData = getData.getBytes(CharsetUtil.UTF8);
         } else {
             pathData = EMPTY_BYTE;
@@ -112,7 +106,7 @@ public class InternalHttpUtil {
         if (encoding == null || encoding.length() == 0) {
             return Collections.emptySet();
         }
-        String[] encodes = encoding.split(",");
+        String[] encodes = Constants.COMMA_SPLIT_PATTERN.split(encoding);
         Set<String> encodeSet = new LinkedHashSet<>();
         for (String encode : encodes) {
             if (encode != null && encode.trim().length() > 0) {
