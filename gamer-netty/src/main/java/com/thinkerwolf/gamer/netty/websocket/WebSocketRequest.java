@@ -17,14 +17,13 @@ public class WebSocketRequest extends AbstractRequest {
 
     private ServletContext servletContext;
 
-    private String sessionId;
 
     public WebSocketRequest(int requestId, String command, ChannelHandlerContext ctx, byte[] content, ServletContext servletContext) {
         super(requestId, command, ctx.channel());
         this.ctx = ctx;
         this.servletContext = servletContext;
+        this.content = content;
         RequestUtil.parseParams(this, content);
-        this.sessionId = getInternalSessionId();
 
         Session session = getSession(false);
         if (session != null) {
@@ -48,12 +47,12 @@ public class WebSocketRequest extends AbstractRequest {
         if (sessionManager == null) {
             return null;
         }
-        Session session = sessionManager.getSession(getInternalSessionId(), create);
+        String sessionId = getInternalSessionId();
+        Session session = sessionManager.getSession(sessionId, create);
         if (create && session != null && !session.getId().equals(sessionId)) {
             // 过期或者创建新session
-            this.sessionId = session.getId();
             session.setPush(new WebSocketPush(ctx.channel()));
-            ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(sessionId);
+            ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(session.getId());
         }
         if (session != null) {
             session.touch();
@@ -65,7 +64,8 @@ public class WebSocketRequest extends AbstractRequest {
         if (ctx.channel().hasAttr(InternalHttpUtil.CHANNEL_JSESSIONID)) {
             return ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).toString();
         }
-        return null;
+        String sessionId = (String) getAttribute(Session.JSESSION);
+        return sessionId;
     }
 
     @Override

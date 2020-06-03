@@ -44,6 +44,7 @@
         <maven_flatten_version>1.1.0</maven_flatten_version>
         <maven_enforce_version>3.0.0-M2</maven_enforce_version>
 
+        <junit_version>4.12</junit_version>
         <spring_version>5.0.7.RELEASE</spring_version>
         <netty_version>4.1.42.Final</netty_version>
         <fastjson_version>1.2.62</fastjson_version>
@@ -51,9 +52,10 @@
         <kryo_version>4.0.0</kryo_version>
         <slf4j_version>1.7.25</slf4j_version>
         <freemarker_version>2.3.28</freemarker_version>
-        <swagger_annotation_version>1.5.24</swagger_annotation_version>
+        <swagger_version>1.5.24</swagger_version>
         <okhttp_version>4.6.0</okhttp_version>
         <guava_version>29.0-jre</guava_version>
+        <jedis_version>3.1.0</jedis_version>
     </properties>
 
     <dependencies>
@@ -81,6 +83,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit_version}</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
@@ -129,12 +137,12 @@
             <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>${swagger_annotation_version}</version>
+                <version>${swagger_version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-models</artifactId>
-                <version>${swagger_annotation_version}</version>
+                <version>${swagger_version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -149,7 +157,7 @@
             <dependency>
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
-                <version>3.1.0</version>
+                <version>${jedis_version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

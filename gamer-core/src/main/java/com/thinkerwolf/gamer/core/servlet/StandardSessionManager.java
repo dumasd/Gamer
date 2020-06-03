@@ -3,61 +3,46 @@ package com.thinkerwolf.gamer.core.servlet;
 import com.thinkerwolf.gamer.common.DefaultThreadFactory;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
-public class StandardSessionManager implements SessionManager {
+/**
+ * 标准基于内存的sessionManager
+ *
+ * @author wukai
+ */
+public class StandardSessionManager extends AbstractSessionManager {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(StandardSessionManager.class);
     private final Map<String, Session> sessionMap;
-    private final List<SessionListener> sessionListeners;
-    private final List<SessionAttributeListener> sessionAttributeListeners;
     private ScheduledExecutorService scheduledService;
-    private long sessionTimeout;
-    private SessionIdGenerator sessionIdGenerator;
 
     public StandardSessionManager() {
+        super(new StandardSessionIdGenerator());
         this.sessionMap = new ConcurrentHashMap<>();
-        this.sessionListeners = new LinkedList<>();
-        this.sessionAttributeListeners = new LinkedList<>();
-        this.sessionIdGenerator = new StandardSessionIdGenerator();
     }
 
     @Override
-    public void init(ServletConfig servletConfig) throws Exception {
-        sessionIdGenerator.generateSessionId();
-        String tick = servletConfig.getInitParam(ServletConfig.SESSION_TICK_TIME);
-        long tickTime;
-        if (tick != null && tick.length() > 0) {
-            tickTime = Long.parseLong(tick) * 1000;
-        } else {
-            tickTime = 1000;  // 1s tick
+    protected void doDestroy() throws Exception {
+        if (scheduledService != null) {
+            scheduledService.shutdown();
         }
-        String timeout = servletConfig.getInitParam(ServletConfig.SESSION_TIMEOUT);
-        if (timeout != null && timeout.length() > 0) {
-            this.sessionTimeout = Long.parseLong(timeout) * 1000;
-        } else {
-            this.sessionTimeout = 2 * 60 * 1000; // 2分钟
-        }
+        sessionMap.clear();
+    }
 
-        List<Object> listeners = servletConfig.getServletContext().getListeners();
-        for (Object listener : listeners) {
-            if (listener instanceof SessionListener) {
-                addSessionListener((SessionListener) listener);
-            } else if (listener instanceof SessionAttributeListener) {
-                addSessionAttributeListener((SessionAttributeListener) listener);
-            }
-        }
-
+    @Override
+    protected void doInit(ServletConfig servletConfig) throws Exception {
+        long tickTime = NumberUtils.toInt(servletConfig.getInitParam(ServletConfig.SESSION_TICK_TIME), 1) * 1000;
         this.scheduledService = new ScheduledThreadPoolExecutor(3, new DefaultThreadFactory("Session-check"));
         scheduledService.schedule(new Runnable() {
             @Override
             public void run() {
                 try {
-//                    LOG.debug("Session tick check....");
                     List<Session> invalidateSessions = new LinkedList<>();
                     for (Session session : sessionMap.values()) {
                         if (!session.isValidate()) {
@@ -78,17 +63,6 @@ public class StandardSessionManager implements SessionManager {
                 }
             }
         }, tickTime, TimeUnit.MILLISECONDS);
-
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        if (scheduledService != null) {
-            scheduledService.shutdown();
-        }
-        sessionMap.clear();
-        sessionListeners.clear();
-        sessionAttributeListeners.clear();
     }
 
     @Override
@@ -99,10 +73,11 @@ public class StandardSessionManager implements SessionManager {
     @Override
     public Session getSession(String sessionId, boolean create) {
         Session session = null;
-        if (!create && (sessionId == null || sessionId.length() == 0)) {
+        if (!create && StringUtils.isBlank(sessionId)) {
             return null;
-        } else if (sessionId != null && sessionId.length() > 0) {
-            // sessionId不为空
+        }
+
+        if (StringUtils.isNotBlank(sessionId)) {
             session = sessionMap.get(sessionId);
         }
 
@@ -113,10 +88,10 @@ public class StandardSessionManager implements SessionManager {
         if (session == null || !session.isValidate()) {
             if (create) {
                 sessionId = generateSessionId();
-                Session createSession = new StandardSession(this, sessionAttributeListeners, sessionId, sessionTimeout);
+                Session createSession = new StandardSession(sessionId, getSessionTimeout(), getSessionAttributeListeners(), this);
                 session = createSession;
                 sessionMap.put(sessionId, createSession);
-                for (SessionListener sessionListener : sessionListeners) {
+                for (SessionListener sessionListener : getSessionListeners()) {
                     try {
                         sessionListener.sessionCreated(new SessionEvent(session));
                     } catch (Exception e) {
@@ -128,16 +103,6 @@ public class StandardSessionManager implements SessionManager {
             }
         }
         return session;
-    }
-
-    /**
-     * 生成sessionId
-     *
-     * @return
-     */
-    protected String generateSessionId() {
-        //
-        return sessionIdGenerator.generateSessionId();
     }
 
     @Override
@@ -155,15 +120,13 @@ public class StandardSessionManager implements SessionManager {
     public void removeSession(String sessionId) {
         Session session = sessionMap.remove(sessionId);
         if (session != null) {
-//            synchronized (sessionListeners) {
-            for (SessionListener sessionListener : sessionListeners) {
+            for (SessionListener sessionListener : getSessionListeners()) {
                 try {
                     sessionListener.sessionDestroyed(new SessionEvent(session));
                 } catch (Exception e) {
                     LOG.warn("Exception when notify sessionDestroy.", e);
                 }
             }
-//            }
         }
     }
 
@@ -171,7 +134,7 @@ public class StandardSessionManager implements SessionManager {
     public void expireSession(String sessionId) {
         Session session = sessionMap.get(sessionId);
         if (session != null) {
-            for (SessionListener sessionListener : sessionListeners) {
+            for (SessionListener sessionListener : getSessionListeners()) {
                 try {
                     sessionListener.sessionExpired(new SessionEvent(session));
                 } catch (Exception e) {
@@ -179,15 +142,5 @@ public class StandardSessionManager implements SessionManager {
                 }
             }
         }
-    }
-
-    @Override
-    public void addSessionListener(SessionListener listener) {
-        sessionListeners.add(listener);
-    }
-
-    @Override
-    public void addSessionAttributeListener(SessionAttributeListener listener) {
-        sessionAttributeListeners.add(listener);
     }
 }

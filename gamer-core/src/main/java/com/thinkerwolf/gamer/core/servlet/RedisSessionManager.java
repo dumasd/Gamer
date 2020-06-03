@@ -2,61 +2,102 @@ package com.thinkerwolf.gamer.core.servlet;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-public class RedisSessionManager implements SessionManager {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-    private long sessionTimeout;
+/**
+ * Redis session
+ *
+ * @author wukai
+ */
+public class RedisSessionManager extends AbstractSessionManager {
 
+    private final Map<String, Session> sessionCache = new ConcurrentHashMap<>();
     private JedisPool jedisPool;
 
+    public RedisSessionManager() {
+        super(new StandardSessionIdGenerator());
+    }
+
     @Override
-    public void init(ServletConfig servletConfig) throws Exception {
+    protected void doDestroy() throws Exception {
+        if (jedisPool != null) {
+            jedisPool.destroy();
+        }
+        sessionCache.clear();
+    }
+
+    @Override
+    protected void doInit(ServletConfig servletConfig) throws Exception {
         String host = StringUtils.defaultIfEmpty(servletConfig.getInitParam("sessionRedisHost"), "localhost");
         int port = NumberUtils.toInt(servletConfig.getInitParam("sessionRedisPort"), 6379);
-        this.sessionTimeout = NumberUtils.toInt(servletConfig.getInitParam(ServletConfig.SESSION_TIMEOUT), 2 * 60 * 1000);
         this.jedisPool = new JedisPool(host, port);
     }
 
     @Override
-    public void destroy() throws Exception {
-
-    }
-
-    @Override
     public Session getSession(String sessionId) {
-        return null;
+        return getSession(sessionId, false);
     }
 
     @Override
     public Session getSession(String sessionId, boolean create) {
-        return null;
+        Session session = null;
+        if (StringUtils.isBlank(sessionId) && !create) {
+            return null;
+        }
+
+        synchronized (sessionCache) {
+            if (StringUtils.isNotBlank(sessionId)) {
+                session = sessionCache.get(sessionId);
+            }
+            if (session != null) {
+                session.validate();
+            }
+            if (session == null || !session.isValidate()) {
+                if (create) {
+                    String id = generateSessionId();
+                    session = new RedisSession(id, getSessionTimeout(), getSessionAttributeListeners(), this, jedisPool);
+                    session.touch();
+                    sessionCache.put(id, session);
+                } else {
+                    session = null;
+                }
+            }
+            return session;
+        }
     }
 
     @Override
     public void touchSession(String sessionId) {
-        Jedis jedis = jedisPool.getResource();
-
+        if (sessionId == null) {
+            return;
+        }
+        Session session = getSession(sessionId, false);
+        if (session != null) {
+            session.touch();
+        }
     }
 
     @Override
     public void removeSession(String sessionId) {
-
+        synchronized (sessionCache) {
+            sessionCache.remove(sessionId);
+        }
     }
 
     @Override
     public void expireSession(String sessionId) {
-
-    }
-
-    @Override
-    public void addSessionListener(SessionListener listener) {
-
-    }
-
-    @Override
-    public void addSessionAttributeListener(SessionAttributeListener listener) {
-
+        Session session = getSession(sessionId, false);
+        if (session != null) {
+            for (SessionListener sessionListener : getSessionListeners()) {
+                try {
+                    sessionListener.sessionExpired(new SessionEvent(session));
+                } catch (Exception e) {
+//                    LOG.warn("Exception when notify sessionDestroy.", e);
+                }
+            }
+        }
     }
 }
