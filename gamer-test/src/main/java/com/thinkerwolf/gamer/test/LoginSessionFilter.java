@@ -1,6 +1,8 @@
 package com.thinkerwolf.gamer.test;
 
+import com.thinkerwolf.gamer.core.mvc.ActionInvocation;
 import com.thinkerwolf.gamer.core.mvc.Invocation;
+import com.thinkerwolf.gamer.core.mvc.ResourceInvocation;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.rpc.mvc.RpcInvocation;
@@ -29,7 +31,19 @@ public class LoginSessionFilter implements Filter {
     }
 
     private boolean should(Invocation invocation, Request request, Response response) {
-        return !"user@login".equals(invocation.getCommand()) && ! (invocation instanceof RpcInvocation);
+        if (invocation instanceof RpcInvocation || invocation instanceof ResourceInvocation) {
+            return false;
+        }
+        if ("user@login".equals(invocation.getCommand())) {
+            return false;
+        }
+        if (invocation instanceof ActionInvocation) {
+            ActionInvocation actionInv = (ActionInvocation) invocation;
+            if (actionInv.getObj().getClass().getName().startsWith("com.thinkerwolf.gamer.swagger.action")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
