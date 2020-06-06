@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.common;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.common.util.ResourceUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.junit.Test;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Set;
 
 public class ClassUtilTests {
@@ -62,6 +64,11 @@ public class ClassUtilTests {
         System.out.println(url.getBytes().length);
     }
 
+    @Test
+    public void testDate() {
+        String s = DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        System.out.println(s);
+    }
 
 
 }
