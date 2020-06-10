@@ -5,6 +5,7 @@ package com.thinkerwolf.gamer.core.json;
  *
  * @author wukai
  */
+@Deprecated
 public enum State {
     /**
      * 异常

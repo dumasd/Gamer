@@ -8,6 +8,7 @@ import java.util.Map;
 /**
  * @author wukai
  */
+@Deprecated
 public final class JsonBuilder {
 
     /**
