@@ -8,6 +8,7 @@ import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.rpc.*;
 import okhttp3.*;
 import okhttp3.Response;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 
@@ -49,7 +50,9 @@ public class HttpInvoker<T> implements Invoker<T> {
             public void onResponse(Call call, Response response) throws IOException {
                 try {
                     ResponseBody responseBody = response.body();
-                    RpcResponse rpcResponse = Serializations.getObject(serializer, responseBody.bytes(), RpcResponse.class);
+                    byte[] body = responseBody.bytes();
+                    byte[] data =  ArrayUtils.subarray(body, 4, body.length);
+                    RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
                     promise.setSuccess(rpcResponse);
                 } catch (Exception e) {
                     promise.setFailure(e);

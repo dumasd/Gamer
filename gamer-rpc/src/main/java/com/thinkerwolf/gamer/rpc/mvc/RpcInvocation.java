@@ -1,6 +1,8 @@
 package com.thinkerwolf.gamer.rpc.mvc;
 
 import com.thinkerwolf.gamer.common.ServiceLoader;
+import com.thinkerwolf.gamer.common.buffer.ChannelBuffer;
+import com.thinkerwolf.gamer.common.buffer.ChannelBuffers;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.serialization.Serializations;
@@ -14,6 +16,7 @@ import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
 import com.thinkerwolf.gamer.rpc.annotation.RpcClient;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.lang.reflect.Method;
 
@@ -52,12 +55,16 @@ public class RpcInvocation implements Invocation {
         Object result = method.invoke(obj, args.getArgs());
 
         RpcResponse rpcResponse = new RpcResponse();
+        rpcResponse.setRequestId(request.getRequestId());
         rpcResponse.setResult(result);
 
         byte[] bytes = Serializations.getBytes(serializer, rpcResponse);
+        ChannelBuffer buf = ChannelBuffers.buffer(4 + bytes.length);
+        buf.writeInt(request.getRequestId());
+        buf.writeBytes(bytes);
 
         response.setContentType(ResponseUtil.CONTENT_BYTES);
         Decorator decorator = ServiceLoader.getService(request.getAttribute(com.thinkerwolf.gamer.core.servlet.Request.DECORATOR_ATTRIBUTE).toString(), Decorator.class);
-        response.write(decorator.decorate(new ByteModel(bytes), request, response));
+        response.write(decorator.decorate(new ByteModel(buf.array()), request, response));
     }
 }

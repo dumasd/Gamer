@@ -1,19 +1,9 @@
 package com.thinkerwolf.gamer.common.util;
 
-
-import com.thinkerwolf.gamer.common.io.Resources;
-
-import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.net.JarURLConnection;
-import java.net.URL;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.regex.Pattern;
 
 public class ClassUtils {
 

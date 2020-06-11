@@ -5,6 +5,10 @@ import com.thinkerwolf.gamer.rpc.Invoker;
 import com.thinkerwolf.gamer.rpc.protocol.Protocol;
 import okhttp3.OkHttpClient;
 
+/**
+ * @author wukai
+ * @since 2020-06-11
+ */
 public class HttpProtocol implements Protocol {
 
     //private ConcurrentMap<URL, OkHttpClient> sharedClients = new ConcurrentHashMap<>();

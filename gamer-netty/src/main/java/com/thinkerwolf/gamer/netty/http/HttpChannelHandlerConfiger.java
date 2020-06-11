@@ -9,14 +9,13 @@ import com.thinkerwolf.gamer.netty.NettyServerHandler;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
@@ -90,6 +89,11 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
                         handshaker.handshake(ctx.channel(), nettyRequest);
                         ctx.pipeline().remove("http-timeout");
                         ctx.pipeline().replace("http-handler", "websocket-handler", new NettyServerHandler(url, websocketHandler));
+                        if (ctx.channel() instanceof ServerChannel) {
+                            ctx.pipeline().addBefore("websocket-handler", "compress", new WebSocketServerCompressionHandler());
+                        } else {
+                            ctx.pipeline().addBefore("websocket-handler", "compress", WebSocketClientCompressionHandler.INSTANCE);
+                        }
                     }
                     return;
                 }

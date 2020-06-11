@@ -11,6 +11,7 @@ import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.netty.NettyClient;
 import com.thinkerwolf.gamer.netty.tcp.Packet;
 import com.thinkerwolf.gamer.rpc.*;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 import java.util.Map;
@@ -112,12 +113,12 @@ public class TcpExchangeClient extends ChannelHandlerAdapter implements Exchange
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
         Packet packet = (Packet) message;
-
         DefaultPromise promise = waitResultMap.get(packet.getRequestId());
         RpcMessage rpcMsg = (RpcMessage) promise.getAttachment();
         Serializer serializer = ServiceLoader.getService(rpcMsg.getSerial(), Serializer.class);
+        byte[] data =  ArrayUtils.subarray(packet.getContent(), 4, packet.getContent().length);
         try {
-            RpcResponse rpcResponse = Serializations.getObject(serializer, packet.getContent(), RpcResponse.class);
+            RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
             promise.setSuccess(rpcResponse);
         } catch (IOException | ClassNotFoundException e) {
             promise.setFailure(e);
