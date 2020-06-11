@@ -7,6 +7,7 @@ import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.CompressUtil;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.netty.AbstractRequest;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -18,7 +19,7 @@ public class HttpRequest extends AbstractRequest {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(HttpRequest.class);
 
-    private ChannelHandlerContext ctx;
+    private Channel channel;
 
     private ServletContext servletContext;
 
@@ -32,11 +33,11 @@ public class HttpRequest extends AbstractRequest {
 
     private String encoding;
 
-    public HttpRequest(ChannelHandlerContext ctx, ServletContext servletContext,
+    public HttpRequest(Channel channel, ServletContext servletContext,
                        io.netty.handler.codec.http.HttpRequest nettyRequest, Response response, boolean compress) {
-        super(0, InternalHttpUtil.getCommand(nettyRequest), ctx.channel());
+        super(0, InternalHttpUtil.getCommand(nettyRequest), channel);
         this.nettyRequest = nettyRequest;
-        this.ctx = ctx;
+        this.channel = channel;
         this.servletContext = servletContext;
         this.cookies = InternalHttpUtil.getCookies(nettyRequest);
         this.contents = InternalHttpUtil.getRequestContent(nettyRequest);
@@ -50,7 +51,7 @@ public class HttpRequest extends AbstractRequest {
         if (RequestUtil.isLongHttp(getCommand())) {
             Session session = getSession(false);
             if (session != null) {
-                session.setPush(new HttpPush(ctx, nettyRequest));
+                session.setPush(new HttpPush(channel, nettyRequest));
             }
         }
     }
@@ -93,7 +94,7 @@ public class HttpRequest extends AbstractRequest {
 
         if (create && (session != null && !session.getId().equals(sessionId))) {
             // session过期或者不存在，创建新的session
-            session.setPush(new HttpPush(ctx, nettyRequest));
+            session.setPush(new HttpPush(channel, nettyRequest));
             session.touch();
             Cookie responseCookie = new DefaultCookie(Session.JSESSION, session.getId());
             responseCookie.setValue(session.getId());

@@ -43,6 +43,11 @@ public class URL implements Serializable {
     public static final String REGISTRY_TIMEOUT = "registryTimeout";
     // ========================= parameter keys end  =============================== //
 
+    // ========================= attachment keys start =============================== //
+    public static final String EXEC_GROUP_NAME = "execGroupName";
+
+    // ========================= attachment keys end =============================== //
+
     public static final int DEFAULT_TCP_PORT = 8777;
     public static final int DEFAULT_HTTP_PORT = 80;
 

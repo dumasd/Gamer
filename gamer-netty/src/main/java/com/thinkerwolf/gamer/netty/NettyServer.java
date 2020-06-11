@@ -8,7 +8,6 @@ import com.thinkerwolf.gamer.core.remoting.RemotingException;
 import com.thinkerwolf.gamer.core.remoting.Server;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
-import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
@@ -24,17 +23,26 @@ public class NettyServer implements Server {
 
     private ServerBootstrap serverBootstrap;
 
-    private URL url;
+    private final URL url;
 
-    private ChannelHandler handler;
+    private final ChannelHandler handler;
+    /**
+     * 第二个Handler，目前用于从Http升级到Websocket时的处理器
+     */
+    private final ChannelHandler secondHandler;
 
     private Channel channel;
 
     private volatile boolean started;
 
     public NettyServer(URL url, ChannelHandler handler) {
+        this(url, handler, null);
+    }
+
+    public NettyServer(URL url, ChannelHandler handler, ChannelHandler secondHandler) {
         this.url = url;
         this.handler = handler;
+        this.secondHandler = secondHandler;
     }
 
     public synchronized void startup() throws Exception {
@@ -66,8 +74,7 @@ public class NettyServer implements Server {
             }
         }
 
-        ChannelInitializer channelInitializer = ChannelHandlers.createChannelInitializer0(url);
-        sb.childHandler(channelInitializer);
+        sb.childHandler(ChannelHandlers.createChannelInitializer0(url, handler, secondHandler));
         ChannelFuture future = sb.bind(new InetSocketAddress(url.getPort()));
         this.channel = future.channel();
         future.addListener((ChannelFutureListener) f -> {
@@ -86,12 +93,12 @@ public class NettyServer implements Server {
 
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
-
+        // TODO
     }
 
     @Override
     public void send(Object message) throws RemotingException {
-
+        // TODO
     }
 
     @Override

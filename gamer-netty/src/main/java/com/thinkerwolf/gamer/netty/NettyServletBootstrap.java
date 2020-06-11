@@ -7,8 +7,12 @@ import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.common.util.ResourceUtils;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
+import com.thinkerwolf.gamer.core.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.ssl.SslConfig;
+import com.thinkerwolf.gamer.netty.http.HttpServletHandler;
+import com.thinkerwolf.gamer.netty.tcp.TcpServletHandler;
+import com.thinkerwolf.gamer.netty.websocket.WebsocketServletHandler;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -78,9 +82,28 @@ public class NettyServletBootstrap {
         notifyServletContextListener();
         for (URL url : urls) {
             url.setAttach(URL.SERVLET_CONFIG, servletConfig);
-            NettyServer server = new NettyServer(url, null);
+            ChannelHandler[] handlers = getHandler(url);
+            NettyServer server = new NettyServer(url, handlers[0], handlers[1]);
             server.startup();
         }
+    }
+
+    private ChannelHandler[] getHandler(URL url) {
+        ChannelHandler[] handlers = new ChannelHandler[2];
+        switch (Protocol.parseOf(url.getProtocol())) {
+            case TCP:
+                handlers[0] = new TcpServletHandler(url);
+                break;
+            case HTTP:
+                url.setAttach(URL.EXEC_GROUP_NAME, "HttpOrWs");
+                handlers[0] = new HttpServletHandler(url);
+                handlers[1] = new WebsocketServletHandler(url);
+                break;
+            case WEBSOCKET:
+                handlers[0] = new WebsocketServletHandler(url);
+                break;
+        }
+        return handlers;
     }
 
     @SuppressWarnings("unchecked")

@@ -3,7 +3,7 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.core.servlet.Push;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.stream.ChunkedWriteHandler;
@@ -14,15 +14,15 @@ import io.netty.util.CharsetUtil;
  */
 public class HttpPush implements Push {
 
-    private ChannelHandlerContext ctx;
+    private Channel channel;
     private HttpRequest nettyRequest;
 
     private HttpChunkedInput chunkedInput;
 
     private PushChunkedInput pushChunkedInput;
 
-    public HttpPush(ChannelHandlerContext ctx, HttpRequest nettyRequest) {
-        this.ctx = ctx;
+    public HttpPush(Channel channel, HttpRequest nettyRequest) {
+        this.channel = channel;
         this.nettyRequest = nettyRequest;
     }
 
@@ -32,10 +32,9 @@ public class HttpPush implements Push {
         if (chunkedInput == null) {
             pushChunkedInput = new PushChunkedInput();
             chunkedInput = new HttpChunkedInput(pushChunkedInput);
-            InternalHttpUtil.chunkResponse(ctx.channel(), nettyRequest, chunkedInput);
+            InternalHttpUtil.chunkResponse(channel, nettyRequest, chunkedInput);
         }
-
-        ByteBuf buf = ctx.alloc().buffer();
+        ByteBuf buf = channel.config().getAllocator().buffer();
         buf.writeInt(opcode);
         buf.writeInt(0);
 
@@ -47,12 +46,12 @@ public class HttpPush implements Push {
 
         pushChunkedInput.writeChunk(buf);
 
-        ChunkedWriteHandler chunkedWriteHandler = ctx.pipeline().get(ChunkedWriteHandler.class);
+        ChunkedWriteHandler chunkedWriteHandler = channel.pipeline().get(ChunkedWriteHandler.class);
         chunkedWriteHandler.resumeTransfer();
     }
 
     @Override
     public boolean isPushable() {
-        return ctx.channel().isOpen() && ctx.channel().isWritable();
+        return channel.isOpen() && channel.isWritable();
     }
 }

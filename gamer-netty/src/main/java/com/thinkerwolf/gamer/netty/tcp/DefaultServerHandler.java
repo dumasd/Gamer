@@ -13,6 +13,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.concurrent.ExecutorService;
 
+@Deprecated
 public class DefaultServerHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
     private static final Logger LOG = InternalLoggerFactory.getLogger(DefaultServerHandler.class);
 

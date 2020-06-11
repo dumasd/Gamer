@@ -1,7 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 

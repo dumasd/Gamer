@@ -26,6 +26,7 @@ import javax.net.ssl.SSLContext;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
+@Deprecated
 public class HttpChannelConfiger extends ChannelHandlerConfiger<Channel> {
 
     private HttpDefaultHandler httpDefaultHandler;

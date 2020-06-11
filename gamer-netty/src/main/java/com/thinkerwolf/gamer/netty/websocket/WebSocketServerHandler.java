@@ -16,8 +16,8 @@ import org.apache.commons.collections.MapUtils;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 
+@Deprecated
 @ChannelHandler.Sharable
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
 
@@ -69,8 +69,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
         buf.readBytes(command);
         buf.readBytes(content);
-        final WebSocketRequest request = new WebSocketRequest(requestId, new String(command, CharsetUtil.UTF_8), ctx, content, servletConfig.getServletContext());
-        final WebSocketResponse response = new WebSocketResponse(ctx.channel());
+        final WebsocketRequest request = new WebsocketRequest(requestId, new String(command, CharsetUtil.UTF_8), ctx.channel(), content, servletConfig.getServletContext());
+        final WebsocketResponse response = new WebsocketResponse(ctx.channel());
 
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.WEBSOCKET_DECORATOR);
 
@@ -87,7 +87,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
 
-    private static void service(Servlet servlet, WebSocketRequest request, WebSocketResponse response, ChannelHandlerContext ctx) {
+    private static void service(Servlet servlet, WebsocketRequest request, WebsocketResponse response, ChannelHandlerContext ctx) {
         try {
             servlet.service(request, response);
         } catch (Exception e) {
@@ -109,8 +109,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
         int requestId = MapUtils.getInteger(params, "requestId", 0);
 
-        WebSocketRequest request = new WebSocketRequest(requestId, command, ctx, text.getBytes(CharsetUtil.UTF_8), servletConfig.getServletContext());
-        WebSocketResponse response = new WebSocketResponse(ctx.channel());
+        WebsocketRequest request = new WebsocketRequest(requestId, command, ctx.channel(), text.getBytes(CharsetUtil.UTF_8), servletConfig.getServletContext());
+        WebsocketResponse response = new WebsocketResponse(ctx.channel());
 
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.WEBSOCKET_DECORATOR);
 

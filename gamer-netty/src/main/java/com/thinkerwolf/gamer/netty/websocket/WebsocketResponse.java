@@ -8,13 +8,13 @@ import io.netty.channel.ChannelFuture;
 import java.io.IOException;
 import java.util.Map;
 
-public class WebSocketResponse implements Response {
+public class WebsocketResponse implements Response {
 
     private Channel channel;
 
     private Integer contentType;
 
-    public WebSocketResponse(Channel channel) {
+    public WebsocketResponse(Channel channel) {
         this.channel = channel;
     }
 

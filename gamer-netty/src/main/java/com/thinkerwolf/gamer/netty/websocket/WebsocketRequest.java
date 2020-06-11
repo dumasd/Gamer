@@ -7,27 +7,26 @@ import com.thinkerwolf.gamer.core.servlet.SessionManager;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.netty.AbstractRequest;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 
-public class WebSocketRequest extends AbstractRequest {
+public class WebsocketRequest extends AbstractRequest {
 
-    private ChannelHandlerContext ctx;
+    private final Channel channel;
 
-    private byte[] content;
+    private final byte[] content;
 
-    private ServletContext servletContext;
+    private final ServletContext servletContext;
 
-
-    public WebSocketRequest(int requestId, String command, ChannelHandlerContext ctx, byte[] content, ServletContext servletContext) {
-        super(requestId, command, ctx.channel());
-        this.ctx = ctx;
+    public WebsocketRequest(int requestId, String command, Channel channel, byte[] content, ServletContext servletContext) {
+        super(requestId, command, channel);
+        this.channel = channel;
         this.servletContext = servletContext;
         this.content = content;
         RequestUtil.parseParams(this, content);
 
         Session session = getSession(false);
         if (session != null) {
-            session.setPush(new WebSocketPush(ctx.channel()));
+            session.setPush(new WebsocketPush(channel));
         }
     }
 
@@ -51,8 +50,8 @@ public class WebSocketRequest extends AbstractRequest {
         Session session = sessionManager.getSession(sessionId, create);
         if (create && session != null && !session.getId().equals(sessionId)) {
             // 过期或者创建新session
-            session.setPush(new WebSocketPush(ctx.channel()));
-            ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(session.getId());
+            session.setPush(new WebsocketPush(channel));
+            channel.attr(InternalHttpUtil.CHANNEL_JSESSIONID).set(session.getId());
         }
         if (session != null) {
             session.touch();
@@ -61,8 +60,8 @@ public class WebSocketRequest extends AbstractRequest {
     }
 
     private String getInternalSessionId() {
-        if (ctx.channel().hasAttr(InternalHttpUtil.CHANNEL_JSESSIONID)) {
-            return ctx.channel().attr(InternalHttpUtil.CHANNEL_JSESSIONID).toString();
+        if (channel.hasAttr(InternalHttpUtil.CHANNEL_JSESSIONID)) {
+            return channel.attr(InternalHttpUtil.CHANNEL_JSESSIONID).toString();
         }
         String sessionId = (String) getAttribute(Session.JSESSION);
         return sessionId;

@@ -28,7 +28,7 @@ public class NettyChannel implements Channel {
         this.handler = handler;
     }
 
-    static NettyChannel getOrAddChannel(io.netty.channel.Channel channel, URL url, ChannelHandler handler) {
+    public static NettyChannel getOrAddChannel(io.netty.channel.Channel channel, URL url, ChannelHandler handler) {
         NettyChannel nettyChannel = channelMap.get(channel);
         if (nettyChannel == null) {
             nettyChannel = new NettyChannel(channel, url, handler);
@@ -43,7 +43,7 @@ public class NettyChannel implements Channel {
         return nettyChannel;
     }
 
-    static void removeChannelIfDisconnected(io.netty.channel.Channel ch) {
+    public static void removeChannelIfDisconnected(io.netty.channel.Channel ch) {
         if (ch != null && !ch.isActive()) {
             channelMap.remove(ch);
         }

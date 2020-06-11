@@ -22,6 +22,7 @@ import io.netty.util.AttributeKey;
 
 import java.util.concurrent.Executor;
 
+@Deprecated
 @ChannelHandler.Sharable
 public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> implements IServerHandler {
 
@@ -88,7 +89,7 @@ public class HttpDefaultHandler extends SimpleChannelInboundHandler<Object> impl
 
         final Response response = new com.thinkerwolf.gamer.netty.http.HttpResponse(ctx.channel(), nettyRequest);
         boolean compress = ServletUtil.isCompress(servletConfig);
-        final Request request = new com.thinkerwolf.gamer.netty.http.HttpRequest(ctx, servletConfig.getServletContext(), nettyRequest, response, compress);
+        final Request request = new com.thinkerwolf.gamer.netty.http.HttpRequest(ctx.channel(), servletConfig.getServletContext(), nettyRequest, response, compress);
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.HTTP_DECORATOR);
 
         // 长连接推送

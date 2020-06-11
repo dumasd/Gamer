@@ -9,11 +9,11 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
-public class WebSocketPush implements Push {
+public class WebsocketPush implements Push {
 
     private Channel channel;
 
-    public WebSocketPush(Channel channel) {
+    public WebsocketPush(Channel channel) {
         this.channel = channel;
     }
 

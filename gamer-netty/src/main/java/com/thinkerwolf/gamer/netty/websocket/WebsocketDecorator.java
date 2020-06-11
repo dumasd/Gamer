@@ -10,7 +10,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
-public class WebSocketDecorator implements Decorator {
+public class WebsocketDecorator implements Decorator {
 
     @Override
     public Object decorate(Model<?> model, Request request, Response response) {

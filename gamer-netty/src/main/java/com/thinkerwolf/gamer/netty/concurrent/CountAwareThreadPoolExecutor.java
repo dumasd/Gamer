@@ -93,8 +93,7 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
     private boolean needReject(ChannelRunnable channelRunnable) {
         Object channel = channelRunnable.getChannel();
         if (ConcurrentUtil.isClosed(channel)) {
-            childExecutors.remove(channel);
-            channelCounters.remove(channel);
+            removeChannel(channel);
             return true;
         }
 
@@ -131,7 +130,7 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
         Object channel = cr.getChannel();
 
         if (ConcurrentUtil.isClosed(channel)) {
-            childExecutors.remove(channel);
+            removeChannel(channel);
             return null;
         }
 
@@ -161,11 +160,15 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
 
     public void check(Object channel) {
         if (ConcurrentUtil.isClosed(channel)) {
-            childExecutors.remove(channel);
-            channelCounters.remove(channel);
+            removeChannel(channel);
         }
     }
 
+    private void removeChannel(Object channel) {
+        childExecutors.remove(channel);
+        channelCounters.remove(channel);
+        logger.debug("Remove channel " + channel);
+    }
 
     @Override
     protected void terminated() {

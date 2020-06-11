@@ -19,7 +19,7 @@ import io.netty.util.AttributeKey;
 
 import java.util.*;
 
-public class InternalHttpUtil {
+public final class InternalHttpUtil {
 
     private static final byte[] EMPTY_BYTE = new byte[]{};
 

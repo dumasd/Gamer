@@ -9,6 +9,7 @@ import io.netty.channel.ChannelPipeline;
 
 import java.util.concurrent.ExecutorService;
 
+@Deprecated
 public class TcpDefaultChannelConfiger extends ChannelHandlerConfiger<Channel> {
     private ServletConfig servletConfig;
     private ExecutorService executor;
