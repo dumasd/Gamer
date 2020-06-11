@@ -17,7 +17,7 @@ public class JsonModel implements Model {
 
     public JsonModel(Object bean) {
         this.bean = bean;
-        String s = JSON.toJSONString(bean, SerializerFeature.IgnoreNonFieldGetter);
+        String s = JSON.toJSONString(bean);
         this.data = s.getBytes(CharsetUtil.UTF8);
     }
 
