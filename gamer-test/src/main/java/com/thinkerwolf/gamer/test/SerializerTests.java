@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.test;
 
-import com.alibaba.fastjson.JSON;
 import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
@@ -24,12 +23,12 @@ public class SerializerTests {
         rpcRequest.setArgs(new Object[]{"wukai"});
         oo.writeObject(rpcRequest);
 
-        System.out.println(JSON.toJSONString(rpcRequest));
+//        System.out.println(JSON.toJSONString(rpcRequest));
 
         System.out.println(Arrays.toString(baos.toByteArray()));
 
         SwaggerResource sr = new SwaggerResource();
-        System.out.println(JSON.toJSONString(sr));
+//        System.out.println(JSON.toJSONString(sr));
 
 
         testRpc();

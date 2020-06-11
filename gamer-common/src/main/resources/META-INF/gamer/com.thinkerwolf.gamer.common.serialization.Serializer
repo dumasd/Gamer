@@ -1,5 +1,5 @@
 hessian=com.thinkerwolf.gamer.common.serialization.hessian.HessianSerializer
 hessian2=com.thinkerwolf.gamer.common.serialization.hessian.Hessian2Serializer
 jdk=com.thinkerwolf.gamer.common.serialization.jdk.JdkSerializer
-fastjson=com.thinkerwolf.gamer.common.serialization.fastjson.FastjsonSerializer
+jackson=com.thinkerwolf.gamer.common.serialization.jackson.JacksonSerializer
 kryo=com.thinkerwolf.gamer.common.serialization.kryo.KryoSerializer

@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.core;
 
-import com.alibaba.fastjson.JSON;
 import com.thinkerwolf.gamer.core.servlet.Session;
 import com.thinkerwolf.gamer.core.servlet.SessionAttributeListener;
 import com.thinkerwolf.gamer.core.servlet.StandardSession;
