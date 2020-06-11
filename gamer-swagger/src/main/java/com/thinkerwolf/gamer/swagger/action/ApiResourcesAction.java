@@ -3,7 +3,7 @@ package com.thinkerwolf.gamer.swagger.action;
 import com.thinkerwolf.gamer.core.annotation.Action;
 import com.thinkerwolf.gamer.core.annotation.Command;
 import com.thinkerwolf.gamer.core.annotation.View;
-import com.thinkerwolf.gamer.core.mvc.model.JsonModel;
+import com.thinkerwolf.gamer.core.mvc.model.JacksonModel;
 import com.thinkerwolf.gamer.core.mvc.view.JsonView;
 import com.thinkerwolf.gamer.swagger.Docket;
 import com.thinkerwolf.gamer.swagger.UiConfiguration;
@@ -31,17 +31,17 @@ public class ApiResourcesAction {
     UiConfiguration uiConfiguration;
 
     @Command("swagger-resources/configuration/ui")
-    public JsonModel uiConfiguration() {
-        return new JsonModel(Optional.ofNullable(uiConfiguration).orElse(UiConfiguration.DEFAULT));
+    public JacksonModel uiConfiguration() {
+        return new JacksonModel(Optional.ofNullable(uiConfiguration).orElse(UiConfiguration.DEFAULT));
     }
 
     @Command("swagger-resources")
-    public JsonModel swaggerResources() {
+    public JacksonModel swaggerResources() {
         List<SwaggerResource> resources = new ArrayList<>();
         SwaggerResource sr = resource(swagger2Url, Docket.DEFAULT_GROUP_NAME);
         sr.setSwaggerVersion("2.0");
         resources.add(sr);
-        return new JsonModel(resources);
+        return new JacksonModel(resources);
     }
 
     private SwaggerResource resource(String baseUrl, String groupName) {

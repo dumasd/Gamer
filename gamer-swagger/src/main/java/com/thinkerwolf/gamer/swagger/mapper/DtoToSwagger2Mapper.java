@@ -8,6 +8,7 @@ import com.thinkerwolf.gamer.swagger.dto.ApiDescriptor;
 import com.thinkerwolf.gamer.swagger.dto.ApiListing;
 import io.swagger.models.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +39,9 @@ public class DtoToSwagger2Mapper {
             for (ApiDescriptor api : listing.getApis()) {
                 Path path = paths.get(api.getPath());
                 if (path == null) {
-                    paths.put(api.getPath(), mapOperations(new Path(), api.getOperations()));
+                    Path newPath = new Path();
+                    newPath.setParameters(new ArrayList<>());
+                    paths.put(api.getPath(), mapOperations(newPath, api.getOperations()));
                 } else {
                     paths.put(api.getPath(), mapOperations(path, api.getOperations()));
                 }
@@ -59,6 +62,8 @@ public class DtoToSwagger2Mapper {
         op.setTags(Lists.newArrayList(operation.getTags()));
         op.setSummary(operation.getSummary());
         op.setDescription(operation.getNotes());
+        op.setSchemes(new ArrayList<>());
+        op.setParameters(new ArrayList<>());
         for (String p : operation.getProtocols()) {
             op.addScheme(Scheme.forValue(p));
         }
