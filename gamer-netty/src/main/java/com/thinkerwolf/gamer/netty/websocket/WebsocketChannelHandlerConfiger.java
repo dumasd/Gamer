@@ -8,12 +8,14 @@ import com.thinkerwolf.gamer.netty.NettyServerHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ServerChannel;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
+
+import java.net.URI;
 
 public class WebsocketChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
     private URL url;
@@ -36,7 +38,15 @@ public class WebsocketChannelHandlerConfiger extends ChannelHandlerConfiger<Chan
 
         pipeline.addLast(new HttpObjectAggregator(65536));
         pipeline.addLast(server ? new WebSocketServerCompressionHandler() : WebSocketClientCompressionHandler.INSTANCE);
-        pipeline.addLast(new WebSocketServerProtocolHandler("websocket", null, true));
+        if (server) {
+            pipeline.addLast(new WebSocketServerProtocolHandler("websocket", null, true));
+        } else {
+            DefaultHttpHeaders headers = new DefaultHttpHeaders();
+            headers.add(HttpHeaderNames.CACHE_CONTROL, HttpHeaderValues.NO_CACHE);
+            URI wsUri = URI.create(url.getProtocolHostPort() + "/websocket");
+            pipeline.addLast(new WebSocketClientProtocolHandler(wsUri, WebSocketVersion.V13, null, true, headers, 4096));
+        }
+
         pipeline.addLast("handler", server ? new NettyServerHandler(url, handler) : new NettyClientHandler(url, handler));
     }
 }

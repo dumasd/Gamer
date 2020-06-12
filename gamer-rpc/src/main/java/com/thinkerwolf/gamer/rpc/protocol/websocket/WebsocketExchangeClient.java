@@ -23,35 +23,46 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-public class WebSocketExchangeClient extends ChannelHandlerAdapter implements ExchangeClient {
+public class WebsocketExchangeClient extends ChannelHandlerAdapter implements ExchangeClient<RpcResponse> {
     private static final Object START = new Object();
     private static final Object STOP = new Object();
-    private static final AtomicReferenceFieldUpdater<WebSocketExchangeClient, Object> statusUpdater
-            = AtomicReferenceFieldUpdater.newUpdater(WebSocketExchangeClient.class, Object.class, "status");
+    private static final AtomicReferenceFieldUpdater<WebsocketExchangeClient, Object> statusUpdater
+            = AtomicReferenceFieldUpdater.newUpdater(WebsocketExchangeClient.class, Object.class, "status");
     private volatile Object status = START;
 
     private final URL url;
     private final Client client;
 
-    private AtomicInteger idGenerator = new AtomicInteger();
-    private Map<Object, DefaultPromise> waitResultMap = new ConcurrentHashMap<>();
+    private final AtomicInteger idGenerator = new AtomicInteger();
+    private final Map<Object, DefaultPromise<RpcResponse>> waitResultMap = new ConcurrentHashMap<>();
 
-    public WebSocketExchangeClient(URL url) {
+    private static final String HANDSHAKE_COMPLETE = "HANDSHAKE_COMPLETE";
+    private static final String HANDSHAKE_TIMEOUT = "HANDSHAKE_TIMEOUT";
+
+    private final DefaultPromise<Object> handshakePromise;
+
+    public WebsocketExchangeClient(URL url) {
         this.url = url;
+        this.handshakePromise = new DefaultPromise<>();
         this.client = new NettyClient(url, this);
     }
 
     @Override
-    public Promise request(Object message) {
+    public Promise<RpcResponse> request(Object message) {
         return request(message, 0, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public Promise request(Object message, long timeout, TimeUnit unit) {
-        DefaultPromise promise = new DefaultPromise();
+    public Promise<RpcResponse> request(Object message, long timeout, TimeUnit unit) {
+        try {
+            handshakePromise.await();
+        } catch (InterruptedException ignored) {
+        }
+        DefaultPromise<RpcResponse> promise = new DefaultPromise<>();
         RpcMessage msg = (RpcMessage) message;
         promise.setAttachment(msg);
         final int id = idGenerator.incrementAndGet();
@@ -96,8 +107,11 @@ public class WebSocketExchangeClient extends ChannelHandlerAdapter implements Ex
                 promise.await(timeout, unit);
             } catch (InterruptedException ignored) {
             }
+            if (!promise.isDone()) {
+                waitResultMap.remove(id);
+                promise.setFailure(new TimeoutException());
+            }
         }
-
         return promise;
     }
 
@@ -105,25 +119,37 @@ public class WebSocketExchangeClient extends ChannelHandlerAdapter implements Ex
     public void received(Channel channel, Object message) throws RemotingException {
         BinaryWebSocketFrame frame = (BinaryWebSocketFrame) message;
         ByteBuf buf = frame.content();
-
         try {
             final int requestId = buf.readInt();
             byte[] data = new byte[buf.readableBytes()];
             buf.readBytes(data);
-            DefaultPromise promise = waitResultMap.get(requestId);
-            try {
-                RpcMessage rpcMsg = (RpcMessage) promise.getAttachment();
-                Serializer serializer = ServiceLoader.getService(rpcMsg.getSerial(), Serializer.class);
-                RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
-                promise.setSuccess(rpcResponse);
-            } catch (Exception e) {
-                promise.setFailure(e);
-                throw new RemotingException(e);
-            } finally {
-                waitResultMap.remove(requestId);
+            DefaultPromise<RpcResponse> promise = waitResultMap.get(requestId);
+            if (promise != null) {
+                try {
+                    RpcMessage rpcMsg = (RpcMessage) promise.getAttachment();
+                    Serializer serializer = ServiceLoader.getService(rpcMsg.getSerial(), Serializer.class);
+                    RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
+                    promise.setSuccess(rpcResponse);
+                } catch (Exception e) {
+                    promise.setFailure(e);
+                    throw new RemotingException(e);
+                } finally {
+                    waitResultMap.remove(requestId);
+                }
             }
         } catch (Exception e) {
             throw new RemotingException(e);
+        }
+    }
+
+    @Override
+    public void event(Channel channel, Object evt) throws RemotingException {
+        super.event(channel, evt);
+        System.err.println(evt);
+        if (HANDSHAKE_COMPLETE.equalsIgnoreCase(evt.toString())) {
+            handshakePromise.setFailure(new TimeoutException());
+        } else if (HANDSHAKE_TIMEOUT.equalsIgnoreCase(evt.toString())) {
+            handshakePromise.setSuccess(new Object());
         }
     }
 
@@ -133,7 +159,7 @@ public class WebSocketExchangeClient extends ChannelHandlerAdapter implements Ex
         CauseHolder holder = new CauseHolder(e);
         Object status = statusUpdater.getAndSet(this, holder);
         if (!(status == STOP || status instanceof CauseHolder)) {
-            for (DefaultPromise promise : waitResultMap.values()) {
+            for (DefaultPromise<RpcResponse> promise : waitResultMap.values()) {
                 promise.setFailure(e);
             }
             waitResultMap.clear();

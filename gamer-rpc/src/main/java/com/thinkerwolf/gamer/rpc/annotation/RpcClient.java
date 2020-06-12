@@ -16,4 +16,11 @@ public @interface RpcClient {
      * 是否异步
      */
     boolean async() default false;
+
+    /**
+     * 超时时间
+     *
+     * @return
+     */
+    long timeout() default 5000;
 }

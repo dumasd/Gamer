@@ -26,8 +26,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  * @author wukai
  * @date 2020/5/14 10:24
  */
-@SuppressWarnings("unchecked")
-public class TcpExchangeClient extends ChannelHandlerAdapter implements ExchangeClient {
+public class TcpExchangeClient extends ChannelHandlerAdapter implements ExchangeClient<RpcResponse> {
 
     private static final Object START = new Object();
     private static final Object STOP = new Object();
@@ -36,13 +35,13 @@ public class TcpExchangeClient extends ChannelHandlerAdapter implements Exchange
     //private static Logger LOG = InternalLoggerFactory.getLogger(TcpExchangeClient.class);
     private volatile Object status = START;
 
-    private Client client;
+    private final Client client;
 
-    private URL url;
+    private final URL url;
 
-    private AtomicInteger idGenerator = new AtomicInteger();
+    private final AtomicInteger idGenerator = new AtomicInteger();
 
-    private Map<Object, DefaultPromise> waitResultMap = new ConcurrentHashMap<>();
+    private final Map<Object, DefaultPromise<RpcResponse>> waitResultMap = new ConcurrentHashMap<>();
 
     public TcpExchangeClient(URL url) {
         this.url = url;
@@ -57,13 +56,13 @@ public class TcpExchangeClient extends ChannelHandlerAdapter implements Exchange
     }
 
     @Override
-    public Promise request(Object message) {
+    public Promise<RpcResponse> request(Object message) {
         return request(message, 0, null);
     }
 
     @Override
-    public Promise request(Object message, long timeout, TimeUnit unit) {
-        DefaultPromise promise = new DefaultPromise();
+    public Promise<RpcResponse> request(Object message, long timeout, TimeUnit unit) {
+        DefaultPromise<RpcResponse> promise = new DefaultPromise<>();
         if (status == STOP || status instanceof CauseHolder) {
             promise.setFailure(getCause(status));
             return promise;
@@ -113,10 +112,10 @@ public class TcpExchangeClient extends ChannelHandlerAdapter implements Exchange
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
         Packet packet = (Packet) message;
-        DefaultPromise promise = waitResultMap.get(packet.getRequestId());
+        DefaultPromise<RpcResponse> promise = waitResultMap.get(packet.getRequestId());
         RpcMessage rpcMsg = (RpcMessage) promise.getAttachment();
         Serializer serializer = ServiceLoader.getService(rpcMsg.getSerial(), Serializer.class);
-        byte[] data =  ArrayUtils.subarray(packet.getContent(), 4, packet.getContent().length);
+        byte[] data = ArrayUtils.subarray(packet.getContent(), 4, packet.getContent().length);
         try {
             RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
             promise.setSuccess(rpcResponse);
@@ -134,7 +133,7 @@ public class TcpExchangeClient extends ChannelHandlerAdapter implements Exchange
         CauseHolder holder = new CauseHolder(e);
         Object status = statusUpdater.getAndSet(this, holder);
         if (!(status == STOP || status instanceof CauseHolder)) {
-            for (DefaultPromise promise : waitResultMap.values()) {
+            for (DefaultPromise<RpcResponse> promise : waitResultMap.values()) {
                 promise.setFailure(e);
             }
             waitResultMap.clear();

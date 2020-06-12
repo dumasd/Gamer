@@ -61,9 +61,8 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
         if (sslContext != null) {
             pipeline.addLast("http-ssl", sslContext.newHandler(ch.alloc()));
         }
-        pipeline.addLast("http-decoder", new HttpRequestDecoder());
+        pipeline.addLast("http-codec", new HttpServerCodec());
         pipeline.addLast("http-aggregator", new HttpObjectAggregator(65536));
-        pipeline.addLast("http-encoder", new HttpResponseEncoder());
         pipeline.addLast("http-chunk", new ChunkedWriteHandler());
         pipeline.addLast("http-handler", new NettyServerHandler(url, handler) {
             @Override

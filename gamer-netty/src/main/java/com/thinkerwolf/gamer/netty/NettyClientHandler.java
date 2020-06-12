@@ -12,8 +12,15 @@ import java.net.SocketAddress;
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyClientHandler extends ChannelDuplexHandler {
 
-    private URL url;
-    private ChannelHandler handler;
+    private final URL url;
+    private final ChannelHandler handler;
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        Channel ch = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
+        handler.event(ch, evt);
+        super.userEventTriggered(ctx, evt);
+    }
 
     public NettyClientHandler(URL url, ChannelHandler handler) {
         this.url = url;

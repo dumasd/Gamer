@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.common.concurrent;
 
-
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -46,7 +45,7 @@ public class DefaultPromise<V> extends AbstractPromise<V> {
 
     @Override
     public boolean isSuccess() {
-        return result != null && result != FAIL;
+        return result != FAIL && !(result instanceof CauseHolder);
     }
 
     @Override

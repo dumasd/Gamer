@@ -4,9 +4,9 @@ public enum Protocol {
 
     TCP("tcp"),
     HTTP("http"),
-    WEBSOCKET("websocket"),;
+    WEBSOCKET("ws"),;
 
-    private String name;
+    private final String name;
 
     Protocol(String name) {
         this.name = name;
@@ -17,8 +17,9 @@ public enum Protocol {
     }
 
     public static Protocol parseOf(String name) {
+        name = name.toLowerCase();
         for (Protocol p : Protocol.values()) {
-            if (p.name.equalsIgnoreCase(name)) {
+            if (name.startsWith(p.name)) {
                 return p;
             }
         }

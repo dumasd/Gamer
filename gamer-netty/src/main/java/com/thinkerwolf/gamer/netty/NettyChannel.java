@@ -86,7 +86,7 @@ public class NettyChannel implements Channel {
             }
             Throwable thrown = future.cause();
             if (thrown != null) {
-                throw thrown;
+                throw new RemotingException(thrown);
             }
         } catch (Throwable e) {
             throw new RemotingException(e);

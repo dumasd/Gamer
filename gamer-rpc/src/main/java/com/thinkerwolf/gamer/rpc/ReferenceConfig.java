@@ -97,7 +97,11 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
             if (en != null && en.length > 0) {
                 for (String e : en) {
                     URL url = URL.parse(e);
-                    url.setParameters(map);
+                    if (url.getParameters() != null) {
+                        url.getParameters().putAll(map);
+                    } else {
+                        url.setParameters(map);
+                    }
                     urls.add(url);
                 }
             }

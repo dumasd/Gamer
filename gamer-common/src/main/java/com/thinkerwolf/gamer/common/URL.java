@@ -6,10 +6,10 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 连接地址
@@ -41,6 +41,7 @@ public class URL implements Serializable {
     public static final String NODE_EPHEMERAL = "nodeEphemeral";
     public static final String NODE_NAME = "nodeName";
     public static final String REGISTRY_TIMEOUT = "registryTimeout";
+    public static final String RPC_CLIENT_NUM = "clientNum";
     // ========================= parameter keys end  =============================== //
 
     // ========================= attachment keys start =============================== //
@@ -271,6 +272,21 @@ public class URL implements Serializable {
     public <T> T getAttach(String key) {
         synchronized (this) {
             return (T) MapUtils.getObject(attachs, key);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getAttach(String key, T dv) {
+        synchronized (this) {
+            return (T) MapUtils.getObject(attachs, key, dv);
+        }
+    }
+
+    public java.net.URL toURL() {
+        try {
+            return new java.net.URL(protocol, host, port, Optional.ofNullable(path).orElse(""));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
     }
 

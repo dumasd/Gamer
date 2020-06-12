@@ -16,7 +16,6 @@ import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
 import com.thinkerwolf.gamer.rpc.annotation.RpcClient;
-import org.apache.commons.lang.ArrayUtils;
 
 import java.lang.reflect.Method;
 
@@ -24,10 +23,10 @@ public class RpcInvocation implements Invocation {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(RpcInvocation.class);
     private final String command;
-    private Class interfaceClass;
-    private Method method;
-    private Object obj;
-    private RpcClient rpcClient;
+    private final Class interfaceClass;
+    private final Method method;
+    private final Object obj;
+    private final RpcClient rpcClient;
 
     public RpcInvocation(Class interfaceClass, Method method, Object obj, RpcClient rpcClient) {
         this.interfaceClass = interfaceClass;

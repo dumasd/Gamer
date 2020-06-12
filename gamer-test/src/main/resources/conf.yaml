@@ -30,7 +30,7 @@ netty:
     coreThreads: 10 # tcp业务核心线程
     maxThreads: 11 # tpc业务最大线程
     countPerChannel: 100 # 客户端最大并发数量
-    protocol: TCP # 协议
+    protocol: tcp # 协议
     port: 8090 # 段口
     options: # netty option
       so_keepalive: true
@@ -41,7 +41,8 @@ netty:
     workerThreads: 5
     coreThreads: 10
     maxThreads: 11
-    protocol: HTTP
+    countPerChannel: 100 # 客户端最大并发数量
+    protocol: http
     ssl:
       enabled: false
       keyStore: C:\Users\wukai\.keystore

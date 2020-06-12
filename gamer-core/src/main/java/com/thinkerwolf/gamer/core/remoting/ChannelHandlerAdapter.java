@@ -2,6 +2,11 @@ package com.thinkerwolf.gamer.core.remoting;
 
 public abstract class ChannelHandlerAdapter implements ChannelHandler {
     @Override
+    public void event(Channel channel, Object evt) throws RemotingException {
+
+    }
+
+    @Override
     public void registered(Channel channel) throws RemotingException {
 
     }

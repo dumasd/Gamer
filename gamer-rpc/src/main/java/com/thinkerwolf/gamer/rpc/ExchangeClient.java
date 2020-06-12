@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  * @author wukai
  * @date 2020/5/11 17:49
  */
-public interface ExchangeClient {
+public interface ExchangeClient<V> {
 
     /**
      * 同步发送，直到返回结果
@@ -19,7 +19,7 @@ public interface ExchangeClient {
      * @param message
      * @return
      */
-    Promise request(Object message);
+    Promise<V> request(Object message);
 
     /**
      * 同步发送，等待超时
@@ -29,5 +29,5 @@ public interface ExchangeClient {
      * @param unit
      * @return
      */
-    Promise request(Object message, long timeout, TimeUnit unit);
+    Promise<V> request(Object message, long timeout, TimeUnit unit);
 }
