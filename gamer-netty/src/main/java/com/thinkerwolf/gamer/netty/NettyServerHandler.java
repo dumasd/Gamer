@@ -6,6 +6,7 @@ import com.thinkerwolf.gamer.core.remoting.ChannelHandler;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.util.ReferenceCountUtil;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -17,6 +18,8 @@ public class NettyServerHandler extends ChannelDuplexHandler {
     private ChannelHandler handler;
 
     private Map<String, Channel> channelMap = new ConcurrentHashMap<>();
+
+    private boolean autoRelease = true;
 
     public NettyServerHandler(URL url, ChannelHandler handler) {
         this.url = url;
@@ -103,6 +106,9 @@ public class NettyServerHandler extends ChannelDuplexHandler {
             handler.received(ch, msg);
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
+            if (autoRelease) {
+                ReferenceCountUtil.release(msg);
+            }
         }
     }
 

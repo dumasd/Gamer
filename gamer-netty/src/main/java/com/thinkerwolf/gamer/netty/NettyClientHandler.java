@@ -6,6 +6,7 @@ import com.thinkerwolf.gamer.core.remoting.ChannelHandler;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.util.ReferenceCountUtil;
 
 import java.net.SocketAddress;
 
@@ -14,6 +15,7 @@ public class NettyClientHandler extends ChannelDuplexHandler {
 
     private final URL url;
     private final ChannelHandler handler;
+    private boolean autoRelease;
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -23,8 +25,13 @@ public class NettyClientHandler extends ChannelDuplexHandler {
     }
 
     public NettyClientHandler(URL url, ChannelHandler handler) {
+        this(url, handler, true);
+    }
+
+    public NettyClientHandler(URL url, ChannelHandler handler, boolean autoRelease) {
         this.url = url;
         this.handler = handler;
+        this.autoRelease = autoRelease;
     }
 
     @Override
@@ -56,7 +63,6 @@ public class NettyClientHandler extends ChannelDuplexHandler {
         Channel ch = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
             handler.caught(ch, cause);
-            //super.exceptionCaught(ctx, cause);
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
         }
@@ -77,8 +83,10 @@ public class NettyClientHandler extends ChannelDuplexHandler {
         Channel ch = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
             handler.received(ch, msg);
-            // super.channelRead(ctx, msg);
         } finally {
+            if (autoRelease) {
+                ReferenceCountUtil.release(msg);
+            }
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
         }
     }

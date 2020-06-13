@@ -1,27 +1,23 @@
 package com.thinkerwolf.gamer.core.mvc;
 
-
 import com.thinkerwolf.gamer.common.DefaultObjectFactory;
 import com.thinkerwolf.gamer.common.ObjectFactory;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.annotation.Action;
-import com.thinkerwolf.gamer.core.annotation.Command;
 import com.thinkerwolf.gamer.core.exception.ServletException;
 import com.thinkerwolf.gamer.core.listener.SpringContextLoadListener;
-import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.spring.SpringObjectFactory;
+import com.thinkerwolf.gamer.core.util.MvcUtil;
 import com.thinkerwolf.gamer.core.util.ServletUtil;
 import com.thinkerwolf.gamer.core.mvc.view.ResourceView;
 import com.thinkerwolf.gamer.core.mvc.view.View;
-import com.thinkerwolf.gamer.core.mvc.view.ViewManager;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.ApplicationContext;
 
-import java.lang.reflect.Method;
 import java.util.*;
 
 public class DispatcherServlet extends AbstractServlet implements MvcServlet {
@@ -123,23 +119,9 @@ public class DispatcherServlet extends AbstractServlet implements MvcServlet {
         ApplicationContext context = (ApplicationContext) config.getServletContext().getAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE);
         Map<String, Object> actionBeans = context.getBeansWithAnnotation(Action.class);
         for (Object obj : actionBeans.values()) {
-            Action action = obj.getClass().getAnnotation(Action.class);
-            String urlPrefix = action.value();
-            com.thinkerwolf.gamer.core.annotation.View[] views = action.views();
-            // 创建视图
-            ViewManager viewManager = new ViewManager();
-            for (com.thinkerwolf.gamer.core.annotation.View view : views) {
-                viewManager.addView(view.name(), createView(view));
-            }
-            Method[] methods = obj.getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                Invocation invocation = createInvocation(config, urlPrefix, method, obj, viewManager);
-                if (invocation != null) {
-                    if (invocationMap.containsKey(invocation.getCommand())) {
-                        throw new ServletException("Duplicate action command :" + invocation.getCommand());
-                    }
-                    invocationMap.put(invocation.getCommand(), invocation);
-                }
+            List<Invocation> invocations = MvcUtil.createInvocations(obj, objectFactory);
+            for (Invocation invocation : invocations) {
+                addInvocation(invocation);
             }
         }
 
@@ -147,24 +129,6 @@ public class DispatcherServlet extends AbstractServlet implements MvcServlet {
         ResourceManager resourceManager = (ResourceManager) objectFactory.buildObject(ResourceManager.class);
         resourceManager.init(config);
         this.resourceInvocation = new ResourceInvocation(resourceManager, view);
-    }
-
-    private ActionInvocation createInvocation(ServletConfig config, String prefix, Method method, Object obj, ViewManager vm) {
-        Command command = method.getAnnotation(Command.class);
-        if (command == null) {
-            return null;
-        }
-        Class<?> returnType = method.getReturnType();
-        if (!Model.class.isAssignableFrom(returnType)) {
-            throw new UnsupportedOperationException("Action method return type must be Model.class");
-        }
-        String comm = command.value();
-        com.thinkerwolf.gamer.core.annotation.View view = method.getAnnotation(com.thinkerwolf.gamer.core.annotation.View.class);
-        View responseView = null;
-        if (view != null) {
-            responseView = createView(view);
-        }
-        return new ActionInvocation(prefix + comm, method, obj, vm, responseView);
     }
 
     private View createView(com.thinkerwolf.gamer.core.annotation.View view) {
