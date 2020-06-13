@@ -16,11 +16,11 @@ public class NettyChannel implements Channel {
 
     private static final ConcurrentMap<io.netty.channel.Channel, NettyChannel> channelMap = new ConcurrentHashMap<>();
 
-    private io.netty.channel.Channel ch;
+    private final io.netty.channel.Channel ch;
 
-    private URL url;
+    private final URL url;
 
-    private ChannelHandler handler;
+    private final ChannelHandler handler;
 
     public NettyChannel(io.netty.channel.Channel ch, URL url, ChannelHandler handler) {
         this.ch = ch;

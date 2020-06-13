@@ -19,17 +19,17 @@ public class HttpRequest extends AbstractRequest {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(HttpRequest.class);
 
-    private Channel channel;
+    private final Channel channel;
 
-    private ServletContext servletContext;
+    private final ServletContext servletContext;
 
-    private Map<String, Cookie> cookies;
+    private final Map<String, Cookie> cookies;
 
-    private io.netty.handler.codec.http.HttpRequest nettyRequest;
+    private final io.netty.handler.codec.http.HttpRequest nettyRequest;
 
-    private Response response;
+    private final Response response;
 
-    private List<byte[]> contents;
+    private final List<byte[]> contents;
 
     private String encoding;
 
