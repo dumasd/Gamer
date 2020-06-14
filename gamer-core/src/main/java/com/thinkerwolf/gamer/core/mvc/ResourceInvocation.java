@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.core.mvc;
 
+import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.core.exception.MvcException;
 import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.Request;
@@ -36,7 +37,7 @@ public class ResourceInvocation implements Invocation {
 
     @Override
     public void handle(Request request, Response response) throws Exception {
-        String command = request.getCommand();
+        String command = URL.decode(request.getCommand());
         if (StringUtils.isNotBlank(command)) {
             ResourceModel resourceModel;
             if (request.getEncoding() != null && request.getEncoding().length() > 0) {
