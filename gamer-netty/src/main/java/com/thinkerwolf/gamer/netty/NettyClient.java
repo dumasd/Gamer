@@ -66,7 +66,10 @@ public class NettyClient implements Client {
 
     @Override
     public void reconnect() throws RemotingException {
-        //TODO
+        // TODO
+        if (!ch.isOpen()) {
+            doConnect();
+        }
     }
 
     @Override

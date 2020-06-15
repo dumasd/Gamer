@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
+import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
@@ -19,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 /**
@@ -82,28 +84,50 @@ public class NettyServletBootstrap {
         notifyServletContextListener();
         for (URL url : urls) {
             url.setAttach(URL.SERVLET_CONFIG, servletConfig);
-            ChannelHandler[] handlers = getHandler(url);
-            NettyServer server = new NettyServer(url, handlers[0], handlers[1]);
+            ChannelHandler[] handlers = createHandlers(url);
+            NettyServer server = new NettyServer(url, handlers[0], handlers.length > 1 ? handlers[1] : null);
             server.startup();
         }
     }
 
-    private ChannelHandler[] getHandler(URL url) {
-        ChannelHandler[] handlers = new ChannelHandler[2];
+    private ChannelHandler[] createHandlers(URL url) {
+        List<ChannelHandler> handlers = new ArrayList<>();
+        String handlerClasses = url.getObject(URL.CHANNEL_HANDLERS);
+        if (StringUtils.isNotEmpty(handlerClasses)) {
+            String[] cls = Constants.SEMICOLON_SPLIT_PATTERN.split(handlerClasses);
+            for (String cl : cls) {
+                Class<?> clazz = ClassUtils.forName(cl);
+                if (!ChannelHandler.class.isAssignableFrom(clazz)) {
+                    throw new ConfigurationException(cl + " is not a ChannelHandler");
+                }
+                Constructor<?> cont = clazz.getConstructors()[0];
+                ChannelHandler handler;
+                try {
+                    if (cont.getParameters().length <= 0) {
+                        handler = (ChannelHandler) cont.newInstance();
+                    } else {
+                        handler = (ChannelHandler) cont.newInstance(url);
+                    }
+                    handlers.add(handler);
+                } catch (Exception e) {
+                    throw new ConfigurationException(e);
+                }
+            }
+            return handlers.toArray(new ChannelHandler[0]);
+        }
+
         switch (Protocol.parseOf(url.getProtocol())) {
             case TCP:
-                handlers[0] = new TcpServletHandler(url);
+                handlers.add(new TcpServletHandler(url));
                 break;
             case HTTP:
                 url.setAttach(URL.EXEC_GROUP_NAME, "HttpOrWs");
-                handlers[0] = new HttpServletHandler(url);
-                handlers[1] = new WebsocketServletHandler(url);
-                break;
+                handlers.add(new HttpServletHandler(url));
             case WEBSOCKET:
-                handlers[0] = new WebsocketServletHandler(url);
+                handlers.add(new WebsocketServletHandler(url));
                 break;
         }
-        return handlers;
+        return handlers.toArray(new ChannelHandler[0]);
     }
 
     @SuppressWarnings("unchecked")
@@ -179,6 +203,7 @@ public class NettyServletBootstrap {
             parameters.put(URL.COUNT_PER_CHANNEL, MapUtils.getInteger(nettyConf, URL.COUNT_PER_CHANNEL, 50));
             parameters.put(URL.OPTIONS, MapUtils.getMap(nettyConf, URL.OPTIONS, Collections.EMPTY_MAP));
             parameters.put(URL.CHILD_OPTIONS, MapUtils.getMap(nettyConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
+            parameters.put(URL.CHANNEL_HANDLERS, MapUtils.getString(nettyConf, URL.CHANNEL_HANDLERS, ""));
             url.setParameters(parameters);
             initSslConfig(url, MapUtils.getMap(nettyConf, "ssl", null));
             this.urls.add(url);

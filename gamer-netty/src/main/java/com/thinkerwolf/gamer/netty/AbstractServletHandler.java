@@ -25,7 +25,7 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter {
     public ExecutorService executor;
     private final URL url;
     private Servlet servlet;
-    private ServletConfig servletConfig;
+    private final ServletConfig servletConfig;
 
     public AbstractServletHandler(URL url) {
         this.url = url;

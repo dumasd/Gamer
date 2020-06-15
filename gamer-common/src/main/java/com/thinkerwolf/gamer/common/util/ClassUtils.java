@@ -52,8 +52,8 @@ public class ClassUtils {
      */
     public static final char JVM_SHORT = 'S';
 
-    private static Map<Class<?>, Object> PRIMITIVE_DEFAULT_VALUE;
-    private static Map<Class<?>, Class<?>> PRIMITIVE_WRAPPER;
+    private static final Map<Class<?>, Object> PRIMITIVE_DEFAULT_VALUE;
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPER;
 
     static {
         PRIMITIVE_DEFAULT_VALUE = new HashMap<>();

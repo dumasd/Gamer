@@ -42,6 +42,7 @@ public class URL implements Serializable {
     public static final String NODE_NAME = "nodeName";
     public static final String REGISTRY_TIMEOUT = "registryTimeout";
     public static final String RPC_CLIENT_NUM = "clientNum";
+    public static final String CHANNEL_HANDLERS = "channelHandlers";
     // ========================= parameter keys end  =============================== //
 
     // ========================= attachment keys start =============================== //
