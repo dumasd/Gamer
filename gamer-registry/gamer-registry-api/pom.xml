@@ -11,7 +11,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>Gamer/RegistryApi</artifactId>
+    <artifactId>gamer-registry-api</artifactId>
+    <name>Gamer/RegistryApi</name>
+
     <packaging>jar</packaging>
 
     <dependencies>
