@@ -34,7 +34,6 @@ public class URL implements Serializable {
     public static final String COUNT_PER_CHANNEL = "countPerChannel";
     public static final String OPTIONS = "options";
     public static final String CHILD_OPTIONS = "childOptions";
-    public static final String SERVLET_CONFIG = "servletConfig";
     public static final String CONNECTION_TIMEOUT = "connectionTimeout";
     public static final String SESSION_TIMEOUT = "sessionTimeout";
     public static final String BACKUP = "backup";
@@ -47,7 +46,7 @@ public class URL implements Serializable {
 
     // ========================= attachment keys start =============================== //
     public static final String EXEC_GROUP_NAME = "execGroupName";
-
+    public static final String SERVLET_CONFIG = "servletConfig";
     // ========================= attachment keys end =============================== //
 
     public static final int DEFAULT_TCP_PORT = 8777;

@@ -46,6 +46,10 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter {
         return servletConfig;
     }
 
+    public ExecutorService getExecutor() {
+        return executor;
+    }
+
     @Override
     public void disconnected(Channel channel) throws RemotingException {
         super.disconnected(channel);

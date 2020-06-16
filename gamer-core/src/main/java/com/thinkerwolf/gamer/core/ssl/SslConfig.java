@@ -3,7 +3,9 @@ package com.thinkerwolf.gamer.core.ssl;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-public class SslConfig {
+import java.io.Serializable;
+
+public class SslConfig implements Serializable {
 
     public static final String ENABLED = "enabled";
 
