@@ -25,6 +25,7 @@ import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import org.apache.commons.collections.MapUtils;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
@@ -46,8 +47,8 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
     @Override
     public void init(URL url) throws Exception {
         this.url = url;
-        SslConfig sslConfig = (SslConfig) MapUtils.getObject(url.getParameters(), URL.SSL);
-        if (sslConfig != null && sslConfig.isEnabled()) {
+        Map<String, Object> sslConfig = url.getObject(URL.SSL);
+        if (MapUtils.getBoolean(sslConfig, SslConfig.ENABLED, false)) {
             SelfSignedCertificate ssc = new SelfSignedCertificate();
             this.sslContext = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
         }

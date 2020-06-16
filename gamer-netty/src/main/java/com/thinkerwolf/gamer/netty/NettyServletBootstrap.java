@@ -24,9 +24,11 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 
 /**
+ * NettyServlet启动器
  *
+ * @author wukai
  */
-public class NettyServletBootstrap {
+public class NettyServletBootstrap implements ServletBootstrap {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(NettyServletBootstrap.class);
 
@@ -71,13 +73,17 @@ public class NettyServletBootstrap {
         }
     }
 
+    @Override
     public ServletConfig getServletConfig() {
         return servletConfig;
     }
 
-    /**
-     * 启动
-     */
+    @Override
+    public List<URL> getUrls() {
+        return urls;
+    }
+
+    @Override
     public void startup() throws Exception {
         Servlet servlet = ClassUtils.newInstance(servletConfig.servletClass());
         servlet.init(servletConfig);
@@ -211,20 +217,8 @@ public class NettyServletBootstrap {
     }
 
     private void initSslConfig(URL url, Map<String, Object> sslConf) {
-        SslConfig sslConfig = new SslConfig();
-        url.getParameters().put(URL.SSL, sslConfig);
-        if (sslConf == null) {
-            return;
-        }
-        sslConfig.setEnabled(MapUtils.getBoolean(sslConf, SslConfig.ENABLED, false));
-        if (!sslConfig.isEnabled()) {
-            return;
-        }
-        sslConfig.setKeyStore(MapUtils.getString(sslConf, "keyStore"));
-        sslConfig.setKeyStorePassword(MapUtils.getString(sslConf, "keyStorePassword"));
-        sslConfig.setTrustStore(MapUtils.getString(sslConf, "trustStore"));
+        url.getParameters().put(URL.SSL, sslConf);
     }
-
 
     @SuppressWarnings("unchecked")
     private void loadServletConfig(Map<String, Object> servletConf, List<String> listenersConf) throws Exception {
