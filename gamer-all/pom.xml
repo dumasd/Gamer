@@ -149,7 +149,7 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>
-                                        META-INF/gamer/com.thinkerwolf.gamer.registry.RegistryFactory
+                                        META-INF/gamer/com.thinkerwolf.gamer.com.thinkerwolf.gamer.registry.RegistryFactory
                                     </resource>
                                 </transformer>
                             </transformers>

@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>gamer-registry</artifactId>
+            <artifactId>gamer-registry-zookeeper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

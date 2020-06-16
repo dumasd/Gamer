@@ -10,23 +10,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>gamer-registry</artifactId>
+    <packaging>pom</packaging>
     <name>Gamer/Registry</name>
 
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>gamer-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.101tec</groupId>
-            <artifactId>zkclient</artifactId>
-            <version>0.11</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>gamer-registry-api</module>
+        <module>gamer-registry-zookeeper</module>
+    </modules>
 
 </project>
