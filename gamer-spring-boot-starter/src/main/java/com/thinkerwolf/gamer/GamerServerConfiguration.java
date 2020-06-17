@@ -1,8 +1,9 @@
 package com.thinkerwolf.gamer;
 
+import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.core.servlet.ServletBootstrap;
+import com.thinkerwolf.gamer.core.servlet.ServletBootstrapFactory;
 import com.thinkerwolf.gamer.core.servlet.ServletContext;
-import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
 import com.thinkerwolf.gamer.properties.GamerProperties;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(GamerProperties.class)
 public class GamerServerConfiguration implements ApplicationContextAware {
 
-
     private ApplicationContext applicationContext;
 
     @Override
@@ -25,15 +25,11 @@ public class GamerServerConfiguration implements ApplicationContextAware {
 
     @Bean
     public ServletBootstrap servletBootstrap(GamerProperties properties) throws Exception {
-        NettyServletBootstrap bootstrap;
-        if (properties.getConfigFile() != null) {
-            bootstrap = new NettyServletBootstrap(properties.getConfigFile());
-        } else {
-            bootstrap = new NettyServletBootstrap();
-        }
+        ServletBootstrapFactory factory = ServiceLoader.getService(properties.getServletBoot(), ServletBootstrapFactory.class);
+        ServletBootstrap bootstrap = factory.create(properties.getConfigFile());
         bootstrap.getServletConfig().getServletContext().setAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE, applicationContext);
         bootstrap.startup();
-        return bootstrap;
+        return factory.create(properties.getConfigFile());
     }
 
 

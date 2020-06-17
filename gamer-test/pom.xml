@@ -35,6 +35,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>gamer-core-netty</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>gamer-registry-zookeeper</artifactId>
             <version>${project.version}</version>
         </dependency>

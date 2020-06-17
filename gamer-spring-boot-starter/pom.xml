@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.thinkerwolf</groupId>
-            <artifactId>gamer-core-netty</artifactId>
+            <artifactId>gamer-core-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
