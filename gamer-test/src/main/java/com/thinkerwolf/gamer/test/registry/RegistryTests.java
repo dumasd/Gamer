@@ -10,36 +10,17 @@ import java.util.concurrent.CountDownLatch;
 
 public class RegistryTests {
 
-    public void testZookeeper() {
-        URL url = URL.parse("zookeeper://127.0.0.1:2181/gamer");
-        Map<String, Object> map = new HashMap<>();
-        map.put(URL.NODE_EPHEMERAL, false);
-        url.setParameters(map);
-        url.setUsername("root");
-        url.setPassword("123");
-        ZookeeperRegistry registry = new ZookeeperRegistry(url);
-
-        URL url1 = URL.parse("http://127.0.0.1:80/http");
-        url1.setParameters(map);
-        registry.register(url1);
-
-        URL url2 = URL.parse("http://127.0.0.1:80");
-        registry.lookup(url2);
-
-        int i = 0;
-    }
-
     public void testRegistryFactory() {
         URL url = URL.parse("zookeeper://127.0.0.1:2181/eliminate");
         try {
             Registry registry = new ZookeeperRegistry(url);
 
+            URL u = URL.parse("http://127.0.0.1:80/eliminate/game");
             Map<String, Object> map = new HashMap<>();
             map.put(URL.NODE_EPHEMERAL, false);
             map.put(URL.NODE_NAME, "aoshitang_10001");
-
-            URL u = URL.parse("http://127.0.0.1:80/game");
             u.setParameters(map);
+
             registry.register(u);
 
             CountDownLatch latch = new CountDownLatch(2);
@@ -70,7 +51,7 @@ public class RegistryTests {
                 }
             });
 
-            URL url2 = URL.parse("http://127.0.0.1:80/game");
+            URL url2 = URL.parse("http://127.0.0.1:80/eliminate/game");
             System.out.println(registry.lookup(url2));
             registry.unregister(u);
             latch.await();

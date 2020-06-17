@@ -14,13 +14,13 @@
     <modules>
         <module>gamer-core</module>
         <module>gamer-common</module>
-        <module>gamer-netty</module>
         <module>gamer-test</module>
         <module>gamer-all</module>
         <module>gamer-rpc</module>
         <module>gamer-registry</module>
         <module>gamer-spring-boot-starter</module>
         <module>gamer-swagger</module>
+        <module>gamer-remoting</module>
     </modules>
 
     <properties>

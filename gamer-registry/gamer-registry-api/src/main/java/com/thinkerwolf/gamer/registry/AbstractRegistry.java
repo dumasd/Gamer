@@ -51,7 +51,6 @@ public abstract class AbstractRegistry implements Registry {
             doRegister(url);
             promise.await(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            e.printStackTrace();
             LOG.error(e.getMessage(), e);
         } finally {
             unsubscribe(url, listener);
@@ -63,7 +62,6 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public void unregister(URL url) {
         checkRegisterUrl(url);
-//        String key = createCacheKey(url);
         DefaultPromise<DataEvent> promise = new DefaultPromise<>();
         final INotifyListener listener = new DataChangeListener(promise);
         subscribe(url, listener);
@@ -72,7 +70,6 @@ public abstract class AbstractRegistry implements Registry {
             doUnRegister(url);
             promise.await(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            e.printStackTrace();
             LOG.error(e.getMessage(), e);
         } finally {
             unsubscribe(url, listener);
@@ -172,6 +169,7 @@ public abstract class AbstractRegistry implements Registry {
         } else {
             properties.setProperty(event.getSource(), event.getUrl().toString());
         }
+        LOG.debug("Notify data " + event);
         Set<INotifyListener> listeners = listenerMap.get(event.getSource());
         if (listeners != null) {
             for (INotifyListener listener : listeners) {
@@ -191,6 +189,20 @@ public abstract class AbstractRegistry implements Registry {
      */
     protected void notifyChild(final ChildEvent event) {
         // 子节点变化
+        LOG.debug("Notify children " + event);
+        Set<String> rks = new HashSet<>();
+        for (Object k : properties.keySet()) {
+            int idx = k.toString().indexOf(event.getSource());
+            if (idx == 0 && k.toString().length() > event.getSource().length()) {
+                rks.add(k.toString());
+            }
+        }
+        for (String rk : rks) {
+            properties.remove(rk);
+        }
+        for (URL url : event.getChildUrls()) {
+            saveToCache(url);
+        }
         Set<INotifyListener> listeners = listenerMap.get(event.getSource());
         if (listeners != null) {
             for (INotifyListener listener : listeners) {

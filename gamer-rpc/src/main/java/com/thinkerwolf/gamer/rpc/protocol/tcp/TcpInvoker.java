@@ -1,6 +1,6 @@
 package com.thinkerwolf.gamer.rpc.protocol.tcp;
 
-import com.thinkerwolf.gamer.common.concurrent.Promise;
+import com.thinkerwolf.gamer.remoting.ExchangeClient;
 import com.thinkerwolf.gamer.rpc.*;
 import com.thinkerwolf.gamer.rpc.protocol.AbstractInvoker;
 

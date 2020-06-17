@@ -2,9 +2,6 @@ package com.thinkerwolf.gamer.test;
 
 import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.core.remoting.ChannelHandler;
-import com.thinkerwolf.gamer.core.remoting.ChannelHandlerAdapter;
-import com.thinkerwolf.gamer.core.remoting.RemotingException;
 import com.thinkerwolf.gamer.common.serialization.ObjectInput;
 import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
@@ -13,6 +10,9 @@ import com.thinkerwolf.gamer.netty.NettyConfigurator;
 import com.thinkerwolf.gamer.netty.tcp.Packet;
 import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
 import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
+import com.thinkerwolf.gamer.remoting.ChannelHandler;
+import com.thinkerwolf.gamer.remoting.ChannelHandlerAdapter;
+import com.thinkerwolf.gamer.remoting.RemotingException;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
@@ -63,7 +63,7 @@ public class RemotingNettyClientTest {
         return new ChannelHandlerAdapter() {
 
             @Override
-            public void received(com.thinkerwolf.gamer.core.remoting.Channel channel, Object message) throws RemotingException {
+            public void received(com.thinkerwolf.gamer.remoting.Channel channel, Object message) throws RemotingException {
                 try {
                     Packet packet = (Packet) message;
                     Serializer serializer = ServiceLoader.getDefaultService(Serializer.class);
@@ -77,7 +77,7 @@ public class RemotingNettyClientTest {
             }
 
             @Override
-            public Object sent(com.thinkerwolf.gamer.core.remoting.Channel channel, Object msg) throws RemotingException {
+            public Object sent(com.thinkerwolf.gamer.remoting.Channel channel, Object msg) throws RemotingException {
                 return msg;
             }
         } ;

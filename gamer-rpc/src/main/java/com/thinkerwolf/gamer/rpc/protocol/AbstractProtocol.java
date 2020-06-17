@@ -1,7 +1,7 @@
 package com.thinkerwolf.gamer.rpc.protocol;
 
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.rpc.ExchangeClient;
+import com.thinkerwolf.gamer.remoting.ExchangeClient;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

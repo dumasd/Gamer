@@ -1,0 +1,86 @@
+package com.thinkerwolf.gamer.netty.tcp;
+
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
+import com.thinkerwolf.gamer.core.servlet.Protocol;
+import com.thinkerwolf.gamer.core.servlet.ServletContext;
+import com.thinkerwolf.gamer.core.servlet.Session;
+import com.thinkerwolf.gamer.core.servlet.SessionManager;
+import com.thinkerwolf.gamer.core.util.RequestUtil;
+import com.thinkerwolf.gamer.netty.AbstractRequest;
+import com.thinkerwolf.gamer.netty.NettyCoreUtil;
+import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
+import io.netty.channel.Channel;
+
+/**
+ * TCP
+ *
+ * @author wukai
+ */
+public class TcpRequest extends AbstractRequest {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(TcpRequest.class);
+
+    private ServletContext servletContext;
+
+    private byte[] content;
+
+    private String sessionId;
+
+    private Channel channel;
+
+    public TcpRequest(int requestId, String command, Channel channel, ServletContext servletContext, byte[] content) {
+        super(requestId, command, channel);
+        this.servletContext = servletContext;
+        this.content = content;
+        this.channel = channel;
+        RequestUtil.parseParams(this, getContent());
+
+        if (channel.hasAttr(NettyCoreUtil.CHANNEL_JSESSIONID)) {
+            this.sessionId = channel.attr(NettyCoreUtil.CHANNEL_JSESSIONID).get();
+        }
+        Session session = getSession(false);
+        if (session != null) {
+            session.setPush(new TcpPush(channel));
+        }
+    }
+
+    @Override
+    public byte[] getContent() {
+        return content;
+    }
+
+    @Override
+    public Session getSession() {
+        return getSession(false);
+    }
+
+    @Override
+    public Session getSession(boolean create) {
+        SessionManager sessionManager = servletContext.getSessionManager();
+        if (sessionManager == null) {
+            return null;
+        }
+        Session session = sessionManager.getSession(sessionId, create);
+        if (create && session != null && !session.getId().equals(sessionId)) {
+            // session create or update
+            this.sessionId = session.getId();
+            session.setPush(new TcpPush(channel));
+            getChannel().attr(NettyCoreUtil.CHANNEL_JSESSIONID).set(sessionId);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Create new session " + session);
+            }
+//            session.setPush();
+
+        }
+        if (session != null) {
+            session.touch();
+        }
+        return session;
+    }
+
+    public Protocol getProtocol() {
+        return Protocol.TCP;
+    }
+
+}

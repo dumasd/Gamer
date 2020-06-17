@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.rpc.protocol;
 
 import com.thinkerwolf.gamer.common.concurrent.Promise;
+import com.thinkerwolf.gamer.remoting.ExchangeClient;
 import com.thinkerwolf.gamer.rpc.*;
 
 import java.util.concurrent.TimeUnit;

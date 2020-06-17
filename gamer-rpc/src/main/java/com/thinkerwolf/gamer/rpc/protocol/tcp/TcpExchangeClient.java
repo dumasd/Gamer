@@ -1,24 +1,15 @@
 package com.thinkerwolf.gamer.rpc.protocol.tcp;
 
-import com.thinkerwolf.gamer.common.CauseHolder;
 import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.concurrent.DefaultPromise;
-import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.common.serialization.Serializations;
-import com.thinkerwolf.gamer.core.remoting.*;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.netty.NettyClient;
 import com.thinkerwolf.gamer.netty.tcp.Packet;
+import com.thinkerwolf.gamer.remoting.AbstractExchangeClient;
 import com.thinkerwolf.gamer.rpc.*;
 import org.apache.commons.lang.ArrayUtils;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 /**
  * Tcp exchange client
@@ -26,117 +17,40 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  * @author wukai
  * @date 2020/5/14 10:24
  */
-public class TcpExchangeClient extends ChannelHandlerAdapter implements ExchangeClient<RpcResponse> {
-
-    private static final Object START = new Object();
-    private static final Object STOP = new Object();
-    private static final AtomicReferenceFieldUpdater<TcpExchangeClient, Object> statusUpdater
-            = AtomicReferenceFieldUpdater.newUpdater(TcpExchangeClient.class, Object.class, "status");
-    //private static Logger LOG = InternalLoggerFactory.getLogger(TcpExchangeClient.class);
-    private volatile Object status = START;
-
-    private final Client client;
-
-    private final URL url;
-
-    private final AtomicInteger idGenerator = new AtomicInteger();
-
-    private final Map<Object, DefaultPromise<RpcResponse>> waitResultMap = new ConcurrentHashMap<>();
+public class TcpExchangeClient extends AbstractExchangeClient<RpcResponse> {
 
     public TcpExchangeClient(URL url) {
-        this.url = url;
-        this.client = new NettyClient(url, this);
-    }
-
-    private static Throwable getCause(Object status) {
-        if (!(status instanceof CauseHolder)) {
-            return null;
-        }
-        return ((CauseHolder) status).cause();
+        super(url);
+        setClient(new NettyClient(url, this));
     }
 
     @Override
-    public Promise<RpcResponse> request(Object message) {
-        return request(message, 0, null);
-    }
-
-    @Override
-    public Promise<RpcResponse> request(Object message, long timeout, TimeUnit unit) {
-        DefaultPromise<RpcResponse> promise = new DefaultPromise<>();
-        if (status == STOP || status instanceof CauseHolder) {
-            promise.setFailure(getCause(status));
-            return promise;
-        }
-        final int id = idGenerator.getAndIncrement();
+    protected Object encodeRequest(Object message, int requestId) throws Exception {
         Packet packet = new Packet();
-        try {
-            RpcMessage msg = (RpcMessage) message;
-            promise.setAttachment(msg);
-            String command = RpcUtils.getRpcCommand(msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());
-            packet.setCommand(command);
-            packet.setRequestId(id);
-
-            RpcRequest rpcRequest = new RpcRequest();
-            rpcRequest.setArgs(msg.getParameters());
-
-            Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
-            packet.setContent(Serializations.getBytes(serializer, rpcRequest));
-        } catch (IOException e) {
-            promise.setFailure(e);
-            return promise;
-        }
-
-        waitResultMap.put(id, promise);
-        try {
-            client.send(packet);
-        } catch (RemotingException e) {
-            waitResultMap.remove(id);
-            promise.setFailure(e);
-        }
-
-        if (timeout > 0 && unit != null) {
-            try {
-                promise.await(timeout, unit);
-            } catch (InterruptedException ignored) {
-            }
-        }
-
-        return promise;
+        RpcMessage msg = (RpcMessage) message;
+        String command = RpcUtils.getRpcCommand(msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());
+        packet.setCommand(command);
+        packet.setRequestId(requestId);
+        RpcRequest rpcRequest = new RpcRequest();
+        rpcRequest.setArgs(msg.getParameters());
+        Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
+        packet.setContent(Serializations.getBytes(serializer, rpcRequest));
+        return packet;
     }
 
     @Override
-    public Object sent(Channel channel, Object message) throws RemotingException {
-        return super.sent(channel, message);
-    }
-
-    @Override
-    public void received(Channel channel, Object message) throws RemotingException {
+    protected Integer decodeResponseId(Object message) {
         Packet packet = (Packet) message;
-        DefaultPromise<RpcResponse> promise = waitResultMap.get(packet.getRequestId());
+        return packet.getRequestId();
+    }
+
+    @Override
+    protected RpcResponse decodeResponse(Object message, DefaultPromise<RpcResponse> promise) throws Exception {
+        Packet packet = (Packet) message;
+        byte[] data = ArrayUtils.subarray(packet.getContent(), 4, packet.getContent().length);
         RpcMessage rpcMsg = (RpcMessage) promise.getAttachment();
         Serializer serializer = ServiceLoader.getService(rpcMsg.getSerial(), Serializer.class);
-        byte[] data = ArrayUtils.subarray(packet.getContent(), 4, packet.getContent().length);
-        try {
-            RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
-            promise.setSuccess(rpcResponse);
-        } catch (IOException | ClassNotFoundException e) {
-            promise.setFailure(e);
-            throw new RemotingException(e);
-        } finally {
-            waitResultMap.remove(packet.getRequestId());
-        }
+        return Serializations.getObject(serializer, data, RpcResponse.class);
     }
 
-    @Override
-    public void caught(Channel channel, Throwable e) throws RemotingException {
-        // 发生异常，拒绝请求
-        CauseHolder holder = new CauseHolder(e);
-        Object status = statusUpdater.getAndSet(this, holder);
-        if (!(status == STOP || status instanceof CauseHolder)) {
-            for (DefaultPromise<RpcResponse> promise : waitResultMap.values()) {
-                promise.setFailure(e);
-            }
-            waitResultMap.clear();
-        }
-    }
 }

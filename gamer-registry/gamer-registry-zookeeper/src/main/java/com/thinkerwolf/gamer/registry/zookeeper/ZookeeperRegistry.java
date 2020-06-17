@@ -1,6 +1,8 @@
 package com.thinkerwolf.gamer.registry.zookeeper;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.registry.AbstractRegistry;
 import com.thinkerwolf.gamer.registry.ChildEvent;
 import com.thinkerwolf.gamer.registry.DataEvent;
@@ -12,6 +14,7 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.ACL;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -28,8 +31,9 @@ import java.util.List;
  */
 public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListener, IZkDataListener, IZkChildListener {
 
+    private static final Logger LOG = InternalLoggerFactory.getLogger(ZookeeperRegistry.class);
+
     private ZkClient client;
-    private String root;
 
     public ZookeeperRegistry(URL url) {
         super(url);
@@ -46,13 +50,19 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
         }
         this.client = new ZkClient(zkServers, sessionTimeout, connectionTimeout, new AdaptiveZkSerializer());
         this.client.subscribeStateChanges(this);
-        this.root = ZkUtils.toPath(url);
-        List<String> childs = ZkUtils.getAllChildren(client, root);
-        for (String c : childs) {
-            URL url = client.readData(c);
+        List<String> childs = ZkUtils.getAllChildren(client, ZkUtils.toPath(url));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Zk all children : " + childs);
+        }
+        for (String child : childs) {
+            URL url = client.readData(child);
             if (url != null) {
                 saveToCache(url);
                 doSubscribe(url);
+            } else {
+                URL parent = new URL();
+                parent.setPath(child);
+                doSubscribe(parent);
             }
         }
     }
@@ -61,10 +71,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
         String p = ZkUtils.toPath(url);
         String nodeName = url.getString(URL.NODE_NAME);
         String append = nodeName == null ? "" : ("/" + nodeName);
-        if ("/".equals(p)) {
-            return root + append;
-        }
-        return root + p + append;
+        return p + append;
     }
 
     @Override
@@ -141,7 +148,16 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     @Override
     public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
-        ChildEvent event = new ChildEvent(internalToKey(parentPath), currentChilds);
+        List<URL> childs = new LinkedList<>();
+        if (currentChilds != null) {
+            for (String c : currentChilds) {
+                URL url = client.readData(parentPath + "/" + c);
+                if (url != null) {
+                    childs.add(url);
+                }
+            }
+        }
+        ChildEvent event = new ChildEvent(internalToKey(parentPath), childs);
         notifyChild(event);
     }
 

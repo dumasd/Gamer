@@ -1,7 +1,7 @@
 package com.thinkerwolf.gamer.rpc.protocol.tcp;
 
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.rpc.ExchangeClient;
+import com.thinkerwolf.gamer.remoting.ExchangeClient;
 import com.thinkerwolf.gamer.rpc.Invoker;
 import com.thinkerwolf.gamer.rpc.protocol.AbstractProtocol;
 

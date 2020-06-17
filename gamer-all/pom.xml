@@ -22,20 +22,55 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>com.thinkerwolf</groupId>
-            <artifactId>gamer-core</artifactId>
+            <artifactId>gamer-core-api</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.thinkerwolf</groupId>
-            <artifactId>gamer-netty</artifactId>
+            <artifactId>gamer-core-netty</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+
+
+        <dependency>
+            <groupId>com.thinkerwolf</groupId>
+            <artifactId>gamer-remoting-api</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.thinkerwolf</groupId>
+            <artifactId>gamer-remoting-netty</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.thinkerwolf</groupId>
+            <artifactId>gamer-registry-api</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.thinkerwolf</groupId>
+            <artifactId>gamer-registry-zookeeper</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+
+
         <dependency>
             <groupId>com.thinkerwolf</groupId>
             <artifactId>gamer-rpc</artifactId>
@@ -43,13 +78,7 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.thinkerwolf</groupId>
-            <artifactId>gamer-registry</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-            <optional>true</optional>
-        </dependency>
+
         <dependency>
             <groupId>com.thinkerwolf</groupId>
             <artifactId>gamer-spring-boot-starter</artifactId>
@@ -107,10 +136,17 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.thinkerwolf:gamer-common</include>
-                                    <include>com.thinkerwolf:gamer-core</include>
-                                    <include>com.thinkerwolf:gamer-netty</include>
+
+                                    <include>com.thinkerwolf:gamer-core-api</include>
+                                    <include>com.thinkerwolf:gamer-core-netty</include>
+
+                                    <include>com.thinkerwolf:gamer-registry-api</include>
+                                    <include>com.thinkerwolf:gamer-registry-zookeeper</include>
+
+                                    <include>com.thinkerwolf:gamer-remoting-api</include>
+                                    <include>com.thinkerwolf:gamer-remoting-netty</include>
+
                                     <include>com.thinkerwolf:gamer-rpc</include>
-                                    <include>com.thinkerwolf:gamer-registry</include>
                                     <include>com.thinkerwolf:gamer-spring-boot-starter</include>
                                     <include>com.thinkerwolf:gamer-swagger</include>
                                 </includes>
@@ -149,7 +185,13 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>
-                                        META-INF/gamer/com.thinkerwolf.gamer.com.thinkerwolf.gamer.registry.RegistryFactory
+                                        META-INF/gamer/com.thinkerwolf.gamer.registry.RegistryFactory
+                                    </resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>
+                                        META-INF/gamer/com.thinkerwolf.gamer.remoting.RemotingFactory
                                     </resource>
                                 </transformer>
                             </transformers>
