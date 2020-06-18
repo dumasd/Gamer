@@ -111,19 +111,32 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
      */
     protected abstract T decodeResponse(Object message, DefaultPromise<T> promise) throws Exception;
 
+    /**
+     *
+     * @param channel channel
+     * @param message message
+     */
+    protected void handleNullIdResponse(Channel channel, Object message) {
+
+    }
+
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
         final Integer rid = decodeResponseId(message);
-        DefaultPromise<T> promise = waitResultMap.get(rid);
-        if (promise != null) {
-            try {
-                T res = decodeResponse(message, promise);
-                promise.setSuccess(res);
-            } catch (Exception e) {
-                promise.setFailure(e);
-                throw new RemotingException(e);
-            } finally {
-                waitResultMap.remove(rid);
+        if (rid == null || rid == 0) {
+            handleNullIdResponse(channel, message);
+        } else {
+            DefaultPromise<T> promise = waitResultMap.get(rid);
+            if (promise != null) {
+                try {
+                    T res = decodeResponse(message, promise);
+                    promise.setSuccess(res);
+                } catch (Exception e) {
+                    promise.setFailure(e);
+                    throw new RemotingException(e);
+                } finally {
+                    waitResultMap.remove(rid);
+                }
             }
         }
     }

@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.RemotingException;
 import io.netty.channel.ChannelFuture;
+import io.netty.util.AttributeKey;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -73,6 +74,26 @@ public class NettyChannel implements Channel {
     @Override
     public io.netty.channel.Channel innerCh() {
         return ch;
+    }
+
+    @Override
+    public Object getAttr(String key) {
+        AttributeKey<Object> innerKey = parseKey(key);
+        return ch.hasAttr(innerKey) ? ch.attr(innerKey).get() : null;
+    }
+
+    @Override
+    public void setAttr(String key, Object value) {
+        AttributeKey<Object> innerKey = parseKey(key);
+        ch.attr(innerKey).set(value);
+    }
+
+    private static AttributeKey<Object> parseKey(String key) {
+        if (!AttributeKey.exists(key)) {
+            return AttributeKey.newInstance(key);
+        } else {
+            return AttributeKey.valueOf(key);
+        }
     }
 
     @Override

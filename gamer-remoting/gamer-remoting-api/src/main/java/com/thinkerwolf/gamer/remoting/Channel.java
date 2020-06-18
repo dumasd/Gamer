@@ -4,6 +4,8 @@ import java.net.SocketAddress;
 
 /**
  * Channel
+ *
+ * @author wukai
  */
 public interface Channel extends Endpoint {
 
@@ -15,4 +17,7 @@ public interface Channel extends Endpoint {
 
     Object innerCh();
 
+    Object getAttr(String key);
+
+    void setAttr(String key, Object value);
 }
