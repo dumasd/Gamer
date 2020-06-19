@@ -100,6 +100,6 @@ public class NettyClient implements Client {
 
     @Override
     public boolean isClosed() {
-        return ch.isOpen();
+        return !ch.isOpen();
     }
 }

@@ -51,6 +51,12 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
             promise.setFailure(getCause(status));
             return promise;
         }
+        try {
+            checkConnection();
+        } catch (Exception e) {
+            promise.setFailure(e);
+            return promise;
+        }
 
         final int requestId = idGenerator.incrementAndGet();
         promise.setAttachment(message);
@@ -112,7 +118,6 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
     protected abstract T decodeResponse(Object message, DefaultPromise<T> promise) throws Exception;
 
     /**
-     *
      * @param channel channel
      * @param message message
      */
@@ -151,6 +156,12 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
                 promise.setFailure(e);
             }
             waitResultMap.clear();
+        }
+    }
+
+    private void checkConnection() throws RemotingException {
+        if (client.isClosed()) {
+            client.reconnect();
         }
     }
 
