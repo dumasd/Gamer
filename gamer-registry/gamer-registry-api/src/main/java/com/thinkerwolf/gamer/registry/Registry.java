@@ -40,8 +40,33 @@ public interface Registry {
 
     List<URL> lookup(URL url);
 
+    /**
+     * 订阅节点
+     *
+     * @param url
+     * @param listener
+     */
     void subscribe(URL url, INotifyListener listener);
 
+    /**
+     * 取消订阅节点
+     *
+     * @param url
+     * @param listener
+     */
     void unsubscribe(URL url, INotifyListener listener);
 
+    /**
+     * 订阅Registry客户端状态
+     *
+     * @param listener
+     */
+    void subscribeState(IStateListener listener);
+
+    /**
+     * 取消订阅Registry客户端状态
+     *
+     * @param listener
+     */
+    void unsubscribeState(IStateListener listener);
 }

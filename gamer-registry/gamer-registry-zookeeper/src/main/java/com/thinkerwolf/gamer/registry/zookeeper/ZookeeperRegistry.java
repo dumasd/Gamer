@@ -6,6 +6,7 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.registry.AbstractRegistry;
 import com.thinkerwolf.gamer.registry.ChildEvent;
 import com.thinkerwolf.gamer.registry.DataEvent;
+import com.thinkerwolf.gamer.registry.RegistryState;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.IZkStateListener;
@@ -50,6 +51,10 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
         }
         this.client = new ZkClient(zkServers, sessionTimeout, connectionTimeout, new AdaptiveZkSerializer());
         this.client.subscribeStateChanges(this);
+        fetchAllChildren();
+    }
+
+    private void fetchAllChildren() {
         List<String> childs = ZkUtils.getAllChildren(client, ZkUtils.toPath(url));
         if (LOG.isDebugEnabled()) {
             LOG.debug("Zk all children : " + childs);
@@ -133,17 +138,32 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     @Override
     public void handleStateChanged(Watcher.Event.KeeperState state) throws Exception {
-
+        RegistryState rs = null;
+        switch (state) {
+            case Expired:
+                rs = RegistryState.EXPIRED;
+                break;
+            case SyncConnected:
+                rs = RegistryState.CONNECTED;
+                break;
+            case Disconnected:
+                rs = RegistryState.DISCONNECTED;
+                break;
+        }
+        if (rs != null) {
+            fireStateChange(rs);
+        }
     }
 
     @Override
     public void handleNewSession() throws Exception {
-
+        fireNewSession();
+        fetchAllChildren();
     }
 
     @Override
     public void handleSessionEstablishmentError(Throwable error) throws Exception {
-
+        fireEstablishmentError(error);
     }
 
     @Override
@@ -158,19 +178,19 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
             }
         }
         ChildEvent event = new ChildEvent(internalToKey(parentPath), childs);
-        notifyChild(event);
+        fireChildChange(event);
     }
 
     @Override
     public void handleDataChange(String dataPath, Object data) throws Exception {
         DataEvent event = new DataEvent(internalToKey(dataPath), (URL) data);
-        notifyData(event);
+        fireDataChange(event);
     }
 
     @Override
     public void handleDataDeleted(String dataPath) throws Exception {
         DataEvent event = new DataEvent(internalToKey(dataPath), null);
-        notifyData(event);
+        fireDataChange(event);
     }
 
     @Override

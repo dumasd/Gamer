@@ -31,6 +31,21 @@
             <artifactId>gamer-core-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.thinkerwolf</groupId>
+            <artifactId>gamer-registry-api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
     </dependencies>
 
+    <build>
+        <defaultGoal>compile</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring_boot_version}</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>

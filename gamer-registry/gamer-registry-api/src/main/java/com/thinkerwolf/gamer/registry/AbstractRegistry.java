@@ -6,10 +6,7 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author wukai
@@ -23,6 +20,8 @@ public abstract class AbstractRegistry implements Registry {
     protected URL url;
 
     private final ConcurrentMap<String, Set<INotifyListener>> listenerMap = new ConcurrentHashMap<>();
+
+    private final Set<IStateListener> stateListeners = new CopyOnWriteArraySet<>();
 
     /**
      * The local cache
@@ -163,7 +162,7 @@ public abstract class AbstractRegistry implements Registry {
      *
      * @param event
      */
-    protected void notifyData(final DataEvent event) {
+    protected void fireDataChange(final DataEvent event) {
         if (event.getUrl() == null) {
             properties.remove(event.getSource());
         } else {
@@ -187,7 +186,7 @@ public abstract class AbstractRegistry implements Registry {
      *
      * @param event
      */
-    protected void notifyChild(final ChildEvent event) {
+    protected void fireChildChange(final ChildEvent event) {
         // 子节点变化
         LOG.debug("Notify children " + event);
         Set<String> rks = new HashSet<>();
@@ -211,6 +210,46 @@ public abstract class AbstractRegistry implements Registry {
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void subscribeState(IStateListener listener) {
+        stateListeners.add(listener);
+    }
+
+    @Override
+    public void unsubscribeState(IStateListener listener) {
+        stateListeners.remove(listener);
+    }
+
+    protected void fireStateChange(RegistryState state) {
+        for (IStateListener listener : stateListeners) {
+            try {
+                listener.notifyStateChange(state);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    protected void fireNewSession() {
+        for (IStateListener listener : stateListeners) {
+            try {
+                listener.notifyNewSession();
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    protected void fireEstablishmentError(Throwable error) {
+        for (IStateListener listener : stateListeners) {
+            try {
+                listener.notifyEstablishmentError(error);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
             }
         }
     }

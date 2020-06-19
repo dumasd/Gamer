@@ -1,24 +1,30 @@
 package com.thinkerwolf.gamer.properties;
 
-import static com.thinkerwolf.gamer.properties.GamerProperties.GamerConstants.GAMER_PREFIX;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = GAMER_PREFIX)
+@ConfigurationProperties(prefix = "gamer")
 @Component
 public class GamerProperties {
-
     /**
-     * 配置文件
+     * Gamer Application id
      */
-    private String configFile = null;
+    private int id = 1;
     /**
-     * 远程框架名称
+     * Gamer Application type
+     */
+    private String type;
+    /**
+     * Servlet config file position
+     */
+    private String configFile = "conf.yml";
+    /**
+     * Remoting name
      */
     private String remoting = "netty";
     /**
-     * Servlet启动器
+     * Servlet bootstrap type
      */
     private String servletBoot = "netty";
 
@@ -46,8 +52,20 @@ public class GamerProperties {
         this.servletBoot = servletBoot;
     }
 
-    public static class GamerConstants {
-        public static final String GAMER_PREFIX = "spring.gamer";
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
 }

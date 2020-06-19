@@ -1,3 +1,2 @@
-spring:
-  gamer:
-    config-file: conf.yml
+gamer:
+  config-file: conf.yml

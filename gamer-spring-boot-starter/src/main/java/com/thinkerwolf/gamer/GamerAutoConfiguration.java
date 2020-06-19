@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @ConditionalOnClass(ServletBootstrap.class)
-@Import({GamerServerConfiguration.class})
+@Import({GamerServerConfiguration.class, GamerRegistryConfiguration.class})
 public class GamerAutoConfiguration {
 
 

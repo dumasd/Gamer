@@ -1,0 +1,69 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
+      "name": "gamer",
+      "type": "com.thinkerwolf.gamer.properties.GamerProperties"
+    },
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerRegistryProperties",
+      "name": "gamer.registry",
+      "type": "com.thinkerwolf.gamer.properties.GamerRegistryProperties"
+    },
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerRegistryProperties",
+      "name": "gamer.registry.client",
+      "sourceMethod": "getClient()",
+      "type": "com.thinkerwolf.gamer.properties.GamerRegistryProperties$Client"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
+      "defaultValue": "conf.yml",
+      "name": "gamer.config-file",
+      "description": "Servlet config file position",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
+      "defaultValue": 1,
+      "name": "gamer.id",
+      "description": "Gamer Application id",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerRegistryProperties$Client",
+      "name": "gamer.registry.client.service-url",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerRegistryProperties",
+      "defaultValue": false,
+      "name": "gamer.registry.enabled",
+      "description": "注册中心连接是否开启",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
+      "defaultValue": "netty",
+      "name": "gamer.remoting",
+      "description": "Remoting name",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
+      "defaultValue": "netty",
+      "name": "gamer.servlet-boot",
+      "description": "Servlet bootstrap type",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
+      "name": "gamer.type",
+      "description": "Gamer Application type",
+      "type": "java.lang.String"
+    }
+  ]
+}
