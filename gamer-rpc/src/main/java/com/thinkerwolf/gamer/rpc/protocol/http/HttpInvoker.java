@@ -2,76 +2,45 @@ package com.thinkerwolf.gamer.rpc.protocol.http;
 
 import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.common.concurrent.DefaultPromise;
 import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.rpc.*;
-import okhttp3.*;
-import okhttp3.Response;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
-
-@SuppressWarnings("unchecked")
 public class HttpInvoker<T> implements Invoker<T> {
 
-    private static MediaType BYTES = MediaType.get("application/octet-stream");
-    private URL url;
-    private OkHttpClient client;
+    private final URL url;
+    private final CloseableHttpClient httpClient;
 
-    public HttpInvoker(URL url, OkHttpClient client) {
+    public HttpInvoker(URL url) {
         this.url = url;
-        this.client = client;
+        this.httpClient = HttpClients.createDefault();
     }
 
     @Override
     public Result invoke(Object args) throws Throwable {
-        // http请求
         RpcMessage msg = (RpcMessage) args;
         String command = RpcUtils.getRpcCommand(msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());
 
         RpcRequest rpcArgs = new RpcRequest();
         rpcArgs.setArgs(msg.getParameters());
         Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
-
-        RequestBody requestBody = RequestBody.create(Serializations.getBytes(serializer, rpcArgs), BYTES);
-        Request request = new Request.Builder().url(url.getProtocolHostPort() + "/" + command)
-                .post(requestBody).build();
-        DefaultPromise promise = new DefaultPromise();
-
-        RpcResponse rpcResponse;
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                promise.setFailure(e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    ResponseBody responseBody = response.body();
-                    byte[] body = responseBody.bytes();
-                    byte[] data =  ArrayUtils.subarray(body, 4, body.length);
-                    RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
-                    promise.setSuccess(rpcResponse);
-                } catch (Exception e) {
-                    promise.setFailure(e);
-                }
-            }
-        });
-
-        if (!msg.isAsync()) {
-            promise.await();
-            if (promise.cause() != null) {
-                return new Result(promise.cause());
-            }
-            rpcResponse = (RpcResponse) promise.getNow();
+        try {
+            HttpPost httpPost = new HttpPost(url.getProtocolHostPort() + "/" + command);
+            httpPost.setEntity(new ByteArrayEntity(Serializations.getBytes(serializer, rpcArgs)));
+            CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
+            byte[] body = EntityUtils.toByteArray(httpResponse.getEntity());
+            byte[] data = ArrayUtils.subarray(body, 4, body.length);
+            RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
             return new Result(rpcResponse.getResult());
-
+        } catch (Exception e) {
+            return new Result(e);
         }
-
-        RpcContext.getContext().setCurrent(promise);
-        rpcResponse = (RpcResponse) promise.getNow();
-        return rpcResponse == null ? new Result(null) : new Result(rpcResponse.getResult());
     }
 }

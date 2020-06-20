@@ -52,10 +52,10 @@
         <slf4j_version>1.7.25</slf4j_version>
         <freemarker_version>2.3.28</freemarker_version>
         <swagger_version>1.5.24</swagger_version>
-        <okhttp_version>4.6.0</okhttp_version>
         <guava_version>29.0-jre</guava_version>
         <jedis_version>3.1.0</jedis_version>
         <jackson.version>2.11.0</jackson.version>
+        <httpclient_version>4.5.12</httpclient_version>
     </properties>
 
     <dependencies>
@@ -130,11 +130,6 @@
                 <version>${kryo_version}</version>
             </dependency>
             <dependency>
-                <groupId>com.squareup.okhttp3</groupId>
-                <artifactId>okhttp</artifactId>
-                <version>${okhttp_version}</version>
-            </dependency>
-            <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-models</artifactId>
                 <version>${swagger_version}</version>
@@ -158,6 +153,11 @@
                 <groupId>com.101tec</groupId>
                 <artifactId>zkclient</artifactId>
                 <version>0.11</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient_version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

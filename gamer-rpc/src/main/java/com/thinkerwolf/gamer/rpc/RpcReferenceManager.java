@@ -10,13 +10,20 @@ import com.thinkerwolf.gamer.rpc.protocol.tcp.TcpExchangeClient;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * RPC连接管理器
+ *
+ * @author wukai
+ * @since 2020-06-20
  */
+@SuppressWarnings("unchecked")
 public class RpcReferenceManager {
 
-    private static RpcReferenceManager INSTANCE = new RpcReferenceManager();
+    private static final RpcReferenceManager INSTANCE = new RpcReferenceManager();
 
     private RpcReferenceManager() {
     }
@@ -25,7 +32,19 @@ public class RpcReferenceManager {
         return INSTANCE;
     }
 
-    @SuppressWarnings("unchecked")
+    private final Map<String, ReferenceConfig<?>> configMap = new ConcurrentHashMap<>();
+
+    public <T> ReferenceConfig<T> getReferenceConfig(final Class<T> interfaceClass, final URL url) {
+        String k = rpcKey(url, interfaceClass);
+        return (ReferenceConfig<T>) configMap.computeIfAbsent(k, s -> {
+            ReferenceConfig<T> config = new ReferenceConfig<>();
+            config.setUrls(Collections.singletonList(url));
+            config.setInterfaceClass(interfaceClass);
+            config.setId(s);
+            return config;
+        });
+    }
+
     public <T> T getConnection(final Class<T> interfaceClass, URL url) {
         if (!interfaceClass.isInterface()) {
             throw new RpcException(interfaceClass.getName());
@@ -39,17 +58,21 @@ public class RpcReferenceManager {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 RpcMessage rpcMessage = new RpcMessage(interfaceClass, method.getName(), method.getParameterTypes(), args);
-                Promise promise = client.request(rpcMessage);
+                Promise<RpcResponse> promise = client.request(rpcMessage);
                 RpcResponse rpcResponse;
                 if (!rpcClient.async()) {
-                    rpcResponse = (RpcResponse) promise.get();
+                    rpcResponse = promise.get();
                     return rpcResponse.getResult();
                 }
                 RpcContext.getContext().setCurrent(promise);
-                rpcResponse = (RpcResponse) promise.getNow();
+                rpcResponse = promise.getNow();
                 return rpcResponse == null ? null : rpcResponse.getResult();
             }
         });
+    }
+
+    private static <T> String rpcKey(URL url, Class<T> interfaceClass) {
+        return url.toString() + "#" + interfaceClass.getName();
     }
 
 }

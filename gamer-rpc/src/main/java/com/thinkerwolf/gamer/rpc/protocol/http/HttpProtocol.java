@@ -3,7 +3,6 @@ package com.thinkerwolf.gamer.rpc.protocol.http;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.rpc.Invoker;
 import com.thinkerwolf.gamer.rpc.protocol.Protocol;
-import okhttp3.OkHttpClient;
 
 /**
  * @author wukai
@@ -15,7 +14,7 @@ public class HttpProtocol implements Protocol {
 
     @Override
     public <T> Invoker<T> invoker(Class<T> interfaceClass, URL url) {
-        HttpInvoker<T> invoker = new HttpInvoker<>(url, new OkHttpClient());
+        HttpInvoker<T> invoker = new HttpInvoker<>(url);
         return invoker;
     }
 

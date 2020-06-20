@@ -66,6 +66,14 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
         this.url = url;
     }
 
+    public void setUrls(List<URL> urls) {
+        this.urls = urls;
+    }
+
+    public List<URL> getUrls() {
+        return urls;
+    }
+
     public synchronized T get() {
         if (ref == null) {
             init();
@@ -91,18 +99,21 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
                 throw new RpcException(e);
             }
         }
-        urls = new ArrayList<>();
-        if (StringUtils.isNotEmpty(url)) {
-            String[] en = Constants.SEMICOLON_SPLIT_PATTERN.split(url);
-            if (en != null && en.length > 0) {
-                for (String e : en) {
-                    URL url = URL.parse(e);
-                    if (url.getParameters() != null) {
-                        url.getParameters().putAll(map);
-                    } else {
-                        url.setParameters(map);
+
+        if (urls == null || urls.size() <= 0) {
+            urls = new ArrayList<>();
+            if (StringUtils.isNotEmpty(url)) {
+                String[] en = Constants.SEMICOLON_SPLIT_PATTERN.split(url);
+                if (en != null && en.length > 0) {
+                    for (String e : en) {
+                        URL url = URL.parse(e);
+                        if (url.getParameters() != null) {
+                            url.getParameters().putAll(map);
+                        } else {
+                            url.setParameters(map);
+                        }
+                        urls.add(url);
                     }
-                    urls.add(url);
                 }
             }
         }

@@ -18,10 +18,10 @@ public class ReferenceConfigTests {
     };
 
     public static void main(String[] args) {
-
+       String url = "ws://101.200.177.204:80?clientNum=5";
 //        String url = "http://127.0.0.1:8080";
 //        String url = "ws://127.0.0.1:8080?clientNum=5";
-        String url = "tcp://127.0.0.1:8090?clientNum=5";
+//        String url = "tcp://127.0.0.1:8090?clientNum=5";
         URL u = URL.parse(url);
 //        String url = "tcp://127.0.0.1:8090";
         ReferenceConfig<IRpcAction> ref = new ReferenceConfig<>();
