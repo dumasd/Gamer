@@ -16,6 +16,7 @@
     <modules>
         <module>gamer-registry-api</module>
         <module>gamer-registry-zookeeper</module>
+        <module>gamer-registry-etcd3</module>
     </modules>
 
 </project>

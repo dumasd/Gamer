@@ -5,8 +5,7 @@ import com.thinkerwolf.gamer.common.URL;
 /**
  * 网络中断
  */
-public interface Endpoint {
-
+public interface Endpoint extends AutoCloseable {
 
 
     /**
@@ -20,6 +19,7 @@ public interface Endpoint {
 
     void send(Object message) throws RemotingException;
 
+    @Override
     void close();
 
     boolean isClosed();

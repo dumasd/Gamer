@@ -131,6 +131,10 @@ public abstract class AbstractRegistry implements Registry {
         properties.setProperty(createCacheKey(url), url.toString());
     }
 
+    public boolean existsCache(URL url) {
+        return properties.containsKey(createCacheKey(url));
+    }
+
     @Override
     public List<URL> lookup(URL url) {
         // 1.Find from cache

@@ -56,6 +56,7 @@
         <jedis_version>3.1.0</jedis_version>
         <jackson.version>2.11.0</jackson.version>
         <httpclient_version>4.5.12</httpclient_version>
+        <jetcd_version>0.5.3</jetcd_version>
     </properties>
 
     <dependencies>
@@ -158,6 +159,11 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.etcd</groupId>
+                <artifactId>jetcd-core</artifactId>
+                <version>${jetcd_version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
