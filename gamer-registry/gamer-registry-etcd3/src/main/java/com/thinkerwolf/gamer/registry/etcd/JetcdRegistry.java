@@ -52,7 +52,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
 
     private final ScheduledExecutorService retryExecutor = new ScheduledThreadPoolExecutor(1, new DefaultThreadFactory("EtcdRetry"));
 
-    private ScheduledExecutorService reconnectExecutor = new ScheduledThreadPoolExecutor(1, new DefaultThreadFactory("EtcdReconnect"));
+    private final ScheduledExecutorService reconnectExecutor = new ScheduledThreadPoolExecutor(1, new DefaultThreadFactory("EtcdReconnect"));
 
     private final Set<URL> registryUrls = new CopyOnWriteArraySet<>();
 
@@ -207,7 +207,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
         try {
             this.client = RetryLoops.invokeWithRetry(() -> retry.get(), retryPolicy);
             this.globalLeaseId = RetryLoops.invokeWithRetry(() -> {
-                long ttl = TimeUnit.MILLISECONDS.toSeconds(sessionTimeout + 5000);
+                long ttl = TimeUnit.MILLISECONDS.toSeconds(sessionTimeout + 1000);
                 CompletableFuture<LeaseGrantResponse> resp = this.client.getLeaseClient().grant(ttl, requestTimeout, TimeUnit.MILLISECONDS);
                 return resp.get().getID();
             }, retryPolicy);

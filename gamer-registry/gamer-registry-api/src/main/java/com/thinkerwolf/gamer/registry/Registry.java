@@ -10,7 +10,7 @@ import java.util.List;
  * @author wukai
  * @date 2020/5/14 15:41
  */
-public interface Registry {
+public interface Registry extends AutoCloseable {
     /**
      * 注册中心地址
      *
@@ -35,6 +35,7 @@ public interface Registry {
     /**
      * 关闭注册中心
      */
+    @Override
     void close();
 
 
