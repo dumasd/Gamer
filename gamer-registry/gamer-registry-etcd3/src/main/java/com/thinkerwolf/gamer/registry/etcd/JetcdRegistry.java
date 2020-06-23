@@ -42,7 +42,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(JetcdRegistry.class);
 
-    private Client client;
+    private volatile Client client;
 
     private volatile long globalLeaseId;
 
@@ -136,6 +136,9 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
             }, retryPolicy);
         } catch (Exception e) {
             LOG.error("Etcd registry error", e);
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
             throw new RuntimeException(e);
         }
     }
@@ -203,8 +206,15 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
         reconnectExecutor.shutdownNow();
     }
 
+    /**
+     * 重连
+     */
     private void reconnect() {
         try {
+            Client oldClient = this.client;
+            if (oldClient != null) {
+                oldClient.close();
+            }
             this.client = RetryLoops.invokeWithRetry(() -> retry.get(), retryPolicy);
             this.globalLeaseId = RetryLoops.invokeWithRetry(() -> {
                 long ttl = TimeUnit.MILLISECONDS.toSeconds(sessionTimeout + 1000);
@@ -240,6 +250,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
                 }
             } catch (Throwable e) {
                 LOG.warn("Get keep alive response throwable", e);
+                fireStateChange(RegistryState.DISCONNECTED);
                 try {
                     reconnect();
                     fireStateChange(RegistryState.CONNECTED);
