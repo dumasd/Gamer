@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 import static com.thinkerwolf.gamer.registry.etcd.JetcdUtil.*;
 
@@ -48,7 +49,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
 
     private IRetryPolicy retryPolicy;
 
-    private CompletableFuture<Client> retry;
+    private Supplier<Client> retry;
 
     private final ScheduledExecutorService retryExecutor = new ScheduledThreadPoolExecutor(1, new DefaultThreadFactory("EtcdRetry"));
 
@@ -76,7 +77,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
         this.sessionTimeout = url.getLong(URL.SESSION_TIMEOUT, DEFAULT_KEEP_ALIVE_DELAY);
 
         this.retryPolicy = new RetryNTimes(requestRetryTimes, requestTimeout, TimeUnit.MILLISECONDS);
-        this.retry = CompletableFuture.supplyAsync(() -> prepareClient(url));
+        this.retry = () -> prepareClient(url);
         reconnect();
         keepAlive();
 
@@ -215,7 +216,8 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
             if (oldClient != null) {
                 oldClient.close();
             }
-            this.client = RetryLoops.invokeWithRetry(() -> retry.get(), retryPolicy);
+            CompletableFuture<Client> future = CompletableFuture.supplyAsync(retry);
+            this.client = RetryLoops.invokeWithRetry(future::get, retryPolicy);
             this.globalLeaseId = RetryLoops.invokeWithRetry(() -> {
                 long ttl = TimeUnit.MILLISECONDS.toSeconds(sessionTimeout + 1000);
                 CompletableFuture<LeaseGrantResponse> resp = this.client.getLeaseClient().grant(ttl, requestTimeout, TimeUnit.MILLISECONDS);
