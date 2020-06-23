@@ -9,7 +9,6 @@ import com.thinkerwolf.gamer.core.servlet.SessionManager;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.netty.AbstractRequest;
 import com.thinkerwolf.gamer.netty.NettyCoreUtil;
-import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.channel.Channel;
 
 /**
@@ -21,11 +20,9 @@ public class TcpRequest extends AbstractRequest {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(TcpRequest.class);
 
-    private ServletContext servletContext;
+    private final ServletContext servletContext;
 
-    private byte[] content;
-
-    private String sessionId;
+    private final byte[] content;
 
     private Channel channel;
 
@@ -36,9 +33,6 @@ public class TcpRequest extends AbstractRequest {
         this.channel = channel;
         RequestUtil.parseParams(this, getContent());
 
-        if (channel.hasAttr(NettyCoreUtil.CHANNEL_JSESSIONID)) {
-            this.sessionId = channel.attr(NettyCoreUtil.CHANNEL_JSESSIONID).get();
-        }
         Session session = getSession(false);
         if (session != null) {
             session.setPush(new TcpPush(channel));
@@ -61,17 +55,15 @@ public class TcpRequest extends AbstractRequest {
         if (sessionManager == null) {
             return null;
         }
+        String sessionId = getInternalSessionId();
         Session session = sessionManager.getSession(sessionId, create);
         if (create && session != null && !session.getId().equals(sessionId)) {
             // session create or update
-            this.sessionId = session.getId();
             session.setPush(new TcpPush(channel));
             getChannel().attr(NettyCoreUtil.CHANNEL_JSESSIONID).set(sessionId);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Create new session " + session);
             }
-//            session.setPush();
-
         }
         if (session != null) {
             session.touch();
@@ -83,4 +75,12 @@ public class TcpRequest extends AbstractRequest {
         return Protocol.TCP;
     }
 
+    private String getInternalSessionId() {
+        if (channel.hasAttr(NettyCoreUtil.CHANNEL_JSESSIONID)) {
+            return channel.attr(NettyCoreUtil.CHANNEL_JSESSIONID).toString();
+        }
+        return null;
+//        String sessionId = (String) getAttribute(Session.JSESSION);
+//        return sessionId;
+    }
 }

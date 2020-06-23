@@ -57,7 +57,7 @@ public class RedisSessionManager extends AbstractSessionManager {
             }
             if (session == null || !session.isValidate()) {
                 if (create) {
-                    String id = generateSessionId();
+                    String id = createSessionId(sessionId);
                     session = new RedisSession(id, getSessionTimeout(), getSessionAttributeListeners(), this, jedisPool);
                     session.touch();
                     sessionCache.put(id, session);
@@ -67,6 +67,13 @@ public class RedisSessionManager extends AbstractSessionManager {
             }
             return session;
         }
+    }
+
+    private String createSessionId(String sessionId) {
+        if (StringUtils.isBlank(sessionId) || sessionCache.containsKey(sessionId)) {
+            return generateSessionId();
+        }
+        return sessionId;
     }
 
     @Override

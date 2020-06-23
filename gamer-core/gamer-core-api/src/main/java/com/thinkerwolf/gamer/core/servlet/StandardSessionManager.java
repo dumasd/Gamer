@@ -87,7 +87,7 @@ public class StandardSessionManager extends AbstractSessionManager {
 
         if (session == null || !session.isValidate()) {
             if (create) {
-                sessionId = generateSessionId();
+                sessionId = createSessionId(sessionId);
                 Session createSession = new StandardSession(sessionId, getSessionTimeout(), getSessionAttributeListeners(), this);
                 session = createSession;
                 sessionMap.put(sessionId, createSession);
@@ -103,6 +103,13 @@ public class StandardSessionManager extends AbstractSessionManager {
             }
         }
         return session;
+    }
+
+    private String createSessionId(String sessionId) {
+        if (StringUtils.isBlank(sessionId) || sessionMap.containsKey(sessionId)) {
+            return generateSessionId();
+        }
+        return sessionId;
     }
 
     @Override

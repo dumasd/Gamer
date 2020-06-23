@@ -64,8 +64,9 @@ public class WebsocketRequest extends AbstractRequest {
         if (channel.hasAttr(NettyCoreUtil.CHANNEL_JSESSIONID)) {
             return channel.attr(NettyCoreUtil.CHANNEL_JSESSIONID).toString();
         }
-        String sessionId = (String) getAttribute(Session.JSESSION);
-        return sessionId;
+        return null;
+//        String sessionId = (String) getAttribute(Session.JSESSION);
+//        return sessionId;
     }
 
     @Override
