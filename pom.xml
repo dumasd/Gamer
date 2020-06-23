@@ -46,7 +46,7 @@
 
         <junit_version>4.12</junit_version>
         <spring_version>5.0.7.RELEASE</spring_version>
-        <netty_version>4.1.42.Final</netty_version>
+        <netty_version>4.1.45.Final</netty_version>
         <hessian_version>4.0.38</hessian_version>
         <kryo_version>4.0.0</kryo_version>
         <slf4j_version>1.7.25</slf4j_version>
