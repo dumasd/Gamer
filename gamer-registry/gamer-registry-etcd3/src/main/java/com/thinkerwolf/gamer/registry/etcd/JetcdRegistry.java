@@ -77,7 +77,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
         this.requestRetryTimes = url.getInteger("registryRetryTimes", DEFAULT_REQUEST_RETRY_TIMES);
         this.requestTimeout = url.getLong(URL.REGISTRY_TIMEOUT, DEFAULT_REQUEST_DELAY);
         this.sessionTimeout = url.getLong(URL.SESSION_TIMEOUT, DEFAULT_KEEP_ALIVE_DELAY);
-        this.ttl = sessionTimeout + 1000;
+        this.ttl = TimeUnit.MILLISECONDS.toSeconds(sessionTimeout + 1000);
 
         this.retryPolicy = new RetryNTimes(requestRetryTimes, requestTimeout, TimeUnit.MILLISECONDS);
         this.retry = () -> prepareClient(url);
@@ -240,19 +240,20 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
     private void keepAlive0() {
         final long oldLeaseId = globalLeaseId;
         CompletableFuture<LeaseKeepAliveResponse> cf = this.client.getLeaseClient().keepAliveOnce(globalLeaseId);
+
         cf.whenComplete((resp, tx) -> {
             try {
-                long keepAliveInterval = System.currentTimeMillis() - lastKeepAliveTime;
+                final long ka = System.currentTimeMillis() - lastKeepAliveTime;
                 if (tx != null) {
                     throw tx;
                 } else {
                     globalLeaseId = resp.getID();
-                    if (keepAliveInterval >= this.ttl) {
+                    if (ka - 500 >= this.ttl * 1000) {
                         for (URL url : registryUrls) {
                             doRegister(url);
                         }
                     }
-                    LOG.debug("Get keep alive response success. interval:{}, lease:{},{}", keepAliveInterval, oldLeaseId, globalLeaseId);
+                    LOG.debug("Get keep alive response success. interval:{}, lease:{},{}", ka, oldLeaseId, globalLeaseId);
                 }
             } catch (Throwable e) {
                 LOG.warn("Get keep alive response throwable", e);

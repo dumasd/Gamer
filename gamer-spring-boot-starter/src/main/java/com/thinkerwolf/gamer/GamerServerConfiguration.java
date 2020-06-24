@@ -1,6 +1,8 @@
 package com.thinkerwolf.gamer;
 
 import com.thinkerwolf.gamer.common.ServiceLoader;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.servlet.ServletBootstrap;
 import com.thinkerwolf.gamer.core.servlet.ServletBootstrapFactory;
 import com.thinkerwolf.gamer.core.servlet.ServletContext;
@@ -14,22 +16,35 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableConfigurationProperties(GamerProperties.class)
-public class GamerServerConfiguration implements ApplicationContextAware {
+public class GamerServerConfiguration {
 
-    private ApplicationContext applicationContext;
+    private static final Logger LOG = InternalLoggerFactory.getLogger(GamerServerConfiguration.class);
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
+    @Configuration
+    public static class ServletBootstrapConfiguration implements ApplicationContextAware {
+        private ApplicationContext applicationContext;
 
-    @Bean
-    public ServletBootstrap servletBootstrap(GamerProperties properties) throws Exception {
-        ServletBootstrapFactory factory = ServiceLoader.getService(properties.getServletBoot(), ServletBootstrapFactory.class);
-        ServletBootstrap bootstrap = factory.create(properties.getConfigFile());
-        bootstrap.getServletConfig().getServletContext().setAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE, applicationContext);
-        bootstrap.startup();
-        return factory.create(properties.getConfigFile());
+        @Bean
+        public ServletBootstrap servletBootstrap(GamerProperties properties) {
+            try {
+                ServletBootstrapFactory factory = ServiceLoader.getService(properties.getServletBoot(), ServletBootstrapFactory.class);
+                ServletBootstrap bootstrap = factory.create(properties.getConfigFile());
+                bootstrap.getServletConfig().getServletContext().setAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE, applicationContext);
+                bootstrap.startup();
+                return factory.create(properties.getConfigFile());
+            } catch (Exception e) {
+                LOG.error("Error when initialize servlet", e);
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+            this.applicationContext = applicationContext;
+        }
     }
 
 
