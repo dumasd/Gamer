@@ -25,6 +25,7 @@ import io.etcd.jetcd.watch.WatchResponse;
 import org.apache.commons.lang.StringUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +43,9 @@ import static com.thinkerwolf.gamer.registry.etcd.JetcdUtil.*;
 public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(JetcdRegistry.class);
+    private static final long DEFAULT_KEEP_ALIVE_DELAY = 1000;
+    private static final int DEFAULT_REQUEST_RETRY_TIMES = 1;
+    private static final long DEFAULT_REQUEST_DELAY = 1500;
 
     private volatile Client client;
 
@@ -57,13 +61,11 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
 
     private final Set<URL> registryUrls = new CopyOnWriteArraySet<>();
 
-    private static final long DEFAULT_KEEP_ALIVE_DELAY = 1000;
-    private static final int DEFAULT_REQUEST_RETRY_TIMES = 1;
-    private static final long DEFAULT_REQUEST_DELAY = 1500;
-
+    private long lastKeepAliveTime;
     private int requestRetryTimes;
     private long requestTimeout;
     private long sessionTimeout;
+    private long ttl;
 
 
     public JetcdRegistry(URL url) {
@@ -75,6 +77,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
         this.requestRetryTimes = url.getInteger("registryRetryTimes", DEFAULT_REQUEST_RETRY_TIMES);
         this.requestTimeout = url.getLong(URL.REGISTRY_TIMEOUT, DEFAULT_REQUEST_DELAY);
         this.sessionTimeout = url.getLong(URL.SESSION_TIMEOUT, DEFAULT_KEEP_ALIVE_DELAY);
+        this.ttl = sessionTimeout + 1000;
 
         this.retryPolicy = new RetryNTimes(requestRetryTimes, requestTimeout, TimeUnit.MILLISECONDS);
         this.retry = () -> prepareClient(url);
@@ -219,7 +222,6 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
             CompletableFuture<Client> future = CompletableFuture.supplyAsync(retry);
             this.client = RetryLoops.invokeWithRetry(future::get, retryPolicy);
             this.globalLeaseId = RetryLoops.invokeWithRetry(() -> {
-                long ttl = TimeUnit.MILLISECONDS.toSeconds(sessionTimeout + 1000);
                 CompletableFuture<LeaseGrantResponse> resp = this.client.getLeaseClient().grant(ttl, requestTimeout, TimeUnit.MILLISECONDS);
                 return resp.get().getID();
             }, retryPolicy);
@@ -229,6 +231,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
     }
 
     private void keepAlive() {
+        this.lastKeepAliveTime = System.currentTimeMillis();
         retryExecutor.scheduleWithFixedDelay(() -> {
             keepAlive0();
         }, sessionTimeout, sessionTimeout, TimeUnit.MILLISECONDS);
@@ -239,16 +242,17 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
         CompletableFuture<LeaseKeepAliveResponse> cf = this.client.getLeaseClient().keepAliveOnce(globalLeaseId);
         cf.whenComplete((resp, tx) -> {
             try {
+                long keepAliveInterval = System.currentTimeMillis() - lastKeepAliveTime;
                 if (tx != null) {
                     throw tx;
                 } else {
                     globalLeaseId = resp.getID();
-                    for (URL url : registryUrls) {
-                        if (!existsCache(url)) {
+                    if (keepAliveInterval >= this.ttl) {
+                        for (URL url : registryUrls) {
                             doRegister(url);
                         }
                     }
-                    LOG.debug("Get keep alive response success " + (oldLeaseId == globalLeaseId));
+                    LOG.debug("Get keep alive response success. interval:{}, lease:{},{}", keepAliveInterval, oldLeaseId, globalLeaseId);
                 }
             } catch (Throwable e) {
                 LOG.warn("Get keep alive response throwable", e);
@@ -259,6 +263,8 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
                 } catch (Exception thx) {
                     LOG.error("Reconnect error ", e);
                 }
+            } finally {
+                this.lastKeepAliveTime = System.currentTimeMillis();
             }
         });
 
