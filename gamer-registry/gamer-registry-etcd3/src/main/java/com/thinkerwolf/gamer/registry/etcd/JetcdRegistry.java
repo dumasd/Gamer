@@ -248,7 +248,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
                     throw tx;
                 } else {
                     globalLeaseId = resp.getID();
-                    if (ka - 500 >= this.ttl * 1000) {
+                    if (ka >= this.ttl * 1000) {
                         for (URL url : registryUrls) {
                             doRegister(url);
                         }
