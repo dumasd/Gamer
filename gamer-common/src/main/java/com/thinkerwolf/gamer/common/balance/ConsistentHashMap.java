@@ -17,8 +17,9 @@ public class ConsistentHashMap<T> {
         this.hashAlgorithm = hashAlgorithm;
         this.virtualNum = virtualNum;
         for (T t : nodes) {
+            String s = t.toString();
             for (int i = 0; i < virtualNum; i++) {
-                long nodeKey = this.hashAlgorithm.hash(t.toString() + "-" + i);
+                long nodeKey = this.hashAlgorithm.hash(s + "-" + i);
                 nodeMap.put(nodeKey, t);
             }
         }
