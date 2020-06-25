@@ -1,0 +1,2 @@
+random=com.thinkerwolf.gamer.common.balance.RandomLoadBalancer
+consistentHash=com.thinkerwolf.gamer.common.balance.ConsistentHashLoadBalancer
