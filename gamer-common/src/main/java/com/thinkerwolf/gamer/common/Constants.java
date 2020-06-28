@@ -39,6 +39,10 @@ public final class Constants {
     public static final String FRAMEWORK_NAME_VERSION = String.format("%s/%s", FRAMEWORK_NAME, VERSION);
 
     /**
+     * 框架网络接口类型
+     */
+    public static final String GAMER_PREFERRED_NETWORK_INTERFACE = "gamer.network.interface.preferred";
+    /**
      * ;
      */
     public static final Pattern SEMICOLON_SPLIT_PATTERN = Pattern.compile("\\s*[;]+\\s*");
