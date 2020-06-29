@@ -5,7 +5,9 @@ import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.rpc.*;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
@@ -35,9 +37,12 @@ public class HttpInvoker<T> implements Invoker<T> {
             HttpPost httpPost = new HttpPost(url.getProtocolHostPort() + "/" + command);
             httpPost.setEntity(new ByteArrayEntity(Serializations.getBytes(serializer, rpcArgs)));
             CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
-            byte[] body = EntityUtils.toByteArray(httpResponse.getEntity());
+            HttpEntity entity = httpResponse.getEntity();
+            byte[] body = EntityUtils.toByteArray(entity);
             byte[] data = ArrayUtils.subarray(body, 4, body.length);
             RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
+            EntityUtils.consumeQuietly(entity);
+            IOUtils.closeQuietly(httpResponse);
             return new Result(rpcResponse.getResult());
         } catch (Exception e) {
             return new Result(e);
