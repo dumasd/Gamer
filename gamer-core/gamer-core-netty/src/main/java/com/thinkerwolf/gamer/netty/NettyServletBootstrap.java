@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.common.util.NetUtils;
 import com.thinkerwolf.gamer.common.util.ResourceUtils;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
@@ -13,6 +14,7 @@ import com.thinkerwolf.gamer.netty.http.HttpServletHandler;
 import com.thinkerwolf.gamer.netty.tcp.TcpServletHandler;
 import com.thinkerwolf.gamer.netty.websocket.WebsocketServletHandler;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
+import io.netty.util.NetUtil;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -196,7 +198,14 @@ public class NettyServletBootstrap implements ServletBootstrap {
                     url.setPort(URL.DEFAULT_HTTP_PORT);
                 }
             }
-            url.setHost(MapUtils.getString(nettyConf, URL.HOST, "127.0.0.1"));
+            String host;
+            if (nettyConf.containsKey(URL.HOST)) {
+                host = MapUtils.getString(nettyConf, URL.HOST);
+            } else {
+                host = NetUtils.getLocalAddress().getHostAddress();
+            }
+
+            url.setHost(host);
             url.setUsername(MapUtils.getString(nettyConf, URL.USERNAME));
             url.setPassword(MapUtils.getString(nettyConf, URL.PASSWORD));
 
