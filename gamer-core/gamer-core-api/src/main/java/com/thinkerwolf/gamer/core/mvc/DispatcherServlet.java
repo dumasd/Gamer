@@ -40,9 +40,9 @@ public class DispatcherServlet extends AbstractServlet implements MvcServlet {
         this.invocationMap = new HashMap<>();
         initSpringContext(servletConfig);
         initObjectFactory(servletConfig);
+        initSessionManager(servletConfig);
         initFilters(servletConfig);
         initAction(servletConfig);
-        initSessionManager(servletConfig);
         FreemarkerHelper.init(servletConfig);
         servletConfig.getServletContext().setAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE, this);
     }
@@ -105,6 +105,7 @@ public class DispatcherServlet extends AbstractServlet implements MvcServlet {
                         Class<?> clazz = ClassUtils.getClass(f);
                         if (Filter.class.isAssignableFrom(clazz)) {
                             Filter filter = (Filter) objectFactory.buildObject(clazz);
+                            filter.init(config);
                             this.filters.add(filter);
                         }
                     } catch (Exception e) {

@@ -83,24 +83,26 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
         this.retry = () -> prepareClient(url);
         reconnect();
         keepAlive();
+        try {
+            lookupAll();
+        } catch (Exception e) {
+            LOG.error("Get all error", e);
+        }
+    }
 
+    private void lookupAll() throws Exception {
         ByteSequence rootPathSeq = ByteSequence.from(url.getPath(), StandardCharsets.UTF_8);
-
         WatchOption wop = WatchOption.newBuilder().withPrefix(rootPathSeq).build();
         this.client.getWatchClient().watch(rootPathSeq, wop, this);
         GetOption option = GetOption.newBuilder().withPrefix(rootPathSeq).build();
         CompletableFuture<GetResponse> future = this.client.getKVClient().get(rootPathSeq, option);
-        try {
-            GetResponse gr = future.get();
-            List<KeyValue> kvs = gr.getKvs();
-            for (KeyValue v : kvs) {
-                URL u = byteSeqToUrl(v.getValue());
-                if (u != null) {
-                    saveToCache(u);
-                }
+        GetResponse gr = future.get();
+        List<KeyValue> kvs = gr.getKvs();
+        for (KeyValue v : kvs) {
+            URL u = byteSeqToUrl(v.getValue());
+            if (u != null) {
+                saveToCache(u);
             }
-        } catch (Exception e) {
-            LOG.error("Get all error", e);
         }
     }
 
@@ -260,6 +262,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
                 fireStateChange(RegistryState.DISCONNECTED);
                 try {
                     reconnect();
+                    lookupAll();
                     fireStateChange(RegistryState.CONNECTED);
                 } catch (Exception thx) {
                     LOG.error("Reconnect error ", e);

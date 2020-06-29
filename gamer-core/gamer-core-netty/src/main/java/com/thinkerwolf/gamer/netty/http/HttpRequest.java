@@ -93,7 +93,7 @@ public class HttpRequest extends AbstractRequest {
 
         if (create && (session != null && !session.getId().equals(sessionId))) {
             // session过期或者不存在，创建新的session
-            session.setPush(new HttpPush(channel, nettyRequest));
+            session.setPush(newPush());
             session.touch();
             Cookie responseCookie = new DefaultCookie(Session.JSESSION, session.getId());
             responseCookie.setValue(session.getId());
@@ -107,6 +107,11 @@ public class HttpRequest extends AbstractRequest {
     @Override
     public Protocol getProtocol() {
         return Protocol.HTTP;
+    }
+
+    @Override
+    public Push newPush() {
+        return new HttpPush(channel, nettyRequest);
     }
 
     @Override

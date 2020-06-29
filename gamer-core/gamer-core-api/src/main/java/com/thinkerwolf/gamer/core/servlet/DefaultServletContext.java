@@ -1,18 +1,18 @@
 package com.thinkerwolf.gamer.core.servlet;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultServletContext implements ServletContext {
 
-    private Map<String, Object> attributes;
+    private final Map<String, Object> attributes;
 
     private List<Object> listeners = new LinkedList<>();
 
     public DefaultServletContext() {
-        this.attributes = new HashMap<>();
+        this.attributes = new ConcurrentHashMap<>();
     }
 
     @Override

@@ -33,6 +33,13 @@ public interface Request {
 
     Protocol getProtocol();
 
+    /**
+     * 创建新的push
+     *
+     * @return
+     */
+    Push newPush();
+
     default String getEncoding() {
         return null;
     }

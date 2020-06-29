@@ -10,6 +10,8 @@ public class RequestUtil {
 
     public static final String LONG_HTTP = "longhttp";
 
+    public static final String REQUEST_SESSION_KEY = "sessionId";
+
     public static boolean isLongHttp(String command) {
         return LONG_HTTP.equalsIgnoreCase(command);
     }

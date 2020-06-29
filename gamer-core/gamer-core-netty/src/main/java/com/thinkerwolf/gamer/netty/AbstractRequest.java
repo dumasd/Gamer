@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.core.servlet.Request;
+import com.thinkerwolf.gamer.core.servlet.Session;
 import io.netty.channel.Channel;
 
 import java.util.Map;
@@ -8,11 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractRequest implements Request {
 
-    private int requestId;
+    private final int requestId;
 
-    private String command;
+    private final String command;
 
-    private Channel channel;
+    private final Channel channel;
 
     private Map<String, Object> attributes;
 
@@ -66,6 +67,18 @@ public abstract class AbstractRequest implements Request {
         return getInternalAttributes(true);
     }
 
+    @Override
+    public Session getSession() {
+        return getSession(false);
+    }
+
+    protected String getInternalSessionId() {
+        if (channel.hasAttr(NettyCoreUtil.CHANNEL_JSESSIONID)) {
+            return channel.attr(NettyCoreUtil.CHANNEL_JSESSIONID).toString();
+        }
+        return null;
+    }
+
     private Map<String, Object> getInternalAttributes(boolean create) {
         if (attributes == null) {
             synchronized (this) {
@@ -78,6 +91,5 @@ public abstract class AbstractRequest implements Request {
         }
         return attributes;
     }
-
 
 }
