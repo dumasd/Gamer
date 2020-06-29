@@ -50,7 +50,7 @@ public abstract class AbstractRegistry implements Registry {
             doRegister(url);
             promise.await(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             unsubscribe(url, listener);
         }
