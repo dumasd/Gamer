@@ -57,7 +57,12 @@
         <jackson.version>2.11.0</jackson.version>
         <httpclient_version>4.5.12</httpclient_version>
         <jetcd_version>0.5.3</jetcd_version>
+        <zkclient_version>0.11</zkclient_version>
+        <classmate_version>1.5.1</classmate_version>
+        <commons-lang_version>2.5</commons-lang_version>
+        <commons-io_version>2.5</commons-io_version>
         <commons-collections_version>3.2.2</commons-collections_version>
+        <snakeyaml_version>1.25</snakeyaml_version>
     </properties>
 
     <dependencies>
@@ -69,12 +74,12 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.5</version>
+            <version>${commons-lang_version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.5</version>
+            <version>${commons-io_version}</version>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
@@ -109,7 +114,7 @@
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
-                <version>1.25</version>
+                <version>${snakeyaml_version}</version>
             </dependency>
             <dependency>
                 <groupId>org.freemarker</groupId>
@@ -144,7 +149,7 @@
             <dependency>
                 <groupId>com.fasterxml</groupId>
                 <artifactId>classmate</artifactId>
-                <version>1.5.1</version>
+                <version>${classmate_version}</version>
             </dependency>
             <dependency>
                 <groupId>redis.clients</groupId>
@@ -154,7 +159,7 @@
             <dependency>
                 <groupId>com.101tec</groupId>
                 <artifactId>zkclient</artifactId>
-                <version>0.11</version>
+                <version>${zkclient_version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
