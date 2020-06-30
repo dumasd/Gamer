@@ -103,13 +103,15 @@ public class NettyServer implements Server {
 
     @Override
     public void close() {
-        if (channel.isOpen()) {
-            channel.close();
+        NettyChannel nc = NettyChannel.getOrAddChannel(channel, url, handler);
+        if (nc != null && !nc.isClosed()) {
+            nc.close();
         }
     }
 
     @Override
     public boolean isClosed() {
-        return !channel.isOpen();
+        NettyChannel nc = NettyChannel.getOrAddChannel(channel, url, handler);
+        return nc == null || nc.isClosed();
     }
 }

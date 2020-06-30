@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>gamer-rpc</artifactId>
-
+    <packaging>jar</packaging>
     <name>Gamer/RPC</name>
 
     <dependencies>
@@ -20,13 +20,22 @@
             <artifactId>junit</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.thinkerwolf</groupId>
-            <artifactId>gamer-core-netty</artifactId>
-            <version>${project.version}</version>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>gamer-core-api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>gamer-remoting-netty</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore-nio</artifactId>
         </dependency>
     </dependencies>
 

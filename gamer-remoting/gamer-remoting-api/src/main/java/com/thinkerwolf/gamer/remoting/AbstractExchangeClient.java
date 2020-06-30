@@ -4,7 +4,10 @@ import com.thinkerwolf.gamer.common.CauseHolder;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.concurrent.DefaultPromise;
 import com.thinkerwolf.gamer.common.concurrent.Promise;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -15,11 +18,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter implements ExchangeClient<T> {
 
-    private static final Object START = new Object();
-    private static final Object STOP = new Object();
-    protected static final AtomicReferenceFieldUpdater<AbstractExchangeClient, Object> statusUpdater
-            = AtomicReferenceFieldUpdater.newUpdater(AbstractExchangeClient.class, Object.class, "status");
-    protected volatile Object status = START;
+    private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractExchangeClient.class);
 
     private URL url;
     private Client client;
@@ -47,10 +46,6 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
     @Override
     public Promise<T> request(Object message, long timeout, TimeUnit unit) {
         DefaultPromise<T> promise = new DefaultPromise<>();
-        if (status == STOP || status instanceof CauseHolder) {
-            promise.setFailure(getCause(status));
-            return promise;
-        }
         try {
             checkConnection();
         } catch (Exception e) {
@@ -149,9 +144,13 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
     @Override
     public void caught(Channel channel, Throwable e) throws RemotingException {
         // 发生异常，拒绝请求
-        CauseHolder holder = new CauseHolder(e);
-        Object status = statusUpdater.getAndSet(this, holder);
-        if (!(status == STOP || status instanceof CauseHolder)) {
+        LOG.error("Caught exception", e);
+        if (e instanceof IOException) {
+            try {
+                client.disconnect();
+            } catch (Exception ex) {
+                LOG.warn("Close client exception", ex);
+            }
             for (DefaultPromise<T> promise : waitResultMap.values()) {
                 promise.setFailure(e);
             }
@@ -160,7 +159,7 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
     }
 
     private void checkConnection() throws RemotingException {
-        if (client.isClosed()) {
+        if (!client.isConnected()) {
             client.reconnect();
         }
     }

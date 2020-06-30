@@ -1,105 +1,95 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
+import com.thinkerwolf.gamer.remoting.AbstractClient;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.Client;
 import com.thinkerwolf.gamer.remoting.RemotingException;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.util.concurrent.TimeUnit;
 
-public class NettyClient implements Client {
+public class NettyClient extends AbstractClient {
 
-    private static NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() * 2, 32));
-
-    private URL url;
+    private static final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() * 2, 32));
 
     private Channel ch;
 
-    private ChannelHandler handler;
-
     private Bootstrap bootstrap;
 
+    private ChannelFuture connectFuture;
+
     public NettyClient(URL url, ChannelHandler handler) {
-        this.url = url;
-        this.handler = handler;
+        super(url, handler);
         try {
-            doOpen();
-            doConnect();
+            init();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Init netty client err", e);
+        }
+        try {
+            connect();
+        } catch (Exception e) {
+            throw new RuntimeException("Connect err", e);
         }
     }
 
-
-    protected void doOpen() throws Exception {
+    protected void init() throws Exception {
         bootstrap = new Bootstrap();
         bootstrap.group(nioEventLoopGroup);
-        bootstrap.channel(NioSocketChannel.class);
-        ChannelInitializer initializer = ChannelHandlers.createChannelInitializer0(url, handler);
-        bootstrap.handler(initializer);
-        bootstrap.option(ChannelOption.SO_KEEPALIVE, true).option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
-
+        bootstrap.option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+                .channel(NioSocketChannel.class);
+        bootstrap.handler(ChannelHandlers.createChannelInitializer0(getUrl(), getHandler()));
     }
 
+    @Override
     protected void doConnect() throws RemotingException {
-        ChannelFuture future = bootstrap.connect(url.getHost(), url.getPort());
+        this.connectFuture = bootstrap.connect(getUrl().getHost(), getUrl().getPort());
         try {
-            future.await(3000, TimeUnit.MILLISECONDS);
+            connectFuture.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignored) {
         }
-        if (future.isSuccess()) {
-            this.ch = future.channel();
-        } else if (future.cause() != null) {
-            throw new RemotingException("Connect to [" + url + "] fail", future.cause());
+        if (connectFuture.isSuccess()) {
+            this.ch = connectFuture.channel();
+        } else if (connectFuture.cause() != null) {
+            throw new RemotingException("Connect to [" + getUrl() + "] fail", connectFuture.cause());
         } else {
-            throw new RemotingException("Connect to [" + url + "] fail without reason");
+            throw new RemotingException("Connect to [" + getUrl() + "] fail without reason");
         }
     }
 
     @Override
-    public void reconnect() throws RemotingException {
-        // TODO
-        if (!ch.isOpen()) {
-            doConnect();
+    protected void doDisconnect() {
+        try {
+            ch.disconnect();
+        } catch (Exception ignored) {
+
         }
+        NettyChannel.removeChannelIfDisconnected(ch);
+        ch = null;
     }
 
     @Override
-    public com.thinkerwolf.gamer.remoting.Channel channel() {
-        return NettyChannel.getOrAddChannel(ch, url, handler);
+    protected void doClose() {
+        nioEventLoopGroup.shutdownGracefully();
     }
 
     @Override
-    public URL getUrl() {
-        return url;
+    public com.thinkerwolf.gamer.remoting.Channel getChannel() {
+        if (ch == null) {
+            return null;
+        }
+        return NettyChannel.getOrAddChannel(ch, getUrl(), getHandler());
     }
 
-    @Override
-    public void send(Object message, boolean sent) throws RemotingException {
-        NettyChannel channel = NettyChannel.getOrAddChannel(ch, url, handler);
-        channel.send(message, sent);
-    }
-
-    @Override
-    public void send(Object message) throws RemotingException {
-        send(message, false);
-    }
-
-    @Override
-    public void close() {
-        ch.close();
-    }
-
-    @Override
-    public boolean isClosed() {
-        return !ch.isOpen();
-    }
 }

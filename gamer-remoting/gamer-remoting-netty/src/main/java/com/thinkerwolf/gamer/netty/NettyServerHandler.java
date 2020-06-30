@@ -6,6 +6,7 @@ import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.ReferenceCountUtil;
 
 import java.net.InetSocketAddress;
@@ -83,6 +84,10 @@ public class NettyServerHandler extends ChannelDuplexHandler {
         Channel ch = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
             ctx.fireExceptionCaught(cause);
+            if (cause instanceof ReadTimeoutException) {
+                // read timeout
+
+            }
             handler.caught(ch, cause);
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());

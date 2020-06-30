@@ -14,12 +14,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.thinkerwolf</groupId>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>gamer-core-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.thinkerwolf</groupId>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>gamer-remoting-netty</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

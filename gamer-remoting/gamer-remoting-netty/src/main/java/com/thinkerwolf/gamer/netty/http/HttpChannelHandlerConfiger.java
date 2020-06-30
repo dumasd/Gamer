@@ -66,7 +66,7 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
     @Override
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
-        pipeline.addLast("http-timeout", new MyReadTimeoutHandler(3000, TimeUnit.MILLISECONDS));
+        pipeline.addLast("http-timeout", new MyReadTimeoutHandler(30000, TimeUnit.MILLISECONDS));
         if (sslContext != null) {
             pipeline.addLast("http-ssl", sslContext.newHandler(ch.alloc()));
         }

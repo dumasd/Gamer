@@ -45,7 +45,7 @@ public abstract class AbstractRegistry implements Registry {
         DefaultPromise<DataEvent> promise = new DefaultPromise<>();
         final INotifyListener listener = new DataChangeListener(promise);
         subscribe(url, listener);
-        long timeout = url.getInteger(URL.REGISTRY_TIMEOUT, DEFAULT_REGISTRY_TIMEOUT);
+        long timeout = url.getInteger(URL.REQUEST_TIMEOUT, DEFAULT_REGISTRY_TIMEOUT);
         try {
             doRegister(url);
             promise.await(timeout, TimeUnit.MILLISECONDS);
@@ -64,7 +64,7 @@ public abstract class AbstractRegistry implements Registry {
         DefaultPromise<DataEvent> promise = new DefaultPromise<>();
         final INotifyListener listener = new DataChangeListener(promise);
         subscribe(url, listener);
-        long timeout = url.getInteger(URL.REGISTRY_TIMEOUT, DEFAULT_REGISTRY_TIMEOUT);
+        long timeout = url.getInteger(URL.REQUEST_TIMEOUT, DEFAULT_REGISTRY_TIMEOUT);
         try {
             doUnRegister(url);
             promise.await(timeout, TimeUnit.MILLISECONDS);
@@ -270,7 +270,7 @@ public abstract class AbstractRegistry implements Registry {
 
         @Override
         public void notifyDataChange(DataEvent event) throws Exception {
-            if (promise != null) {
+            if (promise != null && !promise.isDone()) {
                 promise.setSuccess(event);
             }
         }

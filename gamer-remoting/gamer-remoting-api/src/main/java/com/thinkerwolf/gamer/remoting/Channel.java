@@ -20,4 +20,12 @@ public interface Channel extends Endpoint {
     Object getAttr(String key);
 
     void setAttr(String key, Object value);
+
+    /**
+     * 是否再连接中
+     *
+     * @return
+     */
+    boolean isConnected();
+
 }

@@ -14,7 +14,7 @@ public interface RemotingFactory {
      * @return
      * @throws Exception
      */
-    Server newServer(URL url, ChannelHandler... handlers) throws Exception;
+    Server newServer(URL url, ChannelHandler... handlers);
 
     /**
      * 新建Client
@@ -24,5 +24,5 @@ public interface RemotingFactory {
      * @return
      * @throws Exception
      */
-    Client newClient(URL url, ChannelHandler... handlers) throws Exception;
+    Client newClient(URL url, ChannelHandler... handlers);
 }

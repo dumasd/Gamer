@@ -24,6 +24,9 @@
     </modules>
 
     <properties>
+        <java_source_version>1.8</java_source_version>
+        <java_target_version>1.8</java_target_version>
+        <file_encoding>UTF-8</file_encoding>
         <project.config.directory>src/main/resources</project.config.directory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -56,6 +59,8 @@
         <jedis_version>3.1.0</jedis_version>
         <jackson.version>2.11.0</jackson.version>
         <httpclient_version>4.5.12</httpclient_version>
+        <httpcore_version>4.4.13</httpcore_version>
+        <httpcorenio_version>4.4.13</httpcorenio_version>
         <jetcd_version>0.5.3</jetcd_version>
         <zkclient_version>0.11</zkclient_version>
         <classmate_version>1.5.1</classmate_version>
@@ -167,6 +172,11 @@
                 <version>${httpclient_version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore-nio</artifactId>
+                <version>${httpcorenio_version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-core</artifactId>
                 <version>${jetcd_version}</version>
@@ -178,8 +188,44 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven_jar_version}</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>true</addMavenDescriptor>
+                        <index>true</index>
+                        <manifest>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Specification-Version>${project.version}</Specification-Version>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven_compiler_version}</version>
+                <configuration>
+                    <fork>true</fork>
+                    <debug>true</debug>
+                    <debuglevel>lines,vars,source</debuglevel>
+                    <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                    <source>${java_source_version}</source>
+                    <target>${java_target_version}</target>
+                    <encoding>${file_encoding}</encoding>
+                    <compilerVersion>1.8</compilerVersion>
+                    <compilerArgs>
+                        <compilerArg>-proc:none</compilerArg>
+                        <compilerArg>-parameters</compilerArg>
+                    </compilerArgs>
+
+
+                </configuration>
             </plugin>
 
             <plugin>
@@ -267,11 +313,7 @@
 
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven_jar_version}</version>
-                </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>

@@ -18,7 +18,7 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>${project.parent.groupId}</groupId>
                 <artifactId>gamer-common</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>

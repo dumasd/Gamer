@@ -1,6 +1,8 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.RemotingException;
@@ -10,10 +12,13 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.net.SocketAddress;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class NettyChannel implements Channel {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(NettyChannel.class);
 
     private static final ConcurrentMap<io.netty.channel.Channel, NettyChannel> channelMap = new ConcurrentHashMap<>();
 
@@ -30,6 +35,9 @@ public class NettyChannel implements Channel {
     }
 
     public static NettyChannel getOrAddChannel(io.netty.channel.Channel channel, URL url, ChannelHandler handler) {
+        if (channel == null) {
+            return null;
+        }
         NettyChannel nettyChannel = channelMap.get(channel);
         if (nettyChannel == null) {
             nettyChannel = new NettyChannel(channel, url, handler);
@@ -47,6 +55,9 @@ public class NettyChannel implements Channel {
     public static void removeChannelIfDisconnected(io.netty.channel.Channel ch) {
         if (ch != null && !ch.isActive()) {
             channelMap.remove(ch);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Remove netty channel " + ch);
+            }
         }
     }
 
@@ -124,7 +135,11 @@ public class NettyChannel implements Channel {
 
     @Override
     public void close() {
-        ch.close();
+        try {
+            ch.close();
+        } catch (Exception e) {
+            LOG.warn("", e);
+        }
         removeChannelIfDisconnected(ch);
     }
 
@@ -134,22 +149,20 @@ public class NettyChannel implements Channel {
     }
 
     @Override
+    public boolean isConnected() {
+        return !isClosed() && ch.isActive();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-
         if (o == null || getClass() != o.getClass()) return false;
-
         NettyChannel that = (NettyChannel) o;
-
-        return new EqualsBuilder()
-                .append(ch, that.ch)
-                .isEquals();
+        return Objects.equals(ch, that.ch);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(ch)
-                .toHashCode();
+        return Objects.hash(ch);
     }
 }

@@ -25,7 +25,6 @@ import io.etcd.jetcd.watch.WatchResponse;
 import org.apache.commons.lang.StringUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,7 +74,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
 
     private void init(URL url) {
         this.requestRetryTimes = url.getInteger("registryRetryTimes", DEFAULT_REQUEST_RETRY_TIMES);
-        this.requestTimeout = url.getLong(URL.REGISTRY_TIMEOUT, DEFAULT_REQUEST_DELAY);
+        this.requestTimeout = url.getLong(URL.REQUEST_TIMEOUT, DEFAULT_REQUEST_DELAY);
         this.sessionTimeout = url.getLong(URL.SESSION_TIMEOUT, DEFAULT_KEEP_ALIVE_DELAY);
         this.ttl = TimeUnit.MILLISECONDS.toSeconds(sessionTimeout + 1000);
 

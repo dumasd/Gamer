@@ -39,9 +39,12 @@ public final class Constants {
     public static final String FRAMEWORK_NAME_VERSION = String.format("%s/%s", FRAMEWORK_NAME, VERSION);
 
     /**
-     * 框架网络接口类型
+     * 优先选择的网络接口名称
      */
     public static final String GAMER_PREFERRED_NETWORK_INTERFACE = "gamer.network.interface.preferred";
+
+    public static final String EXECUTOR_KEEP_ALIVE_TIME = "executor.keepAlive.time";
+
     /**
      * ;
      */
