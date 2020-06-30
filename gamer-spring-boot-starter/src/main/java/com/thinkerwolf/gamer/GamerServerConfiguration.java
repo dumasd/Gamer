@@ -31,7 +31,7 @@ public class GamerServerConfiguration {
                 ServletBootstrap bootstrap = factory.create(properties.getConfigFile());
                 bootstrap.getServletConfig().getServletContext().setAttribute(ServletContext.SPRING_APPLICATION_CONTEXT_ATTRIBUTE, applicationContext);
                 bootstrap.startup();
-                return factory.create(properties.getConfigFile());
+                return bootstrap;
             } catch (Exception e) {
                 LOG.error("Error when initialize servlet", e);
                 if (e instanceof RuntimeException) {
