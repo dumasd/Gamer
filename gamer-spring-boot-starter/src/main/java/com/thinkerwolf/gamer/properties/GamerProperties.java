@@ -10,7 +10,7 @@ public class GamerProperties {
     /**
      * Gamer Application id
      */
-    private int id = 1;
+    private String id = "";
     /**
      * Gamer Application type
      */
@@ -60,12 +60,11 @@ public class GamerProperties {
         this.type = type;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
-
 }
