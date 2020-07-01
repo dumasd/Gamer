@@ -22,6 +22,37 @@ public final class Constants {
      */
     public static final String GAMER_LOG_CONFIG_FILE = "gamer.log.configFile";
 
+
+    /**
+     * <h2>应用ID:环境变量key</h2>
+     *
+     * <p>
+     * 获取应用ID优先级
+     * <ul>
+     *     <li><strong>环境变量:GAMER_MY_ID</strong></li>
+     *     <li>虚拟机参数:-Dgamer.my.id</li>
+     *     <li>随机生成的8位字符串</li>
+     * </ul>
+     * </p>
+     *
+     * @see Constants#JVM_GAMER_MY_ID
+     */
+    public static final String ENV_GAMER_MY_ID = "GAMER_MY_ID";
+    /**
+     * <h2>应用ID:虚拟机参数key</h2>
+     * <p>
+     * 获取应用ID优先级
+     * <ul>
+     *     <li>环境变量:GAMER_MY_ID</li>
+     *     <li><strong>虚拟机参数:-Dgamer.my.id</strong></li>
+     *     <li>随机生成的8位字符串</li>
+     * </ul>
+     * </p>
+     *
+     * @see Constants#ENV_GAMER_MY_ID
+     */
+    public static final String JVM_GAMER_MY_ID = "gamer.my.id";
+
     /**
      * LOG配置等级 INFO,CONSOLE
      */
@@ -31,7 +62,6 @@ public final class Constants {
      * 日志路径
      */
     public static final String GAMER_LOG_DIR = "gamer.log.dir";
-
 
     /**
      * 框架名称
