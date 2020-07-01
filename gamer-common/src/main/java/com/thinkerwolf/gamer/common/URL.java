@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -318,33 +319,20 @@ public class URL implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-
         if (o == null || getClass() != o.getClass()) return false;
-
         URL url = (URL) o;
-
-        return new EqualsBuilder()
-                .append(port, url.port)
-                .append(protocol, url.protocol)
-                .append(username, url.username)
-                .append(password, url.password)
-                .append(host, url.host)
-                .append(path, url.path)
-                .append(parameters, url.parameters)
-                .isEquals();
+        return port == url.port &&
+                Objects.equals(protocol, url.protocol) &&
+                Objects.equals(username, url.username) &&
+                Objects.equals(password, url.password) &&
+                Objects.equals(host, url.host) &&
+                Objects.equals(path, url.path) &&
+                Objects.equals(parameters, url.parameters);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(protocol)
-                .append(username)
-                .append(password)
-                .append(host)
-                .append(port)
-                .append(path)
-                .append(parameters)
-                .toHashCode();
+        return Objects.hash(protocol, username, password, host, port, path, parameters);
     }
 
     @Override

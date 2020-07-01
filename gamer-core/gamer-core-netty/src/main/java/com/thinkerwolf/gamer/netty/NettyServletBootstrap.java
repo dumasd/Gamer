@@ -141,13 +141,16 @@ public class NettyServletBootstrap implements ServletBootstrap {
     private void loadConfig() throws Exception {
         if (servletConfig == null || urls == null || urls.size() == 0) {
             Yaml yaml = new Yaml();
-            String file = StringUtils.isBlank(configFile) ? "conf.yaml" : configFile;
+            String file = StringUtils.isBlank(configFile) ? Constants.DEFAULT_CONFIG_FILE : configFile;
             InputStream is = ResourceUtils.findInputStream("", file);
             if (is == null) {
                 LOG.info("Can't load config from [" + configFile + "]");
             }
             if (is == null) {
-                is = ResourceUtils.findInputStream("", "conf.yaml");
+                is = ResourceUtils.findInputStream("", Constants.DEFAULT_CONFIG_FILE);
+            }
+            if (is == null) {
+                is = ResourceUtils.findInputStream("", Constants.DEFAULT_CONFIG_FILE_A);
             }
             try {
                 Map<String, Object> conf = yaml.load(is);
