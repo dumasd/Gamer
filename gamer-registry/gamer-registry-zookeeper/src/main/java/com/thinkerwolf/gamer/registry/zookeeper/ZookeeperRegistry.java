@@ -11,6 +11,7 @@ import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.IZkStateListener;
 import org.I0Itec.zkclient.ZkClient;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.ACL;
 
@@ -83,7 +84,12 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
     protected void doRegister(URL url) {
         String path = toDataPath(url);
         boolean ephemeral = url.getBoolean(URL.NODE_EPHEMERAL, true);
-        ZkUtils.createRecursive(client, path);
+        try {
+            ZkUtils.createRecursive(client, path);
+        } catch (Exception e) {
+            LOG.warn("Zk recursive create", e);
+        }
+
         if (!client.exists(path)) {
             List<ACL> acls = ZkUtils.createACLs(url);
             if (ephemeral) {
