@@ -27,13 +27,13 @@ public class ServiceLoader<T> {
     public static final String GAMER_FOLDER = "META-INF/gamer/";
 
     private static final Logger logger = InternalLoggerFactory.getLogger(ServiceLoader.class);
-    private static ObjectFactory objectFactory = new DefaultObjectFactory();
+    private static final ObjectFactory objectFactory = new DefaultObjectFactory();
     /**
      * service loader map
      */
     private static final Map<Class<?>, ServiceLoader<?>> serviceLoaderMap = new ConcurrentHashMap<>();
 
-    private Class<?> baseClass;
+    private final Class<?> baseClass;
 
     private volatile Map<String, Class<?>> cachedClasses;
 
@@ -199,16 +199,17 @@ public class ServiceLoader<T> {
     }
 
     public static <T> T getDefaultService(Class<T> service) {
-        SPI SPI = service.getAnnotation(SPI.class);
-        if (SPI.value().length() <= 0) {
+        checkClassSpi(service);
+        SPI spi = service.getAnnotation(SPI.class);
+        if (spi.value().length() <= 0) {
             throw new ServiceConfigurationError(service.getName() + " has no default service");
         }
-        return getService(SPI.value(), service);
+        return getService(spi.value(), service);
     }
 
     private static void checkClassSpi(Class<?> service) {
         if (service == null || !service.isInterface() || service.getAnnotation(SPI.class) == null) {
-            throw new ServiceConfigurationError(service.getName() + " is not a service!");
+            throw new ServiceConfigurationError("SPI annotation is missing!");
         }
     }
 
