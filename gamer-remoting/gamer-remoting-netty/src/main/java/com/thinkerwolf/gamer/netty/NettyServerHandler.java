@@ -15,10 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyServerHandler extends ChannelDuplexHandler {
-    private URL url;
-    private ChannelHandler handler;
+    private final URL url;
+    private final ChannelHandler handler;
 
-    private Map<String, Channel> channelMap = new ConcurrentHashMap<>();
+    private final Map<String, Channel> channelMap = new ConcurrentHashMap<>();
 
     private boolean autoRelease = true;
 
@@ -111,9 +111,13 @@ public class NettyServerHandler extends ChannelDuplexHandler {
             handler.received(ch, msg);
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
-            if (autoRelease) {
-                ReferenceCountUtil.release(msg);
-            }
+            releaseMessage(msg);
+        }
+    }
+
+    protected void releaseMessage(Object msg) {
+        if (autoRelease) {
+            ReferenceCountUtil.release(msg);
         }
     }
 

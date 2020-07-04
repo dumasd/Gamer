@@ -78,32 +78,35 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                 HttpRequest nettyRequest = (HttpRequest) msg;
                 String upgrade = nettyRequest.headers().get(HttpHeaderNames.UPGRADE);
-
-                if (HttpHeaderValues.WEBSOCKET.contentEqualsIgnoreCase(upgrade)) {
-                    if (websocketHandler == null) {
-                        ByteBuf buf = Unpooled.buffer();
-                        buf.writeCharSequence("Don't support http to websocket", CharsetUtil.UTF_8);
-                        DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, buf);
-                        response.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN);
-                        ctx.channel().writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                try {
+                    if (HttpHeaderValues.WEBSOCKET.contentEqualsIgnoreCase(upgrade)) {
+                        if (websocketHandler == null) {
+                            ByteBuf buf = Unpooled.buffer();
+                            buf.writeCharSequence("Don't support http to websocket", CharsetUtil.UTF_8);
+                            DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, buf);
+                            response.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN);
+                            ctx.channel().writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                            return;
+                        }
+                        // websocket 握手
+                        WebSocketServerHandshakerFactory factory = new WebSocketServerHandshakerFactory(InternalHttpUtil.getWebSocketUrl(nettyRequest), null, false);
+                        WebSocketServerHandshaker handshaker = factory.newHandshaker(nettyRequest);
+                        if (handshaker == null) {
+                            WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
+                        } else {
+                            handshaker.handshake(ctx.channel(), nettyRequest);
+                            ctx.pipeline().remove("http-timeout");
+                            ctx.pipeline().replace("http-handler", "websocket-handler", new NettyServerHandler(url, websocketHandler));
+                            if (ctx.channel() instanceof ServerChannel) {
+                                ctx.pipeline().addBefore("websocket-handler", "compress", new WebSocketServerCompressionHandler());
+                            } else {
+                                ctx.pipeline().addBefore("websocket-handler", "compress", WebSocketClientCompressionHandler.INSTANCE);
+                            }
+                        }
                         return;
                     }
-                    // websocket 握手
-                    WebSocketServerHandshakerFactory factory = new WebSocketServerHandshakerFactory(InternalHttpUtil.getWebSocketUrl(nettyRequest), null, false);
-                    WebSocketServerHandshaker handshaker = factory.newHandshaker(nettyRequest);
-                    if (handshaker == null) {
-                        WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
-                    } else {
-                        handshaker.handshake(ctx.channel(), nettyRequest);
-                        ctx.pipeline().remove("http-timeout");
-                        ctx.pipeline().replace("http-handler", "websocket-handler", new NettyServerHandler(url, websocketHandler));
-                        if (ctx.channel() instanceof ServerChannel) {
-                            ctx.pipeline().addBefore("websocket-handler", "compress", new WebSocketServerCompressionHandler());
-                        } else {
-                            ctx.pipeline().addBefore("websocket-handler", "compress", WebSocketClientCompressionHandler.INSTANCE);
-                        }
-                    }
-                    return;
+                } finally {
+                    releaseMessage(msg);
                 }
                 super.channelRead(ctx, msg);
             }
