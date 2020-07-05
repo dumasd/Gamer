@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer.core.mvc;
 
 import com.thinkerwolf.gamer.common.DefaultObjectFactory;
 import com.thinkerwolf.gamer.common.ObjectFactory;
+import com.thinkerwolf.gamer.common.SymbolConstants;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.annotation.Action;
@@ -156,16 +157,15 @@ public class DispatcherServlet extends AbstractServlet implements MvcServlet {
         }
 
         if (invocation == null) {
-            invocation = resourceInvocation;
+            int idx = command.lastIndexOf(SymbolConstants.DOT);
+            if (idx > 0 && command.length() > idx + 1) {
+                invocation = resourceInvocation;
+            }
         }
 
-        // invocation为空的问题交给具体业务层处理
-//        if (invocation == null) {
-//            LOG.info("Can't find command in server. command:[" + command + "]");
-//            response.setStatus(ResponseStatus.NOT_FOUND);
-//            ResponseUtil.renderError(ServletErrorType.COMMAND_NOT_FOUND, request, response, null);
-//            return;
-//        }
+        if (invocation == null) {
+            invocation = NullInvocation.INSTANCE;
+        }
 
         FilterChain filterChain = new ApplicationFilterChain(filters);
         filterChain.doFilter(invocation, request, response);

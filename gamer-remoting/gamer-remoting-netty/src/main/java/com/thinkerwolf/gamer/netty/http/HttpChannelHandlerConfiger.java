@@ -77,9 +77,10 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                 HttpRequest nettyRequest = (HttpRequest) msg;
-                String upgrade = nettyRequest.headers().get(HttpHeaderNames.UPGRADE);
-                try {
-                    if (HttpHeaderValues.WEBSOCKET.contentEqualsIgnoreCase(upgrade)) {
+                String upgradeHeader = nettyRequest.headers().get(HttpHeaderNames.UPGRADE);
+                final boolean upgrade = HttpHeaderValues.WEBSOCKET.contentEqualsIgnoreCase(upgradeHeader);
+                if (upgrade) {
+                    try {
                         if (websocketHandler == null) {
                             ByteBuf buf = Unpooled.buffer();
                             buf.writeCharSequence("Don't support http to websocket", CharsetUtil.UTF_8);
@@ -104,9 +105,9 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
                             }
                         }
                         return;
+                    } finally {
+                        releaseMessage(msg);
                     }
-                } finally {
-                    releaseMessage(msg);
                 }
                 super.channelRead(ctx, msg);
             }
