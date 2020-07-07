@@ -1,18 +1,22 @@
 package com.thinkerwolf.gamer.netty.websocket;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.common.buffer.ChannelBuffer;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
+import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.netty.AbstractServletHandler;
 import com.thinkerwolf.gamer.netty.NettyChannel;
 import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.RemotingException;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 import org.apache.commons.collections.MapUtils;
 
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 /**
@@ -47,6 +51,31 @@ public class WebsocketServletHandler extends AbstractServletHandler {
         }
     }
 
+    @Override
+    public Object sent(Channel channel, Object message) throws RemotingException {
+        if (message instanceof ChannelBuffer) {
+            ChannelBuffer cb = (ChannelBuffer) message;
+            int opcode = cb.readInt();
+            cb.readInt();
+            int cmdLen = cb.readInt();
+            int contentLen = cb.readInt();
+            cb.skipBytes(cmdLen);
+
+            ByteBuffer byteBuffer = ByteBuffer.allocateDirect(contentLen);
+            cb.readBytes(byteBuffer);
+            byteBuffer.flip();
+            ByteBuf nettyBuf = Unpooled.wrappedBuffer(byteBuffer);
+
+            if (opcode == ResponseUtil.CONTENT_TEXT
+                    || opcode == ResponseUtil.CONTENT_JSON
+                    || opcode == ResponseUtil.CONTENT_EXCEPTION) {
+                return new TextWebSocketFrame(nettyBuf);
+            } else {
+                return new BinaryWebSocketFrame(nettyBuf);
+            }
+        }
+        return super.sent(channel, message);
+    }
 
     private void processBinaryFrame(BinaryWebSocketFrame frame, final Channel channel) {
         ByteBuf buf = frame.content();

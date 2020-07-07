@@ -4,6 +4,7 @@ import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.rpc.cluster.Cluster;
 import com.thinkerwolf.gamer.rpc.cluster.FailfastInvoker;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
 import com.thinkerwolf.gamer.rpc.protocol.Protocol;
@@ -28,6 +29,8 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
     private Class<T> interfaceClass;
 
     private String interfaceName;
+
+    private String cluster;
 
     private String url;
 
@@ -72,6 +75,14 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
 
     public List<URL> getUrls() {
         return urls;
+    }
+
+    public String getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(String cluster) {
+        this.cluster = cluster;
     }
 
     public synchronized T get() {
@@ -125,7 +136,10 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
                 Protocol protocol = ServiceLoader.getService(url.getProtocol(), Protocol.class);
                 invokers.add(protocol.invoker(interfaceClass, url));
             }
-            ref = rpcProxy.newProxy(interfaceClass, new FailfastInvoker<>(invokers));
+            Cluster clu = cluster == null ?
+                    ServiceLoader.getDefaultService(Cluster.class) :
+                    ServiceLoader.getService(cluster, Cluster.class);
+            ref = rpcProxy.newProxy(interfaceClass, clu.combine(invokers));
         } else {
             // TODO 2.注册中心获取
             throw new UnsupportedOperationException("注册中心集群模式开发中...");

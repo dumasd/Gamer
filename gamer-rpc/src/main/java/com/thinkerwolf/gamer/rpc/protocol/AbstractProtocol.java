@@ -19,7 +19,6 @@ public abstract class AbstractProtocol implements Protocol {
 
     public ExchangeClient[] getClients(URL url) {
         int num = url.getInteger(URL.RPC_CLIENT_NUM, 1);
-        System.err.println("client num :::::: " + num);
         ExchangeClient[] clients = new ExchangeClient[num];
         if (num == 1) {
             ExchangeClient client = getSharedClient(url); // not thread safe

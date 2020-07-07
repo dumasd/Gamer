@@ -12,8 +12,8 @@ import java.util.List;
  * @date 2020/5/14 14:21
  */
 @SPI("failfast")
-public interface Cluster<T> {
+public interface Cluster {
 
-    Invoker<T> combine(List<Invoker<T>> invokers);
+    <T> Invoker<T> combine(List<Invoker<T>> invokers);
 
 }

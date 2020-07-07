@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.remoting;
 
-import com.thinkerwolf.gamer.common.CauseHolder;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.concurrent.DefaultPromise;
 import com.thinkerwolf.gamer.common.concurrent.Promise;
@@ -13,9 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-@SuppressWarnings("rawtypes")
 public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter implements ExchangeClient<T> {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractExchangeClient.class);
@@ -162,13 +159,6 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
         if (!client.isConnected()) {
             client.reconnect();
         }
-    }
-
-    private static Throwable getCause(Object status) {
-        if (!(status instanceof CauseHolder)) {
-            return null;
-        }
-        return ((CauseHolder) status).cause();
     }
 
 }

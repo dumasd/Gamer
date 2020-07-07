@@ -1,32 +1,40 @@
 package com.thinkerwolf.gamer.netty.websocket;
 
+import com.thinkerwolf.gamer.common.buffer.ChannelBuffer;
+import com.thinkerwolf.gamer.common.buffer.ChannelBuffers;
 import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WebsocketDecorator implements Decorator {
 
+    private static final List<Object> SUPPORTED_CONTENTS = new ArrayList<>();
+    static {
+        SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_BYTES);
+        SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_TEXT);
+        SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_JSON);
+        SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_EXCEPTION);
+    }
+
     @Override
     public Object decorate(Model<?> model, Request request, Response response) {
+        checkContent(response.getContentType());
         byte[] content = model.getBytes();
-        ByteBuf buf = Unpooled.buffer();
-        buf.writeBytes(content);
-        Object contentType = response.getContentType();
-        if (contentType == ResponseUtil.CONTENT_TEXT ||
-                contentType == ResponseUtil.CONTENT_JSON) {
-            return new TextWebSocketFrame(buf);
-        } else if (contentType == ResponseUtil.CONTENT_BYTES) {
-            return new BinaryWebSocketFrame(buf);
-        } else if (contentType == ResponseUtil.CONTENT_EXCEPTION) {
-            return new TextWebSocketFrame(buf);
-        }
-        throw new UnsupportedOperationException("Unsupported websocket content type " + contentType);
+        byte[] command = request.getCommand().getBytes(StandardCharsets.UTF_8);
+        ChannelBuffer cb = ChannelBuffers.buffer(16 + command.length + content.length);
+        cb.writeInt((int) response.getContentType());
+        cb.writeInt(request.getRequestId());
+        cb.writeInt(command.length);
+        cb.writeInt(content.length);
+        cb.writeBytes(command);
+        cb.writeBytes(content);
+        return cb;
 
 
         //WebSocketRequest webSocketRequest = (WebSocketRequest) request;
@@ -42,5 +50,10 @@ public class WebsocketDecorator implements Decorator {
         //return new BinaryWebSocketFrame(buf);
     }
 
+    private static void checkContent(Object contentType) {
+        if (!SUPPORTED_CONTENTS.contains(contentType)) {
+            throw new UnsupportedOperationException("Unsupported websocket content type " + contentType);
+        }
+    }
 
 }

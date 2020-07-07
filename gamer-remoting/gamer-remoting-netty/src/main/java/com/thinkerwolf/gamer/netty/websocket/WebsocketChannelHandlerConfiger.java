@@ -6,6 +6,7 @@ import com.thinkerwolf.gamer.netty.NettyClientHandler;
 import com.thinkerwolf.gamer.netty.NettyServerHandler;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ServerChannel;
 import io.netty.handler.codec.http.*;
@@ -46,7 +47,6 @@ public class WebsocketChannelHandlerConfiger extends ChannelHandlerConfiger<Chan
             URI wsUri = URI.create(url.getProtocolHostPort() + "/websocket");
             pipeline.addLast(new WebSocketClientProtocolHandler(wsUri, WebSocketVersion.V13, null, true, headers, 4096));
         }
-
         pipeline.addLast("handler", server ? new NettyServerHandler(url, handler) : new NettyClientHandler(url, handler));
     }
 }

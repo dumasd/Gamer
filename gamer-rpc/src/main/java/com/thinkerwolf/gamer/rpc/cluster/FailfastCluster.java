@@ -4,9 +4,9 @@ import com.thinkerwolf.gamer.rpc.Invoker;
 
 import java.util.List;
 
-public class FailfastCluster<T> implements Cluster<T> {
+public class FailfastCluster implements Cluster {
     @Override
-    public Invoker<T> combine(List<Invoker<T>> invokers) {
-        return null;
+    public <T> Invoker<T> combine(List<Invoker<T>> invokers) {
+        return new FailfastInvoker<>(invokers);
     }
 }

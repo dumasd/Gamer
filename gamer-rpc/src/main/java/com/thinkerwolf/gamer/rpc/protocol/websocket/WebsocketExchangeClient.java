@@ -28,6 +28,8 @@ public class WebsocketExchangeClient extends AbstractExchangeClient<RpcResponse>
 
     private final DefaultPromise<Object> handshakePromise;
 
+    private static final Object DEFAULT_HANDSHAKE_RESULT = new Object();
+
     public WebsocketExchangeClient(URL url) {
         super(url);
         this.handshakePromise = new DefaultPromise<>();
@@ -48,7 +50,6 @@ public class WebsocketExchangeClient extends AbstractExchangeClient<RpcResponse>
         RpcMessage msg = (RpcMessage) message;
         String command = RpcUtils.getRpcCommand(msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer(20);
-
         buf.writeInt(0);
         buf.writeInt(requestId);
 
@@ -88,11 +89,10 @@ public class WebsocketExchangeClient extends AbstractExchangeClient<RpcResponse>
     @Override
     public void event(Channel channel, Object evt) throws RemotingException {
         super.event(channel, evt);
-        System.err.println(evt);
         if (HANDSHAKE_COMPLETE.equalsIgnoreCase(evt.toString())) {
             handshakePromise.setFailure(new TimeoutException());
         } else if (HANDSHAKE_TIMEOUT.equalsIgnoreCase(evt.toString())) {
-            handshakePromise.setSuccess(new Object());
+            handshakePromise.setSuccess(DEFAULT_HANDSHAKE_RESULT);
         }
     }
 

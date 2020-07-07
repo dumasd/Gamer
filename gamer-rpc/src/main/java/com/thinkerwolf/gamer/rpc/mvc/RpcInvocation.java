@@ -61,7 +61,6 @@ public class RpcInvocation implements Invocation {
         ChannelBuffer buf = ChannelBuffers.buffer(4 + bytes.length);
         buf.writeInt(request.getRequestId());
         buf.writeBytes(bytes);
-
         response.setContentType(ResponseUtil.CONTENT_BYTES);
         Decorator decorator = ServiceLoader.getService(request.getAttribute(com.thinkerwolf.gamer.core.servlet.Request.DECORATOR_ATTRIBUTE).toString(), Decorator.class);
         response.write(decorator.decorate(new ByteModel(buf.array()), request, response));
