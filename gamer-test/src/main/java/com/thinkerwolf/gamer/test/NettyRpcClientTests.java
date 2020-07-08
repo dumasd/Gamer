@@ -27,38 +27,7 @@ import java.lang.reflect.Method;
 
 public class NettyRpcClientTests {
     public static void main(String[] args) {
-        //startupTcp();
-        startRpcConnection();
-    }
-
-    private static void startRpcConnection() {
-        URL url = URL.parse("tcp://106.13.146.85:8090");
-        int loop = 3;
-        //while (loop-- > 0) {
-            IRpcAction action = RpcReferenceManager.getInstance().getConnection(IRpcAction.class, url);
-            for (int i = 0 ; i < 100; i++) {
-                final int c = i;
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        action.sayHello("rpc aaaaaaaaa " + c);
-                        RpcContext.getContext().addListener(new RpcCallback<String>() {
-                            @Override
-                            protected void onSuccess(String result) throws Exception {
-
-                                System.out.println(result);
-                            }
-
-                            @Override
-                            protected void onError(Throwable t) throws Exception {
-
-                            }
-                        });
-                    }
-                });
-                t.start();
-            }
-       // }
+        startupTcp();
     }
 
     private static void startupTcp() {

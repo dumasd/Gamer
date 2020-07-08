@@ -2,25 +2,16 @@ package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
-import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
-import com.thinkerwolf.gamer.common.util.NetUtils;
-import com.thinkerwolf.gamer.common.util.ResourceUtils;
+import com.thinkerwolf.gamer.core.conf.yml.YmlConf;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
-import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.netty.http.HttpServletHandler;
 import com.thinkerwolf.gamer.netty.tcp.TcpServletHandler;
 import com.thinkerwolf.gamer.netty.websocket.WebsocketServletHandler;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
-import io.netty.util.NetUtil;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -30,8 +21,6 @@ import java.util.*;
  * @author wukai
  */
 public class NettyServletBootstrap implements ServletBootstrap {
-
-    private static final Logger LOG = InternalLoggerFactory.getLogger(NettyServletBootstrap.class);
 
     private String configFile;
 
@@ -67,11 +56,10 @@ public class NettyServletBootstrap implements ServletBootstrap {
     }
 
     private void init() {
-        try {
-            loadConfig();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        YmlConf ymlConf = new YmlConf().setServletConfig(servletConfig).setUrls(urls)
+                .setConfFile(configFile).load();
+        this.servletConfig = ymlConf.getServletConfig();
+        this.urls = ymlConf.getUrls();
     }
 
     @Override
@@ -135,163 +123,6 @@ public class NettyServletBootstrap implements ServletBootstrap {
                 break;
         }
         return handlers.toArray(new ChannelHandler[0]);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadConfig() throws Exception {
-        if (servletConfig == null || urls == null || urls.size() == 0) {
-            Yaml yaml = new Yaml();
-            String file = StringUtils.isBlank(configFile) ? Constants.DEFAULT_CONFIG_FILE : configFile;
-            InputStream is = ResourceUtils.findInputStream("", file);
-            if (is == null) {
-                LOG.info("Can't load config from [" + configFile + "]");
-            }
-            if (is == null) {
-                is = ResourceUtils.findInputStream("", Constants.DEFAULT_CONFIG_FILE);
-            }
-            if (is == null) {
-                is = ResourceUtils.findInputStream("", Constants.DEFAULT_CONFIG_FILE_A);
-            }
-            try {
-                Map<String, Object> conf = yaml.load(is);
-                Map<String, Object> servletConf = (Map<String, Object>) conf.get("servlet");
-                if (servletConf == null) {
-                    throw new ConfigurationException("Missing servlet config");
-                }
-                Object nettyConf = conf.get("netty");
-                if (nettyConf == null) {
-                    throw new ConfigurationException("Missing netty config");
-                }
-
-                List<Map<String, Object>> nettyConfs;
-                if (nettyConf instanceof List) {
-                    nettyConfs = (List<Map<String, Object>>) nettyConf;
-                } else {
-                    nettyConfs = Collections.singletonList((Map<String, Object>) nettyConf);
-                }
-                List<String> listenersConf = (List<String>) conf.get("listeners");
-                loadUrlConfig(nettyConfs);
-                loadServletConfig(servletConf, listenersConf);
-            } catch (Exception rethrown) {
-                throw rethrown;
-            } finally {
-                IOUtils.closeQuietly(is);
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadUrlConfig(List<Map<String, Object>> nettyConfs) {
-        if (nettyConfs == null || nettyConfs.size() == 0) {
-            throw new ConfigurationException("Missing netty config");
-        }
-        this.urls = new ArrayList<>();
-        for (Map<String, Object> nettyConf : nettyConfs) {
-            URL url = new URL();
-            if (!nettyConf.containsKey(URL.PROTOCOL)) {
-                throw new ConfigurationException("Netty config missing protocol");
-            }
-            url.setProtocol(MapUtils.getString(nettyConf, URL.PROTOCOL).toLowerCase());
-            if (nettyConf.containsKey(URL.PORT)) {
-                url.setPort(MapUtils.getInteger(nettyConf, URL.PORT));
-            } else {
-                if (Protocol.TCP.getName().equals(url.getProtocol())) {
-                    url.setPort(URL.DEFAULT_TCP_PORT);
-                } else {
-                    url.setPort(URL.DEFAULT_HTTP_PORT);
-                }
-            }
-            String host;
-            if (nettyConf.containsKey(URL.HOST)) {
-                host = MapUtils.getString(nettyConf, URL.HOST);
-            } else {
-                host = NetUtils.getLocalAddress().getHostAddress();
-            }
-
-            url.setHost(host);
-            url.setUsername(MapUtils.getString(nettyConf, URL.USERNAME));
-            url.setPassword(MapUtils.getString(nettyConf, URL.PASSWORD));
-
-            Map<String, Object> parameters = new HashMap<>();
-            parameters.put(URL.BOSS_THREADS, MapUtils.getInteger(nettyConf, URL.BOSS_THREADS, 1));
-            parameters.put(URL.WORKER_THREADS, MapUtils.getInteger(nettyConf, URL.WORKER_THREADS, 3));
-            parameters.put(URL.CORE_THREADS, MapUtils.getInteger(nettyConf, URL.CORE_THREADS, 5));
-            parameters.put(URL.MAX_THREADS, MapUtils.getInteger(nettyConf, URL.MAX_THREADS, 8));
-            parameters.put(URL.COUNT_PER_CHANNEL, MapUtils.getInteger(nettyConf, URL.COUNT_PER_CHANNEL, 50));
-            parameters.put(URL.OPTIONS, MapUtils.getMap(nettyConf, URL.OPTIONS, Collections.EMPTY_MAP));
-            parameters.put(URL.CHILD_OPTIONS, MapUtils.getMap(nettyConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
-            parameters.put(URL.CHANNEL_HANDLERS, MapUtils.getString(nettyConf, URL.CHANNEL_HANDLERS, ""));
-            url.setParameters(parameters);
-            initSslConfig(url, MapUtils.getMap(nettyConf, "ssl", null));
-            this.urls.add(url);
-        }
-    }
-
-    private void initSslConfig(URL url, Map<String, Object> sslConf) {
-        url.getParameters().put(URL.SSL, sslConf);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadServletConfig(Map<String, Object> servletConf, List<String> listenersConf) throws Exception {
-        Class<?> servletClass;
-        if (servletConf.get("servletClass") == null) {
-            servletClass = DispatcherServlet.class;
-        } else {
-            String servletClassName = String.valueOf(servletConf.get("servletClass")).trim();
-            servletClass = ClassUtils.forName(servletClassName);
-            if (!Servlet.class.isAssignableFrom(servletClass)) {
-                throw new ConfigurationException(servletClassName + "is not a Servlet class");
-            }
-        }
-        Map<String, Object> initParams;
-        if (!servletConf.containsKey("initParams")) {
-            initParams = new HashMap<>();
-        } else {
-            initParams = (Map<String, Object>) servletConf.get("initParams");
-        }
-
-        ServletContext servletContext = new DefaultServletContext();
-
-        this.servletConfig = new ServletConfig() {
-            @Override
-            public String getServletName() {
-                Object name = servletConf.get("servletName");
-                return name == null ? null : String.valueOf(name).trim();
-            }
-
-            @Override
-            public Class<? extends Servlet> servletClass() {
-                return (Class<? extends Servlet>) servletClass;
-            }
-
-            @Override
-            public String getInitParam(String key) {
-                return initParams.containsKey(key) ? String.valueOf(initParams.get(key)).trim() : null;
-            }
-
-            @Override
-            public Collection<String> getInitParamNames() {
-                return initParams.keySet();
-            }
-
-            @Override
-            public ServletContext getServletContext() {
-                return servletContext;
-            }
-        };
-        loadListeners(listenersConf);
-    }
-
-    private void loadListeners(List<String> listenersConf) throws Exception {
-        List<Object> listeners = new ArrayList<>();
-
-        if (listenersConf != null && listenersConf.size() > 0) {
-            for (String s : listenersConf) {
-                Object listener = ClassUtils.newInstance(s.trim());
-                listeners.add(listener);
-            }
-        }
-        servletConfig.getServletContext().setListeners(listeners);
     }
 
     private void notifyServletContextListener() {

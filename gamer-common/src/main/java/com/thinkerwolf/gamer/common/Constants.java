@@ -11,11 +11,11 @@ public final class Constants {
     /**
      * Classpath下默认配置文件
      */
-    public static final String DEFAULT_CONFIG_FILE = "conf.yml";
+    public static final String DEFAULT_CONFIG_FILE_YML = "conf.yml";
     /**
      * Classpath下默认配置文件
      */
-    public static final String DEFAULT_CONFIG_FILE_A = "conf.yaml";
+    public static final String DEFAULT_CONFIG_FILE_YAML = "conf.yaml";
 
     /**
      * LOG配置文件

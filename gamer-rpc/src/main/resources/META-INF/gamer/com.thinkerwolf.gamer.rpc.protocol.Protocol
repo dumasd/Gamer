@@ -1,3 +1,0 @@
-tcp=com.thinkerwolf.gamer.rpc.protocol.tcp.TcpProtocol
-http=com.thinkerwolf.gamer.rpc.protocol.http.HttpProtocol
-ws=com.thinkerwolf.gamer.rpc.protocol.websocket.WebsocketProtocol

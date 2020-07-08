@@ -3,28 +3,21 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>gamer-parent</artifactId>
+        <artifactId>gamer-rpc</artifactId>
         <groupId>com.thinkerwolf</groupId>
         <version>1.0.0</version>
     </parent>
-
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>gamer-rpc</artifactId>
-    <packaging>pom</packaging>
-    <name>Gamer/Rpc</name>
-    <modules>
-        <module>gamer-rpc-api</module>
-        <module>gamer-rpc-http</module>
-        <module>gamer-rpc-websocket</module>
-        <module>gamer-rpc-tcp</module>
-        <module>gamer-rpc-grpc</module>
-    </modules>
+    <artifactId>gamer-rpc-api</artifactId>
+    <name>Gamer/RpcApi</name>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>gamer-core-api</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 

@@ -3,34 +3,26 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>gamer-remoting</artifactId>
+        <artifactId>gamer-rpc</artifactId>
         <groupId>com.thinkerwolf</groupId>
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>gamer-remoting-netty</artifactId>
-    <name>Gamer/RemotingNetty</name>
+    <artifactId>gamer-rpc-tcp</artifactId>
+    <name>Gamer/RpcTcp</name>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.thinkerwolf</groupId>
-            <artifactId>gamer-remoting-api</artifactId>
-            <version>1.0.0</version>
+            <artifactId>gamer-rpc-api</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>gamer-remoting-netty</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
-
 </project>

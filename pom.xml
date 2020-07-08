@@ -68,6 +68,7 @@
         <commons-io_version>2.5</commons-io_version>
         <commons-collections_version>3.2.2</commons-collections_version>
         <snakeyaml_version>1.25</snakeyaml_version>
+        <grpc_version>1.28.1</grpc_version>
     </properties>
 
     <dependencies>
@@ -180,6 +181,26 @@
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-core</artifactId>
                 <version>${jetcd_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-core</artifactId>
+                <version>${grpc_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-netty</artifactId>
+                <version>${grpc_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-protobuf</artifactId>
+                <version>${grpc_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-stub</artifactId>
+                <version>${grpc_version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
