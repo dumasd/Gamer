@@ -1,5 +1,7 @@
 package com.thinkerwolf.gamer.remoting;
 
+import com.thinkerwolf.gamer.common.concurrent.Promise;
+
 import java.net.SocketAddress;
 
 /**
@@ -21,6 +23,7 @@ public interface Channel extends Endpoint {
 
     void setAttr(String key, Object value);
 
+    Promise<Channel> sendPromise(Object message);
     /**
      * 是否再连接中
      *

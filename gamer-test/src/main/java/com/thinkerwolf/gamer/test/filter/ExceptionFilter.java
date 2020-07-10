@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.test;
+package com.thinkerwolf.gamer.test.filter;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
@@ -32,7 +32,8 @@ public class ExceptionFilter implements Filter {
         } catch (Exception e) {
             LOG.error("Exception when invoke command", e);
             Map<String, Object> error = new HashMap<>();
-            error.put("exception", e);
+            error.put("status", 3);
+            error.put("msg", "Server Internal Error");
             try {
                 ResponseUtil.render(ResponseUtil.JSON_VIEW, new JsonModel(error), request, response);
             } catch (Exception ignored) {

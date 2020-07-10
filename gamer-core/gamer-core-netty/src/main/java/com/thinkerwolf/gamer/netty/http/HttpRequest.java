@@ -94,12 +94,13 @@ public class HttpRequest extends AbstractRequest {
         if (create && (session != null && !session.getId().equals(sessionId))) {
             // session过期或者不存在，创建新的session
             session.setPush(newPush());
-            session.touch();
             Cookie responseCookie = new DefaultCookie(Session.JSESSION, session.getId());
-            responseCookie.setValue(session.getId());
             responseCookie.setMaxAge(session.getMaxAge());
             cookies.put(Session.JSESSION, responseCookie);
             response.addCookie(responseCookie);
+        }
+        if (session != null) {
+            session.touch();
         }
         return session;
     }

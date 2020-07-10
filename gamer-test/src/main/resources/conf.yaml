@@ -12,13 +12,14 @@ servlet:
     sessionTimeout: 120 # session超时时间(s)
     sessionTickTime: 5 # session检查tick(s)
     resourceLocation: META-INF/resources
-    filters: com.thinkerwolf.gamer.test.ExceptionFilter;com.thinkerwolf.gamer.test.LoginSessionFilter
+    filters: com.thinkerwolf.gamer.test.filter.ExceptionFilter
+    # ;com.thinkerwolf.gamer.test.filter.LoginSessionFilter
 
 
 # 监听器配置列表
 listeners:
-  - com.thinkerwolf.gamer.test.LocalSessionListener
-  - com.thinkerwolf.gamer.test.LocalSessionAttributeListener
+  - com.thinkerwolf.gamer.test.listener.LocalSessionListener
+  - com.thinkerwolf.gamer.test.listener.LocalSessionAttributeListener
   - com.thinkerwolf.gamer.rpc.mvc.RpcServiceLoadListener
   - com.thinkerwolf.gamer.swagger.SwaggerEnableListener
 
@@ -44,10 +45,10 @@ netty:
     countPerChannel: 100 # 客户端最大并发数量
     protocol: http
     ssl:
-      enabled: false
+      enabled: true
       keyStore: C:\Users\wukai\.keystore
       keyStorePassword: 123456
-    port: 8080
+    port: 80
     options:
       so_keepalive: true
     childOptions:

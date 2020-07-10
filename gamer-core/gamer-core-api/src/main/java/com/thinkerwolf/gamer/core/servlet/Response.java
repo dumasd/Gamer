@@ -4,36 +4,83 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * 响应
+ * Servlet Response
  *
  * @author wukai
+ * @since 2019-10-10
  */
 public interface Response {
     /**
-     * 设置状态
+     * Set response status
      *
-     * @param status
+     * @param status Status code
      */
     void setStatus(Object status);
 
+    /**
+     * Get response status
+     *
+     * @return status
+     */
     Object getStatus();
 
+    /**
+     * Get response protocol
+     *
+     * @return protocol
+     */
     Protocol getProtocol();
 
-    Object write(Object obj) throws IOException;
+    /**
+     * Write response content to pipeline
+     *
+     * @param message Response content
+     * @return Depend on subclass's implementation
+     * @throws IOException Exception when writing content
+     */
+    Object write(Object message) throws IOException;
 
     void addCookie(Object cookie);
 
     Object getCookies();
 
-    Object getHeader(String header);
 
-    Object setHeader(String header, Object value);
+    /**
+     * Set header with name and value
+     *
+     * @param name  Header name
+     * @param value Header value
+     * @return Old header value
+     */
+    Object setHeader(String name, Object value);
 
+    /**
+     * Get header with name
+     *
+     * @param name Header name
+     * @return Header value
+     */
+    Object getHeader(String name);
+
+    /**
+     * Get all headers
+     *
+     * @return Headers
+     */
     Map<String, Object> getHeaders();
 
+    /**
+     * 设置响应内容类型
+     *
+     * @param contentType Content type
+     */
     void setContentType(Object contentType);
 
+    /**
+     * Get content type
+     *
+     * @return Content type
+     */
     Object getContentType();
 
 }

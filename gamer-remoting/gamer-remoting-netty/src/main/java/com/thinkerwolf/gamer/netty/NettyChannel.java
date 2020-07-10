@@ -1,12 +1,13 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.common.concurrent.DefaultPromise;
+import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
-import com.thinkerwolf.gamer.remoting.Channel;
-import com.thinkerwolf.gamer.remoting.ChannelHandler;
-import com.thinkerwolf.gamer.remoting.RemotingException;
+import com.thinkerwolf.gamer.remoting.*;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.util.AttributeKey;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -16,7 +17,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class NettyChannel implements Channel {
+public class NettyChannel extends AbstractChannel {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(NettyChannel.class);
 
@@ -129,8 +130,17 @@ public class NettyChannel implements Channel {
     }
 
     @Override
-    public void send(Object message) throws RemotingException {
-        send(message, false);
+    public Promise<Channel> sendPromise(Object message) {
+        DefaultPromise<Channel> promise = new DefaultPromise<>();
+        ChannelFuture future = ch.writeAndFlush(message);
+        future.addListener((ChannelFutureListener) cf -> {
+            if (cf.isSuccess()) {
+                promise.setSuccess(NettyChannel.this);
+            } else {
+                promise.setFailure(cf.cause());
+            }
+        });
+        return promise;
     }
 
     @Override

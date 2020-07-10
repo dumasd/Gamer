@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.test;
+package com.thinkerwolf.gamer.test.listener;
 
 import com.thinkerwolf.gamer.core.servlet.Session;
 import com.thinkerwolf.gamer.core.servlet.SessionEvent;

@@ -19,7 +19,7 @@ public class GamerRegistryConfiguration {
     private static final Logger LOG = InternalLoggerFactory.getLogger(GamerRegistryConfiguration.class);
 
     @Configuration
-    @ConditionalOnProperty(prefix = "gamer.registry", name = "enabled", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "gamer.registry", name = "enabled")
     public static class RegistryConfiguration {
         @Bean
         public Registry registry(GamerRegistryProperties registryProperties) {

@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.test;
+package com.thinkerwolf.gamer.test.filter;
 
 import com.thinkerwolf.gamer.core.mvc.ActionInvocation;
 import com.thinkerwolf.gamer.core.mvc.Invocation;

@@ -6,12 +6,13 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
+import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.util.AttributeKey;
 
 import java.util.Map;
 
 public final class NettyCoreUtil {
-    public static final AttributeKey<String> CHANNEL_JSESSIONID = AttributeKey.newInstance(Session.JSESSION);
+    public static final AttributeKey<String> CHANNEL_JSESSIONID = AttributeKey.valueOf(Session.JSESSION);
 
     public static void addHeadersAndCookies(HttpResponse httpResponse, Response response) {
         Map<String, Cookie> cookies = (Map<String, Cookie>) response.getCookies();
@@ -25,6 +26,15 @@ public final class NettyCoreUtil {
         if (headers != null) {
             for (Map.Entry<String, Object> en : headers.entrySet()) {
                 httpResponse.headers().add(en.getKey(), en.getValue());
+            }
+        }
+    }
+
+    public static void addHeaders(Http2Headers http2Headers, Response response) {
+        Map<String, Object> headers = response.getHeaders();
+        if (headers != null) {
+            for (Map.Entry<String, Object> en : headers.entrySet()) {
+                http2Headers.add(en.getKey(), en.getKey());
             }
         }
     }

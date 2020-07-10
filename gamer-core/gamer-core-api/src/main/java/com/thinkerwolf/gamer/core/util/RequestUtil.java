@@ -6,11 +6,25 @@ import org.apache.commons.lang.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequestUtil {
-
+/**
+ * Servlet请求工具类
+ *
+ * @author wukai
+ * @since 2019-12-02
+ */
+public final class RequestUtil {
+    /**
+     * Http1长连接推送路径
+     */
     public static final String LONG_HTTP = "longhttp";
-
+    /**
+     * 请求sessionId参数键
+     */
     public static final String REQUEST_SESSION_KEY = "sessionId";
+    /**
+     * 请求requestId参数键
+     */
+    public static final String REQUEST_ID_KEY = "requestId";
 
     public static boolean isLongHttp(String command) {
         return LONG_HTTP.equalsIgnoreCase(command);

@@ -1,34 +1,36 @@
-package com.thinkerwolf.gamer.netty;
+package com.thinkerwolf.gamer.core.servlet;
 
-import com.thinkerwolf.gamer.core.servlet.Request;
-import com.thinkerwolf.gamer.core.servlet.Session;
-import io.netty.channel.Channel;
+import com.thinkerwolf.gamer.remoting.Channel;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractRequest implements Request {
+/**
+ * @author wukai
+ * @since 2020-07-10
+ */
+public abstract class AbstractChRequest implements Request {
 
     private int requestId;
-
     private final String command;
-
-    private final Channel channel;
-
+    private final Channel ch;
     private Map<String, Object> attributes;
+    private final ServletConfig servletConfig;
 
-    public AbstractRequest(int requestId, String command, Channel channel) {
+    public AbstractChRequest(int requestId, String command, Channel ch, ServletConfig servletConfig) {
         this.requestId = requestId;
         this.command = command;
-        this.channel = channel;
-    }
-
-    public AbstractRequest(String command, Channel channel) {
-        this(0, command, channel);
+        this.ch = ch;
+        this.servletConfig = servletConfig;
     }
 
     protected void setRequestId(int requestId) {
         this.requestId = requestId;
+    }
+
+    @Override
+    public Channel getChannel() {
+        return ch;
     }
 
     @Override
@@ -39,11 +41,6 @@ public abstract class AbstractRequest implements Request {
     @Override
     public String getCommand() {
         return command;
-    }
-
-    @Override
-    public Channel getChannel() {
-        return channel;
     }
 
     @Override
@@ -80,11 +77,32 @@ public abstract class AbstractRequest implements Request {
         return getSession(false);
     }
 
-    protected String getInternalSessionId() {
-        if (channel.hasAttr(NettyCoreUtil.CHANNEL_JSESSIONID)) {
-            return channel.attr(NettyCoreUtil.CHANNEL_JSESSIONID).toString();
+    @Override
+    public Session getSession(boolean create) {
+        SessionManager sessionManager = servletConfig.getServletContext().getSessionManager();
+        if (sessionManager == null) {
+            return null;
         }
-        return null;
+        String sessionId = getInternalSessionId();
+        Session session = sessionManager.getSession(sessionId, create);
+        if (create && session != null && !session.getId().equals(sessionId)) {
+            session.setPush(newPush());
+            getChannel().setAttr(Session.JSESSION, session.getId());
+        }
+        if (session != null) {
+            session.touch();
+        }
+        return session;
+    }
+
+    /**
+     * 请求内部的SessionID
+     *
+     * @return Session Id
+     */
+    protected String getInternalSessionId() {
+        Object attr = ch.getAttr(Session.JSESSION);
+        return attr == null ? null : attr.toString();
     }
 
     private Map<String, Object> getInternalAttributes(boolean create) {
@@ -99,5 +117,4 @@ public abstract class AbstractRequest implements Request {
         }
         return attributes;
     }
-
 }

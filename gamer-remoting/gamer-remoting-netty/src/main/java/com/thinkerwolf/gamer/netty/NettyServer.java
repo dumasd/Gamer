@@ -10,6 +10,8 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.apache.commons.collections.MapUtils;
 
@@ -74,7 +76,8 @@ public class NettyServer implements Server {
             }
         }
 
-        sb.childHandler(ChannelHandlers.createChannelInitializer0(url, handler, secondHandler));
+        sb.handler(new LoggingHandler(LogLevel.INFO))
+                .childHandler(ChannelHandlers.createChannelInitializer0(url, handler, secondHandler));
         ChannelFuture future = sb.bind(new InetSocketAddress(url.getPort()));
         this.channel = future.channel();
         future.addListener((ChannelFutureListener) f -> {

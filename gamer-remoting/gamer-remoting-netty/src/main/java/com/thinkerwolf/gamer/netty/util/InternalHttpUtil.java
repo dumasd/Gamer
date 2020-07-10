@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.netty.util;
 import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.util.CharsetUtil;
+import com.thinkerwolf.gamer.netty.http.Http2HeadersAndDataFrames;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -11,13 +12,24 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import io.netty.handler.codec.http2.Http2Headers;
+import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.handler.stream.ChunkedInput;
 
 import java.util.*;
 
 public final class InternalHttpUtil {
-
+    /**
+     * Default max content length
+     */
+    public static final int DEFAULT_MAX_CONTENT_LENGTH = 65536;
+    /**
+     * Empty bytes
+     */
     private static final byte[] EMPTY_BYTE = new byte[]{};
+    /**
+     * Http1 push request uri
+     */
     public static final String LONG_HTTP = "longhttp";
 
     public static boolean isLongHttp(String command) {
@@ -48,25 +60,73 @@ public final class InternalHttpUtil {
         return result;
     }
 
-    public static String getCommand(HttpRequest request) {
-        String url = request.uri();
-        if (url.startsWith("/")) {
-            url = url.substring(1);
-        }
-        int i = url.indexOf("?");
-        if (i < 0) {
-            return url;
+    public static List<byte[]> getRequestContent(Http2HeadersAndDataFrames frames) {
+        List<byte[]> result = new LinkedList<>();
+        Http2Headers headers = frames.headersFrame().headers();
+        String path = headers.path().toString();
+        byte[] pathData;
+        int i = path.indexOf("?");
+        if (i >= 0) {
+            String getData = URL.decode(path.substring(i + 1));
+            pathData = getData.getBytes(CharsetUtil.UTF8);
         } else {
-            return url.substring(0, i);
+            pathData = EMPTY_BYTE;
         }
+        result.add(pathData);
+        if (frames.dataFrame() != null) {
+            ByteBuf buf = frames.dataFrame().content();
+            byte[] postData = new byte[buf.readableBytes()];
+            buf.readBytes(postData);
+            result.add(postData);
+        }
+        return result;
     }
 
+    public static String getCommand(HttpRequest request) {
+        return getCommand(request.uri());
+    }
+
+    public static String getCommand(Http2HeadersAndDataFrames frames) {
+        return getCommand(frames.headersFrame().headers().path());
+    }
+
+    public static String getCommand(CharSequence path) {
+        String p = URL.decode(path.toString());
+        if (p.startsWith("/")) {
+            p = p.substring(1);
+        }
+        int i = p.indexOf("?");
+        if (i < 0) {
+            return p;
+        } else {
+            return p.substring(0, i);
+        }
+    }
 
     public static Map<String, Cookie> getCookies(HttpRequest request) {
         Map<String, Cookie> cookies = new HashMap<>();
         String value = request.headers().get(HttpHeaderNames.COOKIE);
         if (value != null) {
             Set<Cookie> set = ServerCookieDecoder.STRICT.decode(value);
+            for (Cookie cookie : set) {
+                Cookie c = new DefaultCookie(cookie.name(), cookie.value());
+                c.setDomain(cookie.domain());
+                c.setHttpOnly(cookie.isHttpOnly());
+                c.setSecure(cookie.isSecure());
+                c.setMaxAge(cookie.maxAge());
+                c.setPath(cookie.path());
+                c.setWrap(cookie.wrap());
+                cookies.put(cookie.name(), c);
+            }
+        }
+        return cookies;
+    }
+
+    public static Map<String, Cookie> getCookies(Http2HeadersFrame headersFrame) {
+        Map<String, Cookie> cookies = new HashMap<>();
+        CharSequence value = headersFrame.headers().get(HttpHeaderNames.COOKIE);
+        if (value != null) {
+            Set<Cookie> set = ServerCookieDecoder.STRICT.decode(value.toString());
             for (Cookie cookie : set) {
                 Cookie c = new DefaultCookie(cookie.name(), cookie.value());
                 c.setDomain(cookie.domain());

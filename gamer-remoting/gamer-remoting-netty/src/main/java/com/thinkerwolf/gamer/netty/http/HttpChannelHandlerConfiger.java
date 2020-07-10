@@ -2,46 +2,39 @@ package com.thinkerwolf.gamer.netty.http;
 
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.netty.ChannelHandlerConfiger;
-import com.thinkerwolf.gamer.netty.NettyServerHandler;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ServerChannel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.channel.*;
+import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http2.*;
+import io.netty.handler.ssl.*;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.util.AsciiString;
 import io.netty.util.AttributeKey;
-import io.netty.util.CharsetUtil;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.commons.collections.MapUtils;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Http\Http2
+ *
+ * @author wukai
+ * @since 2020-06-08
+ */
 public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
 
+    private URL url;
     private final ChannelHandler handler;
     private final ChannelHandler websocketHandler;
-    private URL url;
+
     private SslContext sslContext;
+
+    protected HttpServerUpgradeHandler.UpgradeCodecFactory upgradeCodecFactory;
+
 
     public HttpChannelHandlerConfiger(ChannelHandler handler) {
         this(handler, null);
@@ -58,60 +51,78 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
         Map<String, Object> sslConfig = url.getObject(URL.SSL);
         if (MapUtils.getBoolean(sslConfig, "enabled", false)) {
             SelfSignedCertificate ssc = new SelfSignedCertificate();
-            this.sslContext = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
+            SslProvider provider = SslProvider.isAlpnSupported(SslProvider.OPENSSL) ? SslProvider.OPENSSL : SslProvider.JDK;
+            this.sslContext = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
+                    .sslProvider(provider)
+                    /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2 specification.
+                     * Please refer to the HTTP/2 specification for cipher requirements. */
+                    .ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE)
+                    .applicationProtocolConfig(new ApplicationProtocolConfig(
+                            ApplicationProtocolConfig.Protocol.ALPN,
+                            // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
+                            ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
+                            // ACCEPT is currently the only mode supported by both OpenSsl and JDK providers.
+                            ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
+                            ApplicationProtocolNames.HTTP_2,
+                            ApplicationProtocolNames.HTTP_1_1))
+                    .build();
         }
+
+
         url.setAttach(URL.EXEC_GROUP_NAME, "HttpToWs");
+        this.upgradeCodecFactory = protocol -> {
+            if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
+                return new Http2ServerUpgradeCodec(
+                        Http2FrameCodecBuilder.forServer().build(),
+                        new Http2ServerHandler(url, handler)
+                );
+            }
+            return null;
+        };
     }
 
     @Override
     protected void initChannel(Channel ch) throws Exception {
+//        initHttpChannel(ch);
+        initHttp2Channel(ch);
+    }
+
+    protected void initHttp2Channel(Channel ch) {
+        final ChannelPipeline p = ch.pipeline();
+        if (sslContext == null) {
+            // Plain text
+            final HttpServerCodec sourceCodec = new HttpServerCodec();
+            HttpServerUpgradeHandler upgradeHandler = new HttpServerUpgradeHandler(sourceCodec, upgradeCodecFactory);
+            p.addLast(sourceCodec);
+            p.addLast(upgradeHandler);
+            p.addLast(new SimpleChannelInboundHandler<HttpMessage>() {
+                @Override
+                protected void channelRead0(ChannelHandlerContext ctx, HttpMessage msg) throws Exception {
+                    ChannelPipeline pipeline = ctx.pipeline();
+                    pipeline.addFirst("http-timeout", new MyReadTimeoutHandler(30000, TimeUnit.MILLISECONDS));
+                    pipeline.replace(this, "http-aggregator", new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
+                    pipeline.addLast("http-chunk", new ChunkedWriteHandler());
+                    pipeline.addLast("http-handler", new Http1ServerHandler(url, handler, websocketHandler));
+                    ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
+                }
+            });
+        } else {
+            // Ssl
+            p.addLast("http-ssl", sslContext.newHandler(ch.alloc()));
+            p.addLast("http-negotiation", new Http2OrHttpHandler(url, handler, websocketHandler));
+        }
+    }
+
+    protected void initHttpChannel(Channel ch) {
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast("http-timeout", new MyReadTimeoutHandler(30000, TimeUnit.MILLISECONDS));
         if (sslContext != null) {
-            pipeline.addLast("http-ssl", sslContext.newHandler(ch.alloc()));
+            pipeline.addLast("http-ssl", new OptionalSslHandler(sslContext));
         }
         pipeline.addLast("http-codec", new HttpServerCodec());
-        pipeline.addLast("http-aggregator", new HttpObjectAggregator(65536));
+        pipeline.addLast("http-aggregator", new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
         pipeline.addLast("http-chunk", new ChunkedWriteHandler());
-        pipeline.addLast("http-handler", new NettyServerHandler(url, handler) {
-            @Override
-            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                HttpRequest nettyRequest = (HttpRequest) msg;
-                String upgradeHeader = nettyRequest.headers().get(HttpHeaderNames.UPGRADE);
-                final boolean upgrade = HttpHeaderValues.WEBSOCKET.contentEqualsIgnoreCase(upgradeHeader);
-                if (upgrade) {
-                    try {
-                        if (websocketHandler == null) {
-                            ByteBuf buf = Unpooled.buffer();
-                            buf.writeCharSequence("Don't support http to websocket", CharsetUtil.UTF_8);
-                            DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, buf);
-                            response.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN);
-                            ctx.channel().writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-                            return;
-                        }
-                        // websocket 握手
-                        WebSocketServerHandshakerFactory factory = new WebSocketServerHandshakerFactory(InternalHttpUtil.getWebSocketUrl(nettyRequest), null, false);
-                        WebSocketServerHandshaker handshaker = factory.newHandshaker(nettyRequest);
-                        if (handshaker == null) {
-                            WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
-                        } else {
-                            handshaker.handshake(ctx.channel(), nettyRequest);
-                            ctx.pipeline().remove("http-timeout");
-                            ctx.pipeline().replace("http-handler", "websocket-handler", new NettyServerHandler(url, websocketHandler));
-                            if (ctx.channel() instanceof ServerChannel) {
-                                ctx.pipeline().addBefore("websocket-handler", "compress", new WebSocketServerCompressionHandler());
-                            } else {
-                                ctx.pipeline().addBefore("websocket-handler", "compress", WebSocketClientCompressionHandler.INSTANCE);
-                            }
-                        }
-                        return;
-                    } finally {
-                        releaseMessage(msg);
-                    }
-                }
-                super.channelRead(ctx, msg);
-            }
-        });
+        pipeline.addLast("http-handler", new Http1ServerHandler(url, handler, websocketHandler));
     }
 
     static class MyReadTimeoutHandler extends ReadTimeoutHandler {

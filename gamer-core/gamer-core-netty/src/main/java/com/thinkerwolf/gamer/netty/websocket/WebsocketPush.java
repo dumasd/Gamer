@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer.netty.websocket;
 
 import com.thinkerwolf.gamer.core.servlet.Push;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
+import com.thinkerwolf.gamer.remoting.RemotingException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -13,8 +14,14 @@ public class WebsocketPush implements Push {
 
     private Channel channel;
 
+    private com.thinkerwolf.gamer.remoting.Channel ch;
+
     public WebsocketPush(Channel channel) {
         this.channel = channel;
+    }
+
+    public WebsocketPush(com.thinkerwolf.gamer.remoting.Channel ch) {
+        this.ch = ch;
     }
 
     @Override
@@ -33,21 +40,19 @@ public class WebsocketPush implements Push {
         } else {
             throw new UnsupportedOperationException("Unsupported websocket content type " + opcode);
         }
-        channel.writeAndFlush(frame);
-
-
-//        ByteBuf buf = channel.alloc().buffer();
-//        buf.writeInt(opcode);
-//        buf.writeInt(0);
-//        byte[] commandBytes = command.getBytes(CharsetUtil.UTF_8);
-//        buf.writeInt(commandBytes.length);
-//        buf.writeInt(content.length);
-//        buf.writeBytes(commandBytes);
-//        buf.writeBytes(content);
-//
-//        WebSocketFrame frame = new BinaryWebSocketFrame(buf);
-//
-//        channel.writeAndFlush(frame);
+        if (channel != null) {
+            channel.writeAndFlush(frame);
+        }
+        if (ch != null) {
+            try {
+                ch.send(frame);
+            } catch (RemotingException e) {
+                if (e.getCause() != null) {
+                    throw new RuntimeException(e.getCause());
+                }
+                throw new RuntimeException(e.getMessage());
+            }
+        }
     }
 
     @Override

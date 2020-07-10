@@ -36,7 +36,7 @@ public class WebsocketServletHandler extends AbstractServletHandler {
         if (message instanceof WebSocketFrame) {
             WebSocketFrame frame = (WebSocketFrame) message;
             if (frame instanceof CloseWebSocketFrame) {
-                channel.send(frame);
+                channel.send(new CloseWebSocketFrame());
             } else if (frame instanceof PingWebSocketFrame) {
                 channel.send(new PongWebSocketFrame(frame.content()));
             } else if (frame instanceof BinaryWebSocketFrame) {
