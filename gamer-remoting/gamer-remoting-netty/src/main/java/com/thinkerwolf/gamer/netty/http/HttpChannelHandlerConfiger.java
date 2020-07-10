@@ -88,62 +88,18 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
     }
 
     protected void initHttp2Channel(Channel ch) {
-        final ChannelPipeline p = ch.pipeline();
+        final ChannelPipeline pipeline = ch.pipeline();
         if (sslContext == null) {
             // Plain text
-            final HttpServerCodec sourceCodec = new HttpServerCodec();
-            HttpServerUpgradeHandler upgradeHandler = new HttpServerUpgradeHandler(sourceCodec, upgradeCodecFactory);
-            p.addLast(sourceCodec);
-            p.addLast(upgradeHandler);
-            p.addLast(new SimpleChannelInboundHandler<HttpMessage>() {
-                @Override
-                protected void channelRead0(ChannelHandlerContext ctx, HttpMessage msg) throws Exception {
-                    ChannelPipeline pipeline = ctx.pipeline();
-                    pipeline.addFirst("http-timeout", new MyReadTimeoutHandler(30000, TimeUnit.MILLISECONDS));
-                    pipeline.replace(this, "http-aggregator", new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
-                    pipeline.addLast("http-chunk", new ChunkedWriteHandler());
-                    pipeline.addLast("http-handler", new Http1ServerHandler(url, handler, websocketHandler));
-                    ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
-                }
-            });
+            HttpHandlers.configHttp2Plaintext(pipeline, upgradeCodecFactory, url, handler, websocketHandler);
         } else {
             // Ssl
-            p.addLast("http-ssl", sslContext.newHandler(ch.alloc()));
-            p.addLast("http-negotiation", new Http2OrHttpHandler(url, handler, websocketHandler));
+            HttpHandlers.configHttp2Ssl(pipeline, sslContext, upgradeCodecFactory, url, handler, websocketHandler);
+
         }
     }
 
     protected void initHttpChannel(Channel ch) {
-        ChannelPipeline pipeline = ch.pipeline();
-        pipeline.addLast("http-timeout", new MyReadTimeoutHandler(30000, TimeUnit.MILLISECONDS));
-        if (sslContext != null) {
-            pipeline.addLast("http-ssl", new OptionalSslHandler(sslContext));
-        }
-        pipeline.addLast("http-codec", new HttpServerCodec());
-        pipeline.addLast("http-aggregator", new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
-        pipeline.addLast("http-chunk", new ChunkedWriteHandler());
-        pipeline.addLast("http-handler", new Http1ServerHandler(url, handler, websocketHandler));
-    }
-
-    static class MyReadTimeoutHandler extends ReadTimeoutHandler {
-
-        public MyReadTimeoutHandler(long timeout, TimeUnit unit) {
-            super(timeout, unit);
-        }
-
-        @Override
-        protected void readTimedOut(ChannelHandlerContext ctx) throws Exception {
-            if (!isLongHttp(ctx)) {
-                super.readTimedOut(ctx);
-            }
-        }
-
-        private boolean isLongHttp(ChannelHandlerContext ctx) {
-            Object o = ctx.channel().attr(AttributeKey.valueOf(InternalHttpUtil.LONG_HTTP)).get();
-            if (!(o instanceof Boolean)) {
-                return false;
-            }
-            return (Boolean) o;
-        }
+        HttpHandlers.configHttp1(ch.pipeline(), sslContext, url, handler, websocketHandler);
     }
 }
