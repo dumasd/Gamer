@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.core.servlet;
 
+import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.remoting.Channel;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public abstract class AbstractChResponse implements Response {
     }
 
     @Override
-    public Object write(Object message) throws IOException {
+    public Promise<Channel> write(Object message) throws IOException {
         return channel.sendPromise(message);
     }
 

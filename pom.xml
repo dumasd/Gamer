@@ -49,7 +49,7 @@
 
         <junit_version>4.12</junit_version>
         <spring_version>5.0.7.RELEASE</spring_version>
-        <netty_version>4.1.45.Final</netty_version>
+        <netty-all_version>4.1.50.Final</netty-all_version>
         <hessian_version>4.0.38</hessian_version>
         <kryo_version>4.0.0</kryo_version>
         <slf4j_version>1.7.25</slf4j_version>
@@ -117,11 +117,6 @@
             <artifactId>activation</artifactId>
             <version>1.1.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.mortbay.jetty.alpn</groupId>
-            <artifactId>alpn-boot</artifactId>
-            <version>8.1.13.v20181017</version>
-        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -135,7 +130,8 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
-                <version>${netty_version}</version>
+                <version>${netty-all_version}</version>
+                <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -315,6 +311,11 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+            </plugin>
             <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

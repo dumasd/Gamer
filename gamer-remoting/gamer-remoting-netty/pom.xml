@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.thinkerwolf</groupId>
             <artifactId>gamer-remoting-api</artifactId>
-            <version>1.0.0</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

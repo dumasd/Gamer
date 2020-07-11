@@ -13,6 +13,8 @@ import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.RemotingException;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.util.AttributeKey;
 
 import java.util.List;
@@ -44,6 +46,7 @@ public class HttpServletHandler extends AbstractServletHandler {
         } else if (message instanceof Http2HeadersAndDataFrames) {
             Http2HeadersAndDataFrames frames = (Http2HeadersAndDataFrames) message;
             Http2Response response = new Http2Response(channel);
+
             Http2Request request = new Http2Request(channel, getServletConfig(), response, frames);
             request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.HTTP_DECORATOR);
             service(request, response, channel, message);

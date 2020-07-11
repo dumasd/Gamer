@@ -11,7 +11,7 @@ import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
-import java.util.concurrent.TimeUnit;
+import static com.thinkerwolf.gamer.netty.util.InternalHttpUtil.DEFAULT_KEEP_ALIVE_TIMEOUT;
 
 public class Http2OrHttpHandler extends ApplicationProtocolNegotiationHandler {
 
@@ -33,7 +33,7 @@ public class Http2OrHttpHandler extends ApplicationProtocolNegotiationHandler {
 
         if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
             ChannelPipeline pipeline = ctx.pipeline();
-            pipeline.addFirst("http-timeout", new HttpHandlers.MyReadTimeoutHandler(30000, TimeUnit.MILLISECONDS));
+            pipeline.addFirst("http-timeout", new HttpHandlers.MyReadTimeoutHandler(DEFAULT_KEEP_ALIVE_TIMEOUT));
             pipeline.addLast("http-aggregator", new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
             pipeline.addLast("http-chunk", new ChunkedWriteHandler());
             pipeline.addLast("http-handler", new Http1ServerHandler(url, handlers[0], handlers.length > 1 ? handlers[1] : null));

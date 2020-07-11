@@ -8,6 +8,8 @@ import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.netty.AbstractRequest;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 
@@ -113,6 +115,10 @@ public class HttpRequest extends AbstractRequest {
     @Override
     public Push newPush() {
         return new HttpPush(channel, nettyRequest);
+    }
+
+    public boolean isKeepAlive() {
+        return HttpUtil.isKeepAlive(nettyRequest);
     }
 
     @Override

@@ -14,6 +14,7 @@ import java.util.Map;
 public class Http2Request extends AbstractChRequest {
 
     private final Http2Response response;
+    private final Http2HeadersAndDataFrames frames;
     private final Http2FrameStream stream;
     private final Map<String, Cookie> cookies;
     private final List<byte[]> contents;
@@ -21,6 +22,7 @@ public class Http2Request extends AbstractChRequest {
     public Http2Request(Channel ch, ServletConfig servletConfig, Http2Response response, Http2HeadersAndDataFrames frames) {
         super(0, InternalHttpUtil.getCommand(frames), ch, servletConfig);
         this.response = response;
+        this.frames = frames;
         this.contents = InternalHttpUtil.getRequestContent(frames);
         this.stream = frames.stream();
         this.cookies = InternalHttpUtil.getCookies(frames.headersFrame());
@@ -71,6 +73,11 @@ public class Http2Request extends AbstractChRequest {
             }
         }
         return sessionId;
+    }
+
+    @Override
+    public boolean isKeepAlive() {
+        return InternalHttpUtil.isKeepAlive(frames.headersFrame().headers());
     }
 
     @Override

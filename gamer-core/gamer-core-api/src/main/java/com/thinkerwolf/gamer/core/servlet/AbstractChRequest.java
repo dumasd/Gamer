@@ -95,6 +95,10 @@ public abstract class AbstractChRequest implements Request {
         return session;
     }
 
+    public boolean isKeepAlive() {
+        return true;
+    }
+
     /**
      * 请求内部的SessionID
      *

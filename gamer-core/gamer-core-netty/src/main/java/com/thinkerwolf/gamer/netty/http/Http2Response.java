@@ -1,7 +1,9 @@
 package com.thinkerwolf.gamer.netty.http;
 
+import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.core.servlet.AbstractChResponse;
 import com.thinkerwolf.gamer.core.servlet.Protocol;
+import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.remoting.Channel;
 import io.netty.handler.codec.http.cookie.Cookie;
 
@@ -19,16 +21,32 @@ public class Http2Response extends AbstractChResponse {
     }
 
     @Override
-    public Object write(Object message) throws IOException {
+    public Promise<Channel> write(Object message) throws IOException {
+        Promise<Channel> promise;
         if (message instanceof Http2HeadersAndDataFrames) {
-            Http2HeadersAndDataFrames frames = (Http2HeadersAndDataFrames) message;
-            Object o = super.write(frames.headersFrame());
+            final Http2HeadersAndDataFrames frames = (Http2HeadersAndDataFrames) message;
+            final boolean keepAlive = InternalHttpUtil.isKeepAlive(frames.headersFrame().headers());
+            Promise<Channel> p = super.write(frames.headersFrame());
             if (frames.dataFrame() != null) {
-                o = super.write(frames.dataFrame());
+                promise = super.write(frames.dataFrame());
+                p.addListener(f -> checkCloseChannel(promise, keepAlive));
+            } else {
+                promise = p;
+                checkCloseChannel(promise, keepAlive);
             }
-            return o;
+        } else {
+            promise = super.write(message);
+            checkCloseChannel(promise, false);
         }
-        return super.write(message);
+        return promise;
+    }
+
+    private void checkCloseChannel(Promise<Channel> promise, final boolean keepAlive) {
+        promise.addListener(future -> {
+            if (!keepAlive) {
+                getChannel().close();
+            }
+        });
     }
 
     @Override

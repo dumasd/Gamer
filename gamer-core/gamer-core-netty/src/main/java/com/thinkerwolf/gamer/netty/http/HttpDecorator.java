@@ -19,6 +19,7 @@ public class HttpDecorator implements Decorator {
     public Object decorate(Model<?> model, Request request, Response response) {
         byte[] bytes = model.getBytes();
         if (response instanceof HttpResponse) {
+            HttpRequest servletHttpRequest = (HttpRequest) request;
             HttpResponse servletHttpResponse = (HttpResponse) response;
             HttpResponseStatus status = servletHttpResponse.getStatus() != null ?
                     HttpResponseStatus.valueOf(servletHttpResponse.getStatus()) : HttpResponseStatus.OK;
@@ -31,6 +32,11 @@ public class HttpDecorator implements Decorator {
             httpResponse.headers().add(HttpHeaderNames.DATE, DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
             httpResponse.headers().add(HttpHeaderNames.SERVER, Constants.FRAMEWORK_NAME_VERSION);
             httpResponse.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+            if (servletHttpRequest.isKeepAlive()) {
+                httpResponse.headers().add(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+            } else {
+                httpResponse.headers().add(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+            }
             httpResponse.content().writeBytes(bytes);
             return httpResponse;
         } else if (response instanceof Http2Response) {
@@ -47,6 +53,11 @@ public class HttpDecorator implements Decorator {
             http2Headers.add(HttpHeaderNames.DATE, DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
             http2Headers.add(HttpHeaderNames.SERVER, Constants.FRAMEWORK_NAME_VERSION);
             http2Headers.add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+            if (servletHttp2Request.isKeepAlive()) {
+                http2Headers.add(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+            } else {
+                http2Headers.add(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+            }
             Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(http2Headers, false);
             Http2DataFrame dataFrame = new DefaultHttp2DataFrame(Unpooled.buffer(bytes.length).writeBytes(bytes), true);
             return new Http2HeadersAndDataFrames(headersFrame, dataFrame).stream(servletHttp2Request.getStream());

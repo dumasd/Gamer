@@ -31,6 +31,10 @@ public final class InternalHttpUtil {
      * Http1 push request uri
      */
     public static final String LONG_HTTP = "longhttp";
+    /**
+     * Default Keep Alive timeout
+     */
+    public static final int DEFAULT_KEEP_ALIVE_TIMEOUT = 30000;
 
     public static boolean isLongHttp(String command) {
         return LONG_HTTP.equalsIgnoreCase(command);
@@ -185,6 +189,11 @@ public final class InternalHttpUtil {
             }
         }
 
+    }
+
+    public static boolean isKeepAlive(Http2Headers headers) {
+        return !headers.contains(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE, true) &&
+                headers.contains(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE, true);
     }
 
     public static String getWebSocketUrl(HttpRequest httpRequest) {

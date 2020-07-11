@@ -3,11 +3,9 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.http.HttpMessage;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -23,6 +21,8 @@ import io.netty.util.ReferenceCountUtil;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.thinkerwolf.gamer.netty.util.InternalHttpUtil.DEFAULT_KEEP_ALIVE_TIMEOUT;
+
 public final class HttpHandlers {
 
     public static final String TIMEOUT_NAME = "http-timeout";
@@ -32,6 +32,7 @@ public final class HttpHandlers {
     public static final String HANDLER_NAME = "http-handler";
     public static final String SSL_NAME = "http-ssl";
     public static final String NEGOTIATION_NAME = "http-negotiation";
+    public static final String WEBSOCKET_HANDLER_NAME = "websocket-handler";
 
     /**
      * Http2 plain text config
@@ -50,7 +51,7 @@ public final class HttpHandlers {
             @Override
             protected void channelRead0(ChannelHandlerContext ctx, HttpMessage msg) throws Exception {
                 ChannelPipeline pipe = ctx.pipeline();
-                pipe.addFirst(TIMEOUT_NAME, new MyReadTimeoutHandler(30000, TimeUnit.MILLISECONDS));
+                pipe.addFirst(TIMEOUT_NAME, new MyReadTimeoutHandler(DEFAULT_KEEP_ALIVE_TIMEOUT));
                 pipe.replace(this, AGGREGATOR_NAME, new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
                 pipe.addLast(CHUNK_NAME, new ChunkedWriteHandler());
                 pipe.addLast(HANDLER_NAME, new Http1ServerHandler(url, handlers[0], handlers.length > 1 ? handlers[1] : null));
@@ -95,7 +96,7 @@ public final class HttpHandlers {
      */
     public static void configHttp1(ChannelPipeline pipeline, SslContext sslContext, URL url, ChannelHandler... handlers) {
         ChannelHandler websocketHandler = handlers.length > 1 ? handlers[1] : null;
-        pipeline.addLast(TIMEOUT_NAME, new MyReadTimeoutHandler(30000, TimeUnit.MILLISECONDS));
+        pipeline.addLast(TIMEOUT_NAME, new MyReadTimeoutHandler(DEFAULT_KEEP_ALIVE_TIMEOUT));
         if (sslContext != null) {
             pipeline.addLast(SSL_NAME, new OptionalSslHandler(sslContext));
         }
@@ -107,8 +108,12 @@ public final class HttpHandlers {
 
     public static class MyReadTimeoutHandler extends ReadTimeoutHandler {
 
-        public MyReadTimeoutHandler(long timeout, TimeUnit unit) {
-            super(timeout, unit);
+        public MyReadTimeoutHandler(long timeout) {
+            super(timeout, TimeUnit.MILLISECONDS);
+        }
+
+        public MyReadTimeoutHandler() {
+            this(DEFAULT_KEEP_ALIVE_TIMEOUT);
         }
 
         @Override

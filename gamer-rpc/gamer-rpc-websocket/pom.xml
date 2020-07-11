@@ -17,12 +17,12 @@
         <dependency>
             <groupId>com.thinkerwolf</groupId>
             <artifactId>gamer-rpc-api</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.parent.groupId}</groupId>
+            <groupId>com.thinkerwolf</groupId>
             <artifactId>gamer-remoting-netty</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
