@@ -18,7 +18,6 @@
         <module>gamer-rpc-http</module>
         <module>gamer-rpc-websocket</module>
         <module>gamer-rpc-tcp</module>
-        <module>gamer-rpc-grpc</module>
     </modules>
 
     <dependencies>
