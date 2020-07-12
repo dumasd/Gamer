@@ -10,7 +10,7 @@ public @interface RpcClient {
     /**
      * 序列化方式
      */
-    String serialize() default "jdk";
+    String serialize() default "hessian2";
 
     /**
      * 是否异步

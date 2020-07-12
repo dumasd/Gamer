@@ -25,6 +25,10 @@ public class NettyServer implements Server {
 
     private ServerBootstrap serverBootstrap;
 
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
+
+
     private final URL url;
 
     private final ChannelHandler handler;
@@ -58,8 +62,8 @@ public class NettyServer implements Server {
 
         this.serverBootstrap = new ServerBootstrap();
         ServerBootstrap sb = this.serverBootstrap;
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory(bossName));
-        EventLoopGroup workerGroup = new NioEventLoopGroup(workerThreads, new DefaultThreadFactory(workerName));
+        this.bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory(bossName));
+        this.workerGroup = new NioEventLoopGroup(workerThreads, new DefaultThreadFactory(workerName));
         sb.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
 
         Map<String, Object> options = url.getObject(URL.OPTIONS, Collections.emptyMap());
@@ -109,6 +113,13 @@ public class NettyServer implements Server {
         NettyChannel nc = NettyChannel.getOrAddChannel(channel, url, handler);
         if (nc != null && !nc.isClosed()) {
             nc.close();
+
+        }
+        if (bossGroup != null && !bossGroup.isShutdown()) {
+            bossGroup.shutdownGracefully();
+        }
+        if (workerGroup != null && !workerGroup.isShutdown()) {
+            workerGroup.shutdownGracefully();
         }
     }
 
