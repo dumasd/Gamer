@@ -4,6 +4,7 @@ import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 
 import java.util.List;
+import java.util.Map;
 
 public interface Conf<C extends Conf<C>> {
 
@@ -19,4 +20,5 @@ public interface Conf<C extends Conf<C>> {
 
     C load() throws Exception;
 
+    C load(Map<String, Object> confMap) throws Exception;
 }

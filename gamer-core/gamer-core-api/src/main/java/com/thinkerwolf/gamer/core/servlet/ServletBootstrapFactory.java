@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer.core.servlet;
 
 import com.thinkerwolf.gamer.common.SPI;
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.core.conf.Conf;
 
 import java.util.List;
 

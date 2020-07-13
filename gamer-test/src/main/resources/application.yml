@@ -1,3 +1,48 @@
 gamer:
   id: 1001
-  config-file: conf.yml
+  conf:
+    servlet:
+      servletName: gamer
+      servletClass: com.thinkerwolf.gamer.core.mvc.DispatcherServlet   # servlet类名
+      initParams: # 参数列表
+        componentScanPackage: com.thinkerwolf # 组件扫描包名
+        compress: true # 传输压缩(仅http生效)
+        #sessionManager: com.thinkerwolf.gamer.core.servlet.RedisSessionManager
+        sessionRedisHost: localhost
+        sessionRedisPort: 6379
+        sessionTimeout: 120 # session超时时间(s)
+        sessionTickTime: 5 # session检查tick(s)
+        resourceLocation: META-INF/resources
+        filters: com.thinkerwolf.gamer.test.filter.ExceptionFilter
+    listeners:
+      - com.thinkerwolf.gamer.test.listener.LocalSessionListener
+      - com.thinkerwolf.gamer.test.listener.LocalSessionAttributeListener
+      - com.thinkerwolf.gamer.rpc.mvc.RpcServiceLoadListener
+      - com.thinkerwolf.gamer.swagger.SwaggerEnableListener
+    net:
+      - bossThreads: 1 # boss线程数
+        workerThreads: 5 # worker线程数
+        coreThreads: 10 # tcp业务核心线程
+        maxThreads: 11 # tpc业务最大线程
+        countPerChannel: 100 # 客户端最大并发数量
+        protocol: tcp # 协议
+        port: 8090 # 段口
+        options: # netty option
+          so_keepalive: true
+        childOptions: # netty childOptions
+          tcp_nodelay: true
+      - bossThreads: 1
+        workerThreads: 5
+        coreThreads: 10
+        maxThreads: 11
+        countPerChannel: 100 # 客户端最大并发数量
+        protocol: http
+        ssl:
+          enabled: true
+          keyStore: C:\Users\wukai\.keystore
+          keyStorePassword: 123456
+        port: 80
+        options:
+          so_keepalive: true
+        childOptions:
+          tcp_nodelay: true

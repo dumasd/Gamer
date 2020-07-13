@@ -25,6 +25,60 @@ public class YmlConf extends AbstractConf<YmlConf> {
     private static final Logger LOG = InternalLoggerFactory.getLogger(YmlConf.class);
 
     @Override
+    public YmlConf load(Map<String, Object> confMap) throws Exception {
+        if (getServletConfig() != null
+                && getUrls() != null) {
+            return this;
+        }
+        Map<String, Object> servletConf = (Map<String, Object>) confMap.get("servlet");
+        if (servletConf == null) {
+            throw new ConfigurationException("Missing servlet config");
+        }
+        Object netConf = confMap.get("net");
+        if (netConf == null) {
+            netConf = confMap.get("netty");
+        }
+        if (netConf == null) {
+            throw new ConfigurationException("Missing netty config");
+        }
+
+        List<Map<String, Object>> nets;
+        if (netConf instanceof List) {
+            nets = (List<Map<String, Object>>) netConf;
+        } else {
+            Map<String, Object> map = (Map<String, Object>) netConf;
+            boolean isNumber = false;
+            for (String s : map.keySet()) {
+                if (StringUtils.isNumericSpace(s)) {
+                    isNumber = true;
+                    break;
+                }
+            }
+            if (!isNumber) {
+                nets = Collections.singletonList((Map<String, Object>) netConf);
+            } else {
+                final List<Map<String, Object>> tempNets = new LinkedList<>();
+                map.values().forEach(o -> tempNets.add((Map<String, Object>) o));
+                nets = tempNets;
+            }
+        }
+
+        Object listenersObj = confMap.get("listeners");
+        List<String> listenersConf;
+        if (listenersObj instanceof List) {
+            listenersConf = (List<String>) listenersObj;
+        } else if (listenersObj instanceof Map) {
+            Collection<String> c = ((Map) listenersObj).values();
+            listenersConf = new ArrayList<>(c);
+        } else {
+            listenersConf = Collections.emptyList();
+        }
+        loadUrlConfig(nets);
+        loadServletConfig(servletConf, listenersConf);
+        return this;
+    }
+
+    @Override
     public YmlConf load() {
         if (getServletConfig() != null
                 && getUrls() != null) {
@@ -48,34 +102,12 @@ public class YmlConf extends AbstractConf<YmlConf> {
                 throw new ConfigurationException("No config file!!");
             }
             Map<String, Object> conf = yaml.load(is);
-            Map<String, Object> servletConf = (Map<String, Object>) conf.get("servlet");
-            if (servletConf == null) {
-                throw new ConfigurationException("Missing servlet config");
-            }
-            Object netConf = conf.get("net");
-            if (netConf == null) {
-                netConf = conf.get("netty");
-            }
-            if (netConf == null) {
-                throw new ConfigurationException("Missing netty config");
-            }
-
-            List<Map<String, Object>> netConfs;
-            if (netConf instanceof List) {
-                netConfs = (List<Map<String, Object>>) netConf;
-            } else {
-                netConfs = Collections.singletonList((Map<String, Object>) netConf);
-            }
-            List<String> listenersConf = (List<String>) conf.get("listeners");
-            loadUrlConfig(netConfs);
-            loadServletConfig(servletConf, listenersConf);
+            return load(conf);
         } catch (Exception e) {
             throw new ConfigurationException(e);
         } finally {
             IOUtils.closeQuietly(is);
         }
-
-        return this;
     }
 
 

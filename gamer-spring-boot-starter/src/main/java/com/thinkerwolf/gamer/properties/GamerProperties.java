@@ -4,6 +4,9 @@ package com.thinkerwolf.gamer.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.Map;
+
 @ConfigurationProperties(prefix = "gamer")
 @Component
 public class GamerProperties {
@@ -18,7 +21,8 @@ public class GamerProperties {
     /**
      * Servlet config file position
      */
-    private String configFile = "conf.yml";
+    private String configFile;
+
     /**
      * Remoting name
      */
@@ -27,6 +31,11 @@ public class GamerProperties {
      * Servlet bootstrap type
      */
     private String servletBoot = "netty";
+    /**
+     * Conf. If <strong><i>configFile</i></strong> is not assigned, it will use this to initialize the <strong>ServletBootstrap</strong>
+     */
+    private Map<String, Object> conf;
+
 
     public String getConfigFile() {
         return configFile;
@@ -66,5 +75,13 @@ public class GamerProperties {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Map<String, Object> getConf() {
+        return conf;
+    }
+
+    public void setConf(Map<String, Object> conf) {
+        this.conf = conf;
     }
 }

@@ -18,6 +18,12 @@ public class ConsistentHashLoadBalancer implements LoadBalancer {
 
     @Override
     public <T> T select(Collection<T> list, String key, Map<String, Object> props) {
+        if (list.isEmpty()) {
+            return null;
+        }
+        if (list.size() < 2) {
+            return list.iterator().next();
+        }
         int num = MapUtils.getInteger(props, HASH_NODE_NUM, 100);
         String alg = MapUtils.getString(props, HASH_ALGORITHM_NAME, HashAlgorithm.MURMUR.name());
         HashAlgorithm hashAlgorithm = HashAlgorithm.nameOf(alg);

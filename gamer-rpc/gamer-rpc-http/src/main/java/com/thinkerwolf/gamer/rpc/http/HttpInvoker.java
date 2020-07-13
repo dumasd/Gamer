@@ -55,16 +55,15 @@ public class HttpInvoker<T> implements Invoker<T> {
         this.executor = ConcurrentUtils.newNormalExecutor(url, new DefaultThreadFactory("http-invoker", true));
         initHttpClient();
     }
-    
+
     private void initHttpClient() {
         Registry<ConnectionSocketFactory> schemeRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register("http", PlainConnectionSocketFactory.getSocketFactory())
                 .register("https", SSLConnectionSocketFactory.getSocketFactory())
                 .build();
-        HttpHost httpHost = new HttpHost(url.getHost(), url.getPort());
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(schemeRegistry);
-        connManager.setConnectionConfig(httpHost, ConnectionConfig.DEFAULT);
-        connManager.setSocketConfig(httpHost, SocketConfig.custom().setTcpNoDelay(true).build());
+        connManager.setDefaultConnectionConfig(ConnectionConfig.DEFAULT);
+        connManager.setDefaultSocketConfig(SocketConfig.custom().setTcpNoDelay(true).build());
         connManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
         connManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
         this.httpClient = HttpClients.createMinimal(connManager);
