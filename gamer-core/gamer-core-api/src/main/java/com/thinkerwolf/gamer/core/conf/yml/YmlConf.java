@@ -75,14 +75,14 @@ public class YmlConf extends AbstractConf<YmlConf> {
         }
         loadUrlConfig(nets);
         loadServletConfig(servletConf, listenersConf);
-        return this;
+        return self();
     }
 
     @Override
     public YmlConf load() {
         if (getServletConfig() != null
                 && getUrls() != null) {
-            return this;
+            return self();
         }
         InputStream is = null;
         try {
