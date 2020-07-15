@@ -8,7 +8,7 @@ package com.thinkerwolf.gamer.common;
  */
 public final class SymbolConstants {
     /**
-     *
+     * DotChar(点)(.)
      */
     public static final char C_DOT = '.';
     /**

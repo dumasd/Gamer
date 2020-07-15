@@ -6,7 +6,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 属性包工具 properties
+ * ResourceBundle util
  *
  * @author wukai
  */
@@ -14,7 +14,7 @@ public final class PropertiesUtil {
 
     private static final String PACKAGE = "package";
 
-    private static Map<String, ResourceBundle> class2Bundles = new ConcurrentHashMap<>();
+    private static final Map<String, ResourceBundle> class2Bundles = new ConcurrentHashMap<>();
 
     public static String getString(Class<?> clazz, String key, Locale locale) {
         ResourceBundle bundle = getBundle(clazz, locale);
@@ -88,7 +88,7 @@ public final class PropertiesUtil {
     private static ResourceBundle createBundle(Class<?> clazz, Locale locale) {
         ResourceBundle bundle = null;
         String name = clazz.getName();
-        while (bundle == null && name != null) {
+        while (bundle == null) {
             int idx = name.lastIndexOf('.');
             String baseName;
             if (idx > 0) {

@@ -15,7 +15,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * 资源工具类
+ * Resource Utils
  *
  * @author wukai
  */

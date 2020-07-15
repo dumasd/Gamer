@@ -5,9 +5,14 @@ import com.thinkerwolf.gamer.common.HashAlgorithm;
 import java.util.Collection;
 import java.util.TreeMap;
 
+/**
+ * Consistent hash circle
+ *
+ * @param <T> Value type
+ */
 public class ConsistentHashMap<T> {
 
-    private int virtualNum;
+    private final int virtualNum;
 
     private final TreeMap<Long, T> nodeMap = new TreeMap<>();
 
@@ -27,6 +32,22 @@ public class ConsistentHashMap<T> {
 
     public ConsistentHashMap(Collection<T> nodes) {
         this(HashAlgorithm.MURMUR, 100, nodes);
+    }
+
+    public void add(T t) {
+        String s = t.toString();
+        for (int i = 0; i < virtualNum; i++) {
+            long nodeKey = this.hashAlgorithm.hash(s + "-" + i);
+            nodeMap.put(nodeKey, t);
+        }
+    }
+
+    public void remove(T t) {
+        String s = t.toString();
+        for (int i = 0; i < virtualNum; i++) {
+            long nodeKey = this.hashAlgorithm.hash(s + "-" + i);
+            nodeMap.remove(nodeKey);
+        }
     }
 
     public T find(String key) {
