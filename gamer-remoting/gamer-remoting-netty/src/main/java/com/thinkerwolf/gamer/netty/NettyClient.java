@@ -1,11 +1,8 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
-import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.remoting.AbstractClient;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
-import com.thinkerwolf.gamer.remoting.Client;
 import com.thinkerwolf.gamer.remoting.RemotingException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -81,7 +78,7 @@ public class NettyClient extends AbstractClient {
 
     @Override
     protected void doClose() {
-        nioEventLoopGroup.shutdownGracefully();
+//        nioEventLoopGroup.shutdownGracefully();
     }
 
     @Override

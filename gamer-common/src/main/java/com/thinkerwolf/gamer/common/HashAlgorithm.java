@@ -28,7 +28,7 @@ public enum HashAlgorithm {
     KETAMA,
     /**
      * MurMurHash算法，是非加密HASH算法，性能很高，
-     * 比传统的CRC32,MD5，SHA-1（这两个算法都是加密HASH算法，复杂度本身就很高，带来的性能上的损害也不可避免）
+     * 比传统的CRC32,MD5,SHA-1,SHA-256（这两个算法都是加密HASH算法，复杂度本身就很高，带来的性能上的损害也不可避免）
      * 等HASH算法要快很多，这个算法的碰撞率很低.
      * http://murmurhash.googlepages.com/
      */
