@@ -4,7 +4,7 @@ import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 
 import java.lang.reflect.Method;
 
-public class ServletUtil {
+public final class ServletUtil {
 
     public static boolean isCompress(ServletConfig servletConfig) {
         String s = servletConfig.getInitParam(ServletConfig.COMPRESS);

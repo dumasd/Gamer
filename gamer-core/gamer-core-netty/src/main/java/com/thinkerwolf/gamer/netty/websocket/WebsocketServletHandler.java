@@ -109,7 +109,7 @@ public class WebsocketServletHandler extends AbstractServletHandler {
             channel.close();
             return;
         }
-        int requestId = MapUtils.getInteger(params, "requestId", 0);
+        int requestId = RequestUtil.getRequestId(params);
         WebsocketRequest request = new WebsocketRequest(requestId, command, channel, text.getBytes(UTF_8), getServletConfig());
         WebsocketResponse response = new WebsocketResponse(channel);
 

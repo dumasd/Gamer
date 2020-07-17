@@ -8,7 +8,7 @@ import com.thinkerwolf.gamer.core.mvc.adaptor.ParamAdaptor;
 import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.*;
-import com.thinkerwolf.gamer.core.util.CompressUtil;
+import com.thinkerwolf.gamer.common.util.CompressUtil;
 import com.thinkerwolf.gamer.core.mvc.view.View;
 import com.thinkerwolf.gamer.core.mvc.view.ViewManager;
 

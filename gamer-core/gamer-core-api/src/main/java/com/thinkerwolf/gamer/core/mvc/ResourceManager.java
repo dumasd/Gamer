@@ -5,7 +5,7 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ResourceUtils;
 import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
-import com.thinkerwolf.gamer.core.util.CompressUtil;
+import com.thinkerwolf.gamer.common.util.CompressUtil;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;

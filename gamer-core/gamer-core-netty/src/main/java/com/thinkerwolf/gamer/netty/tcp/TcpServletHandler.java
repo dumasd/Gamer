@@ -36,7 +36,7 @@ public class TcpServletHandler extends AbstractServletHandler {
     public void received(Channel ch, Object message) throws RemotingException {
         Packet packet = (Packet) message;
         TcpRequest request = new TcpRequest(packet.getRequestId(), packet.getCommand(), ch, packet.getContent(), getServletConfig());
-        request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.TCP_GAMER_DECORATOR);
+        request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.TCP_DECORATOR);
         TcpResponse response = new TcpResponse(ch);
         service(request, response, ch, message);
     }

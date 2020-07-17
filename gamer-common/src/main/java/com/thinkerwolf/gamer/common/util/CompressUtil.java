@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core.util;
+package com.thinkerwolf.gamer.common.util;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
@@ -16,7 +16,7 @@ import java.util.zip.GZIPOutputStream;
  * @author wukai
  * @data 2020-03-21
  */
-public class CompressUtil {
+public final class CompressUtil {
 
     public static final String GZIP = "gzip";
     public static final String DEFLATE = "deflate";
@@ -56,8 +56,6 @@ public class CompressUtil {
             gzip.write(bytes);
             gzip.close();
             return out.toByteArray();
-        } catch (IOException e) {
-            throw e;
         } finally {
             IOUtils.closeQuietly(out);
             IOUtils.closeQuietly(gzip);
@@ -72,8 +70,6 @@ public class CompressUtil {
             deflater = new DeflaterOutputStream(out);
             deflater.write(bytes);
             return out.toByteArray();
-        } catch (IOException e) {
-            throw e;
         } finally {
             IOUtils.closeQuietly(out);
             IOUtils.closeQuietly(deflater);

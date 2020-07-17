@@ -1,27 +1,19 @@
 package com.thinkerwolf.gamer.netty.websocket;
 
-import com.thinkerwolf.gamer.core.servlet.Push;
+import com.thinkerwolf.gamer.core.servlet.AbstractChPush;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.remoting.RemotingException;
+import com.thinkerwolf.gamer.remoting.Channel;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
-public class WebsocketPush implements Push {
-
-    private Channel channel;
-
-    private com.thinkerwolf.gamer.remoting.Channel ch;
+public class WebsocketPush extends AbstractChPush {
 
     public WebsocketPush(Channel channel) {
-        this.channel = channel;
-    }
-
-    public WebsocketPush(com.thinkerwolf.gamer.remoting.Channel ch) {
-        this.ch = ch;
+        super(channel);
     }
 
     @Override
@@ -40,23 +32,14 @@ public class WebsocketPush implements Push {
         } else {
             throw new UnsupportedOperationException("Unsupported websocket content type " + opcode);
         }
-        if (channel != null) {
-            channel.writeAndFlush(frame);
-        }
-        if (ch != null) {
-            try {
-                ch.send(frame);
-            } catch (RemotingException e) {
-                if (e.getCause() != null) {
-                    throw new RuntimeException(e.getCause());
-                }
-                throw new RuntimeException(e.getMessage());
-            }
-        }
-    }
 
-    @Override
-    public boolean isPushable() {
-        return channel != null && channel.isWritable();
+        try {
+            getChannel().send(frame);
+        } catch (RemotingException e) {
+            if (e.getCause() != null) {
+                throw new RuntimeException(e.getCause());
+            }
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

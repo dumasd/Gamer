@@ -17,6 +17,11 @@ public class TcpRequest extends AbstractChRequest {
         super(requestId, command, ch, servletConfig);
         this.content = content;
         RequestUtil.parseParams(this, content);
+
+        Session session = getSession(false);
+        if (session != null) {
+            session.setPush(newPush());
+        }
     }
 
     @Override

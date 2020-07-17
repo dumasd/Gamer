@@ -1,13 +1,17 @@
 package com.thinkerwolf.gamer.netty;
 
 public class NettyConstants {
-
-    public static final String TCP_PROTOBUF_DECORATOR = "nettyProtobuf";
-
-    public static final String TCP_GAMER_DECORATOR = "nettyGamer";
-
+    /**
+     * TCP包装器
+     */
+    public static final String TCP_DECORATOR = "nettyTcp";
+    /**
+     * Http包装器
+     */
     public static final String HTTP_DECORATOR = "nettyHttp";
-
+    /**
+     * WebSocket包装器
+     */
     public static final String WEBSOCKET_DECORATOR = "nettyWebSocket";
 
 

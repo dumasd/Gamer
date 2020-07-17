@@ -19,7 +19,7 @@ public class WebsocketRequest extends AbstractChRequest {
 
         Session session = getSession(false);
         if (session != null) {
-            session.setPush(new WebsocketPush(ch));
+            session.setPush(newPush());
         }
     }
 

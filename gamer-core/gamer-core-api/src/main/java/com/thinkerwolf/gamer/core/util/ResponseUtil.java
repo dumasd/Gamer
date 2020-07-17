@@ -12,7 +12,7 @@ import com.thinkerwolf.gamer.core.servlet.*;
  * @author wukai
  * @date 2020/5/18 14:05
  */
-public class ResponseUtil {
+public final class ResponseUtil {
 
     public static Integer CONTENT_TEXT = 1;
     public static Integer CONTENT_JSON = 2;

@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.core.util;
 
 import com.thinkerwolf.gamer.core.servlet.Request;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.HashMap;
@@ -51,6 +52,10 @@ public final class RequestUtil {
             }
         }
         return params;
+    }
+
+    public static int getRequestId(Map<String, Object> params) {
+        return MapUtils.getInteger(params, REQUEST_ID_KEY, 0);
     }
 
 
