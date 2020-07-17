@@ -6,7 +6,6 @@ import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.netty.AbstractServletHandler;
-import com.thinkerwolf.gamer.netty.NettyChannel;
 import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.RemotingException;
@@ -18,6 +17,8 @@ import org.apache.commons.collections.MapUtils;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * WebSocket
@@ -90,9 +91,8 @@ public class WebsocketServletHandler extends AbstractServletHandler {
 
         buf.readBytes(command);
         buf.readBytes(content);
-        NettyChannel nettyChannel = (NettyChannel) channel;
-        final WebsocketRequest request = new WebsocketRequest(requestId, new String(command, CharsetUtil.UTF_8), nettyChannel.innerCh(), content, getServletConfig().getServletContext());
-        final WebsocketResponse response = new WebsocketResponse(nettyChannel.innerCh());
+        final WebsocketRequest request = new WebsocketRequest(requestId, new String(command, CharsetUtil.UTF_8), channel, content, getServletConfig());
+        final WebsocketResponse response = new WebsocketResponse(channel);
 
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.WEBSOCKET_DECORATOR);
         service(request, response, channel, frame);
@@ -109,10 +109,9 @@ public class WebsocketServletHandler extends AbstractServletHandler {
             channel.close();
             return;
         }
-        NettyChannel nettyChannel = (NettyChannel) channel;
         int requestId = MapUtils.getInteger(params, "requestId", 0);
-        WebsocketRequest request = new WebsocketRequest(requestId, command, nettyChannel.innerCh(), text.getBytes(CharsetUtil.UTF_8), getServletConfig().getServletContext());
-        WebsocketResponse response = new WebsocketResponse(nettyChannel.innerCh());
+        WebsocketRequest request = new WebsocketRequest(requestId, command, channel, text.getBytes(UTF_8), getServletConfig());
+        WebsocketResponse response = new WebsocketResponse(channel);
 
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.WEBSOCKET_DECORATOR);
         service(request, response, channel, frame);

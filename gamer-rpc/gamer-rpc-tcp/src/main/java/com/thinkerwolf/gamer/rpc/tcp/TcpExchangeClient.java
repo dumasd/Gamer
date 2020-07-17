@@ -6,7 +6,7 @@ import com.thinkerwolf.gamer.common.concurrent.DefaultPromise;
 import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.netty.NettyClient;
-import com.thinkerwolf.gamer.netty.tcp.Packet;
+import com.thinkerwolf.gamer.remoting.tcp.Packet;
 import com.thinkerwolf.gamer.remoting.AbstractExchangeClient;
 import com.thinkerwolf.gamer.rpc.RpcMessage;
 import com.thinkerwolf.gamer.rpc.RpcRequest;

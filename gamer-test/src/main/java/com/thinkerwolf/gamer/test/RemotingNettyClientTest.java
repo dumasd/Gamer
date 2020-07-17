@@ -7,7 +7,7 @@ import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.netty.NettyClient;
 import com.thinkerwolf.gamer.netty.NettyConfigurator;
-import com.thinkerwolf.gamer.netty.tcp.Packet;
+import com.thinkerwolf.gamer.remoting.tcp.Packet;
 import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
 import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;

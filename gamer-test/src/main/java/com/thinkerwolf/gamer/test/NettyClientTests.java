@@ -1,7 +1,7 @@
 package com.thinkerwolf.gamer.test;
 
 import com.google.protobuf.ByteString;
-import com.thinkerwolf.gamer.netty.tcp.Packet;
+import com.thinkerwolf.gamer.remoting.tcp.Packet;
 import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
 import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
 import com.thinkerwolf.gamer.netty.protobuf.PacketProto;

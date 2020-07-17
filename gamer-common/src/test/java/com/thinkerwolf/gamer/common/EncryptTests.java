@@ -6,6 +6,8 @@ import org.junit.Test;
 import javax.crypto.*;
 
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.util.Base64;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -54,6 +56,16 @@ public class EncryptTests {
 
         byte[] decBs = decrypt(transformation, secretKey, encBs);
         System.out.println("DecryptText : " + new String(decBs, UTF_8));
+    }
+
+    @Test
+    public void testRSA() throws Exception {
+        String transformation = "RSA";
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(transformation);
+        KeyPair keyPair = kpg.generateKeyPair();
+
+
+
     }
 
 

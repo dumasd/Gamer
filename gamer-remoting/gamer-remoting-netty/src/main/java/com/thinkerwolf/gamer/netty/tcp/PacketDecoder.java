@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
+import com.thinkerwolf.gamer.remoting.tcp.Packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;

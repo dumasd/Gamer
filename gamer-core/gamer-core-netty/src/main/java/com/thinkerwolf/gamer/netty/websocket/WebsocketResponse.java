@@ -1,31 +1,17 @@
 package com.thinkerwolf.gamer.netty.websocket;
 
+import com.thinkerwolf.gamer.common.concurrent.Promise;
+import com.thinkerwolf.gamer.core.servlet.AbstractChResponse;
 import com.thinkerwolf.gamer.core.servlet.Protocol;
-import com.thinkerwolf.gamer.core.servlet.Response;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
+import com.thinkerwolf.gamer.remoting.Channel;
 
 import java.io.IOException;
 import java.util.Map;
 
-public class WebsocketResponse implements Response {
-
-    private Channel channel;
-
-    private Integer contentType;
+public class WebsocketResponse extends AbstractChResponse {
 
     public WebsocketResponse(Channel channel) {
-        this.channel = channel;
-    }
-
-    @Override
-    public Object getStatus() {
-        return null;
-    }
-
-    @Override
-    public void setStatus(Object status) {
-
+        super(channel);
     }
 
     @Override
@@ -34,17 +20,12 @@ public class WebsocketResponse implements Response {
     }
 
     @Override
-    public ChannelFuture write(Object obj) throws IOException {
-        return channel.writeAndFlush(obj);
+    public Promise<Channel> write(Object message) throws IOException {
+        return getChannel().sendPromise(message);
     }
 
     @Override
     public void addCookie(Object cookie) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Object getCookies() {
         throw new UnsupportedOperationException();
     }
 
@@ -64,12 +45,10 @@ public class WebsocketResponse implements Response {
     }
 
     @Override
-    public Integer getContentType() {
-        return contentType;
-    }
-
-    @Override
     public void setContentType(Object contentType) {
-        this.contentType = (Integer) contentType;
+        if (!(contentType instanceof Integer)) {
+            throw new IllegalArgumentException(contentType.toString());
+        }
+        super.setContentType(contentType);
     }
 }

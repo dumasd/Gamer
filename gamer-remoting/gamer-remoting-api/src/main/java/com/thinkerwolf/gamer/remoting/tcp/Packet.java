@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty.tcp;
+package com.thinkerwolf.gamer.remoting.tcp;
 
 /**
  * <table>

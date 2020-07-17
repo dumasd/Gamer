@@ -7,7 +7,8 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import io.netty.util.CharsetUtil;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * http push
@@ -38,7 +39,7 @@ public class HttpPush implements Push {
         buf.writeInt(opcode);
         buf.writeInt(0);
 
-        byte[] commandBytes = command.getBytes(CharsetUtil.UTF_8);
+        byte[] commandBytes = command.getBytes(UTF_8);
         buf.writeInt(commandBytes.length);
         buf.writeInt(content.length);
         buf.writeBytes(commandBytes);

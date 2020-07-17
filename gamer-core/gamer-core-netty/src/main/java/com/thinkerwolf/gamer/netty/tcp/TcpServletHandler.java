@@ -7,9 +7,9 @@ import com.thinkerwolf.gamer.core.servlet.Session;
 import com.thinkerwolf.gamer.core.servlet.SessionManager;
 import com.thinkerwolf.gamer.netty.AbstractServletHandler;
 import com.thinkerwolf.gamer.netty.NettyConstants;
-import com.thinkerwolf.gamer.netty.NettyCoreUtil;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.RemotingException;
+import com.thinkerwolf.gamer.remoting.tcp.Packet;
 
 /**
  * @author wukai
@@ -24,22 +24,20 @@ public class TcpServletHandler extends AbstractServletHandler {
     @Override
     public void registered(Channel channel) throws RemotingException {
         SessionManager sessionManager = (SessionManager) getServletConfig().getServletContext().getAttribute(ServletContext.ROOT_SESSION_MANAGER_ATTRIBUTE);
-        io.netty.channel.Channel nch = (io.netty.channel.Channel) channel.innerCh();
         if (sessionManager != null) {
             Session session = sessionManager.getSession(null, false);
             if (session != null) {
-                nch.attr(NettyCoreUtil.CHANNEL_JSESSIONID).set(session.getId());
+                channel.setAttr(Session.JSESSION, session.getId());
             }
         }
     }
 
     @Override
     public void received(Channel ch, Object message) throws RemotingException {
-        io.netty.channel.Channel nch = (io.netty.channel.Channel) ch.innerCh();
         Packet packet = (Packet) message;
-        TcpRequest request = new TcpRequest(packet.getRequestId(), packet.getCommand(), nch, getServletConfig().getServletContext(), packet.getContent());
+        TcpRequest request = new TcpRequest(packet.getRequestId(), packet.getCommand(), ch, packet.getContent(), getServletConfig());
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.TCP_GAMER_DECORATOR);
-        TcpResponse response = new TcpResponse(nch);
+        TcpResponse response = new TcpResponse(ch);
         service(request, response, ch, message);
     }
 

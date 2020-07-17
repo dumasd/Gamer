@@ -9,12 +9,12 @@ import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class WebsocketDecorator implements Decorator {
 
-    private static final List<Object> SUPPORTED_CONTENTS = new ArrayList<>();
+    private static final Set<Object> SUPPORTED_CONTENTS = new HashSet<>();
     static {
         SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_BYTES);
         SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_TEXT);
