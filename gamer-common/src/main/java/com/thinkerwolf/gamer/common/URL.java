@@ -41,7 +41,7 @@ public class URL implements Serializable {
     public static final String NODE_EPHEMERAL = "nodeEphemeral";
     public static final String NODE_NAME = "nodeName";
     public static final String REQUEST_TIMEOUT = "requestTimeout";
-    public static final String RPC_CLIENT_NUM = "clientNum";
+    public static final String RPC_CLIENT_NUM = "rpcClientNum";
     public static final String CHANNEL_HANDLERS = "channelHandlers";
     // ========================= parameter keys end  =============================== //
 
@@ -239,6 +239,7 @@ public class URL implements Serializable {
     }
 
     public Integer getInteger(String key, Integer defaultValue) {
+
         return MapUtils.getInteger(parameters, key, defaultValue);
     }
 

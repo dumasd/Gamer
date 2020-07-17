@@ -45,7 +45,7 @@ public class DefaultPromise<V> extends AbstractPromise<V> {
 
     @Override
     public boolean isSuccess() {
-        return result != FAIL && !(result instanceof CauseHolder);
+        return result != null && result != FAIL && !(result instanceof CauseHolder);
     }
 
     @Override
@@ -147,6 +147,7 @@ public class DefaultPromise<V> extends AbstractPromise<V> {
             millis = TimeUnit.NANOSECONDS.toMillis(time);
             nanos = (int) (time % millis);
         }
+        boolean interrupted = false;
         synchronized (this) {
             while (!isDone()) {
                 try {
@@ -157,10 +158,16 @@ public class DefaultPromise<V> extends AbstractPromise<V> {
                     } else {
                         wait();
                     }
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                    break;
                 } finally {
                     decWaiters();
                 }
             }
+        }
+        if (interrupted) {
+            Thread.currentThread().interrupt();
         }
         return this;
     }

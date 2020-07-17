@@ -6,6 +6,8 @@ import com.thinkerwolf.gamer.remoting.ExchangeClient;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.thinkerwolf.gamer.common.URL.RPC_CLIENT_NUM;
+
 @SuppressWarnings("rawtypes")
 public abstract class AbstractProtocol implements Protocol {
     /**
@@ -18,7 +20,10 @@ public abstract class AbstractProtocol implements Protocol {
     }
 
     public ExchangeClient[] getClients(URL url) {
-        int num = url.getInteger(URL.RPC_CLIENT_NUM, 1);
+        Integer num = url.getInteger(RPC_CLIENT_NUM);
+        if (num == null) {
+            num = url.getAttach(RPC_CLIENT_NUM, 1);
+        }
         ExchangeClient[] clients = new ExchangeClient[num];
         if (num == 1) {
             ExchangeClient client = getSharedClient(url); // not thread safe
