@@ -1,7 +1,8 @@
-package com.thinkerwolf.gamer.netty.concurrent;
+package com.thinkerwolf.gamer.remoting.concurrent;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
+import com.thinkerwolf.gamer.remoting.Channel;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -9,30 +10,27 @@ import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 /**
- * 业务处理Executor
+ * 可以知道每个Channel连接请求数量的业务线程池
  *
  * @author wukai
  */
 public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
-    /**
-     * 创建Executor列表
-     */
-    private static Logger logger = InternalLoggerFactory.getLogger(CountAwareThreadPoolExecutor.class);
+
+    private static final Logger logger = InternalLoggerFactory.getLogger(CountAwareThreadPoolExecutor.class);
 
     /**
-     * 每个Channel的请求数量计数，需要清理
+     * Every channel request count map
      */
-    private ConcurrentMap<Object, AtomicInteger> channelCounters = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Channel, AtomicInteger> channelCounters = new ConcurrentHashMap<>();
     /**
-     * 每个Channel的Executor，需要清理
+     * Every channel children executor
      */
-    private ConcurrentMap<Object, ChildExecutor> childExecutors = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Channel, ChildExecutor> childExecutors = new ConcurrentHashMap<>();
     /**
-     * 每个Channel最大请求数
+     * Channel's maximum concurrent request num
      */
-    private int countPerChannel;
+    private final int countPerChannel;
 
     public CountAwareThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory, int countPerChannel) {
         this(corePoolSize, corePoolSize, threadFactory, countPerChannel);
@@ -89,12 +87,12 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
     /**
      * 是否需要拒绝此Runnable
      *
-     * @param channelRunnable
-     * @return
+     * @param channelRunnable channel task
+     * @return bool
      */
     private boolean needReject(ChannelRunnable channelRunnable) {
-        Object channel = channelRunnable.getChannel();
-        if (ConcurrentUtil.isClosed(channel)) {
+        Channel channel = channelRunnable.getChannel();
+        if (channel.isClosed()) {
             removeChannel(channel);
             return true;
         }
@@ -110,66 +108,58 @@ public class CountAwareThreadPoolExecutor extends ThreadPoolExecutor {
         return false;
     }
 
-    private AtomicInteger getChannelCounter(Object channel) {
-        if (ConcurrentUtil.isClosed(channel)) {
-            return channelCounters.remove(channel);
-        }
-
-        AtomicInteger channelCounter = channelCounters.get(channel);
-        if (channelCounter == null) {
-            channelCounter = new AtomicInteger(0);
-            channelCounters.putIfAbsent(channel, channelCounter);
-            channelCounter = channelCounters.get(channel);
-        }
-        return channelCounter;
+    private AtomicInteger getChannelCounter(Channel channel) {
+        return channelCounters.compute(channel, (ch, v) -> {
+            if (ch.isClosed()) {
+                return null;
+            }
+            if (v == null) {
+                v = new AtomicInteger(0);
+            }
+            return v;
+        });
     }
 
-//    private class ClearTask implements Runnable {
-//
-//    }
-
     private ChildExecutor getChildExecutor(ChannelRunnable cr) {
-        Object channel = cr.getChannel();
-
-        if (ConcurrentUtil.isClosed(channel)) {
-            removeChannel(channel);
-            return null;
-        }
-
-        ChildExecutor executor = childExecutors.get(channel);
-        if (executor == null) {
-            executor = new ChildExecutor();
-            childExecutors.putIfAbsent(channel, executor);
-            executor = childExecutors.get(channel);
-        }
-        return executor;
+        Channel channel = cr.getChannel();
+        return childExecutors.compute(channel, (ch, v) -> {
+            if (ch.isClosed()) {
+                return null;
+            }
+            if (v == null) {
+                v = new ChildExecutor();
+            }
+            return v;
+        });
     }
 
     public void check() {
-        Iterator<Object> iter = childExecutors.keySet().iterator();
-        for (; iter.hasNext(); ) {
-            if (ConcurrentUtil.isClosed(iter.next())) {
+        Iterator<Channel> iter = childExecutors.keySet().iterator();
+        while (iter.hasNext()) {
+            if (iter.next().isClosed()) {
                 iter.remove();
             }
         }
         iter = channelCounters.keySet().iterator();
-        for (; iter.hasNext(); ) {
-            if (ConcurrentUtil.isClosed(iter.next())) {
+        while (iter.hasNext()) {
+            if (iter.next().isClosed()) {
                 iter.remove();
             }
         }
     }
 
-    public void check(Object channel) {
-        if (ConcurrentUtil.isClosed(channel)) {
+    public void check(Channel channel) {
+        if (channel.isClosed()) {
             removeChannel(channel);
         }
     }
 
-    private void removeChannel(Object channel) {
+    private void removeChannel(Channel channel) {
         childExecutors.remove(channel);
         channelCounters.remove(channel);
-        logger.debug("Remove channel " + channel);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Remove channel " + channel);
+        }
     }
 
     @Override

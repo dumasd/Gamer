@@ -1,8 +1,7 @@
-package com.thinkerwolf.gamer.netty.concurrent;
+package com.thinkerwolf.gamer.remoting.concurrent;
 
 import com.thinkerwolf.gamer.common.DefaultThreadFactory;
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.remoting.Channel;
 
 public class ConcurrentUtil {
 
@@ -17,15 +16,6 @@ public class ConcurrentUtil {
     public static CountAwareThreadPoolExecutor newExecutor(URL url) {
         String p = url.getProtocol();
         return newExecutor(url, p + "-user");
-    }
-
-    public static boolean isClosed(Object channel) {
-        if (channel instanceof io.netty.channel.Channel) {
-            return !((io.netty.channel.Channel) channel).isOpen();
-        } else if (channel instanceof Channel) {
-            return ((Channel) channel).isClosed();
-        }
-        return false;
     }
 
 }

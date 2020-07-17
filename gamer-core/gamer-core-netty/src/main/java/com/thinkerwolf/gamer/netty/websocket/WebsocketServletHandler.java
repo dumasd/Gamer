@@ -5,7 +5,7 @@ import com.thinkerwolf.gamer.common.buffer.ChannelBuffer;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
-import com.thinkerwolf.gamer.netty.AbstractServletHandler;
+import com.thinkerwolf.gamer.core.servlet.AbstractServletHandler;
 import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.RemotingException;

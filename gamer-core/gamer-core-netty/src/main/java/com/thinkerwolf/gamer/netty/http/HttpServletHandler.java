@@ -7,17 +7,12 @@ import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.core.util.ServletUtil;
-import com.thinkerwolf.gamer.netty.AbstractServletHandler;
+import com.thinkerwolf.gamer.core.servlet.AbstractServletHandler;
 import com.thinkerwolf.gamer.netty.NettyChannel;
 import com.thinkerwolf.gamer.netty.NettyConstants;
-import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.RemotingException;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpUtil;
 import io.netty.util.AttributeKey;
-
-import java.util.List;
 
 public class HttpServletHandler extends AbstractServletHandler {
 

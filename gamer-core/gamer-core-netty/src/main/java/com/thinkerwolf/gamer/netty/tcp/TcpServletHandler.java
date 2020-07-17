@@ -5,7 +5,7 @@ import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.ServletContext;
 import com.thinkerwolf.gamer.core.servlet.Session;
 import com.thinkerwolf.gamer.core.servlet.SessionManager;
-import com.thinkerwolf.gamer.netty.AbstractServletHandler;
+import com.thinkerwolf.gamer.core.servlet.AbstractServletHandler;
 import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.RemotingException;

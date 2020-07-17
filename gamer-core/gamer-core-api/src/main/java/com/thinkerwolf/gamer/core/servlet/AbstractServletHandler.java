@@ -1,16 +1,14 @@
-package com.thinkerwolf.gamer.netty;
+package com.thinkerwolf.gamer.core.servlet;
 
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
-import com.thinkerwolf.gamer.core.servlet.*;
-import com.thinkerwolf.gamer.netty.concurrent.ChannelRunnable;
-import com.thinkerwolf.gamer.netty.concurrent.ConcurrentUtil;
-import com.thinkerwolf.gamer.netty.concurrent.CountAwareThreadPoolExecutor;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.ChannelHandlerAdapter;
 import com.thinkerwolf.gamer.remoting.RemotingException;
-import io.netty.handler.timeout.ReadTimeoutException;
+import com.thinkerwolf.gamer.remoting.concurrent.ChannelRunnable;
+import com.thinkerwolf.gamer.remoting.concurrent.ConcurrentUtil;
+import com.thinkerwolf.gamer.remoting.concurrent.CountAwareThreadPoolExecutor;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -64,14 +62,13 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter {
 
     @Override
     public void caught(Channel channel, Throwable e) throws RemotingException {
-        io.netty.channel.Channel nettyChannel = ((NettyChannel) channel).innerCh();
         LOG.info("Channel caught. channel:" + channel.id()
                 + ", isOpen:" + (!channel.isClosed()), e);
-        if (e instanceof ReadTimeoutException || e instanceof IOException) {
+        if (e instanceof IOException) {
             channel.close();
-            if (executor instanceof CountAwareThreadPoolExecutor) {
-                ((CountAwareThreadPoolExecutor) executor).check(channel);
-            }
+        }
+        if (executor instanceof CountAwareThreadPoolExecutor) {
+            ((CountAwareThreadPoolExecutor) executor).check(channel);
         }
     }
 
