@@ -221,7 +221,7 @@ public class URL implements Serializable {
         this.parameters = parameters;
     }
 
-    public String getProtocolHostPort() {
+    public String toProtocolHostPort() {
         return String.format("%s://%s:%d", protocol, host, port);
     }
 

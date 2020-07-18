@@ -87,7 +87,7 @@ public class HttpInvoker<T> implements Invoker<T> {
         RpcRequest rpcArgs = new RpcRequest();
         rpcArgs.setArgs(msg.getParameters());
         Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
-        HttpPost httpPost = new HttpPost(url.getProtocolHostPort() + "/" + command);
+        HttpPost httpPost = new HttpPost(url.toProtocolHostPort() + "/" + command);
         httpPost.setConfig(requestConfig);
         httpPost.setEntity(new ByteArrayEntity(Serializations.getBytes(serializer, rpcArgs)));
 

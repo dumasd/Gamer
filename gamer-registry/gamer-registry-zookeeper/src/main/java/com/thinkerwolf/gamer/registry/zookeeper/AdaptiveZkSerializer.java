@@ -11,7 +11,16 @@ import java.io.IOException;
 
 public class AdaptiveZkSerializer implements ZkSerializer {
 
-    private static Serializer serializer = ServiceLoader.getAdaptiveService(Serializer.class);
+    private static Serializer serializer;
+
+    static {
+        try {
+            serializer = ServiceLoader.getService("jackson", Serializer.class);
+        } catch (Exception e) {
+            serializer = ServiceLoader.getAdaptiveService(Serializer.class);
+        }
+    }
+
 
     @Override
     public byte[] serialize(Object data) throws ZkMarshallingError {
