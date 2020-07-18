@@ -17,4 +17,8 @@ public interface Invoker<T> {
         return true;
     }
 
+    default void destroy() {
+
+    };
+
 }

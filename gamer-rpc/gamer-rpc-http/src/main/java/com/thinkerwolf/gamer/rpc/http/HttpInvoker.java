@@ -13,6 +13,7 @@ import com.thinkerwolf.gamer.rpc.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -29,11 +30,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
+import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.TimerTask;
+import java.util.concurrent.*;
 
 import static com.thinkerwolf.gamer.common.URL.RPC_CLIENT_NUM;
 
@@ -42,26 +42,26 @@ public class HttpInvoker<T> implements Invoker<T> {
 
     private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 100;
     private static final int DEFAULT_READ_TIMEOUT_MILLISECONDS = (60 * 1000);
-    private static final Map<URL, CloseableHttpClient> httpClientCache = new ConcurrentHashMap<>();
+    private static final Map<String, CloseableHttpClient> httpClientCache = new ConcurrentHashMap<>();
+    private static final ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(2);
 
     private final URL url;
     private CloseableHttpClient httpClient;
     private final RequestConfig requestConfig;
-    private final ExecutorService executor;
     private final long timeout;
 
     public HttpInvoker(URL url) {
         this.url = url;
-        this.timeout = url.getInteger(URL.REQUEST_TIMEOUT, 4000);
+        this.timeout = url.getInteger(URL.REQUEST_TIMEOUT, 2000);
         this.requestConfig = RequestConfig.custom()
                 .setSocketTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS)
                 .build();
-        this.executor = ConcurrentUtils.newNormalExecutor(url, new DefaultThreadFactory("http-invoker", true));
         initHttpClient();
+
     }
 
     private void initHttpClient() {
-        this.httpClient = httpClientCache.computeIfAbsent(url, url -> {
+        this.httpClient = httpClientCache.computeIfAbsent(url.toHostPort(), k -> {
             Registry<ConnectionSocketFactory> schemeRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register("http", PlainConnectionSocketFactory.getSocketFactory())
                     .register("https", SSLConnectionSocketFactory.getSocketFactory())
@@ -75,7 +75,16 @@ public class HttpInvoker<T> implements Invoker<T> {
             }
             connManager.setMaxTotal(maxConn);
             connManager.setDefaultMaxPerRoute(maxConn);
-            return HttpClients.createMinimal(connManager);
+
+            CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).build();
+            scheduled.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    connManager.closeExpiredConnections();
+                    connManager.closeIdleConnections(30000, TimeUnit.MILLISECONDS);
+                }
+            }, 3000, 3000, TimeUnit.MILLISECONDS);
+            return httpClient;
         });
     }
 
@@ -89,33 +98,27 @@ public class HttpInvoker<T> implements Invoker<T> {
         Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
         HttpPost httpPost = new HttpPost(url.toProtocolHostPort() + "/" + command);
         httpPost.setConfig(requestConfig);
+        httpPost.setHeader(HttpHeaders.CONNECTION, "keep-alive");
         httpPost.setEntity(new ByteArrayEntity(Serializations.getBytes(serializer, rpcArgs)));
 
         DefaultPromise<RpcResponse> promise = new DefaultPromise<>();
-        executor.execute(() -> {
-            CloseableHttpResponse httpResponse = null;
-            HttpEntity entity = null;
-            try {
-                httpResponse = httpClient.execute(httpPost);
-                entity = httpResponse.getEntity();
-                byte[] body = EntityUtils.toByteArray(entity);
-                byte[] data = ArrayUtils.subarray(body, 4, body.length);
-                RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
-                promise.setSuccess(rpcResponse);
-            } catch (Exception e) {
-                promise.setFailure(e);
-            } finally {
-                EntityUtils.consumeQuietly(entity);
-                IOUtils.closeQuietly(httpResponse);
-            }
-        });
+        CloseableHttpResponse httpResponse = null;
+        HttpEntity entity = null;
+        try {
+            httpResponse = httpClient.execute(httpPost);
+            entity = httpResponse.getEntity();
+            byte[] body = EntityUtils.toByteArray(entity);
+            byte[] data = ArrayUtils.subarray(body, 4, body.length);
+            RpcResponse rpcResponse = Serializations.getObject(serializer, data, RpcResponse.class);
+            promise.setSuccess(rpcResponse);
+        } catch (Exception e) {
+            promise.setFailure(e);
+        } finally {
+            EntityUtils.consumeQuietly(entity);
+            IOUtils.closeQuietly(httpResponse);
+        }
 
         if (!msg.getRpcClient().async()) {
-            try {
-                promise.await(timeout, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                LOG.warn("", e);
-            }
             if (!promise.isDone()) {
                 promise.setFailure(new TimeoutException());
             }
@@ -130,6 +133,17 @@ public class HttpInvoker<T> implements Invoker<T> {
                 return new Result(promise.getNow().getResult());
             }
             return new Result((Object) null);
+        }
+    }
+
+    @Override
+    public void destroy() {
+        CloseableHttpClient httpClient = httpClientCache.remove(url.toHostPort());
+        if (httpClient != null) {
+            try {
+                httpClient.close();
+            } catch (IOException ignored) {
+            }
         }
     }
 }
