@@ -2,16 +2,15 @@ package com.thinkerwolf.gamer.rpc.websocket;
 
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.remoting.ExchangeClient;
+import com.thinkerwolf.gamer.rpc.AbstractClientProtocol;
 import com.thinkerwolf.gamer.rpc.Invoker;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
-import com.thinkerwolf.gamer.rpc.AbstractProtocol;
 
-public class WebsocketProtocol extends AbstractProtocol {
+public class WebsocketProtocol extends AbstractClientProtocol {
 
     @Override
-    public <T> Invoker<T> invoker(Class<T> interfaceClass, URL url) {
-        WebsocketInvoker<T> invoker = new WebsocketInvoker<>(getClients(url));
-        return invoker;
+    protected <T> Invoker<T> doInvoker(Class<T> interfaceClass, URL url) {
+        return new WebsocketInvoker<T>(getClients(url));
     }
 
     @Override

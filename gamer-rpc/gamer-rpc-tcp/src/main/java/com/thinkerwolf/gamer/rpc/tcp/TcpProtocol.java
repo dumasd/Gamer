@@ -2,7 +2,7 @@ package com.thinkerwolf.gamer.rpc.tcp;
 
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.remoting.ExchangeClient;
-import com.thinkerwolf.gamer.rpc.AbstractProtocol;
+import com.thinkerwolf.gamer.rpc.AbstractClientProtocol;
 import com.thinkerwolf.gamer.rpc.Invoker;
 
 /**
@@ -11,10 +11,10 @@ import com.thinkerwolf.gamer.rpc.Invoker;
  * @author wukai
  * @date 2020/5/14 10:30
  */
-public class TcpProtocol extends AbstractProtocol {
+public class TcpProtocol extends AbstractClientProtocol {
 
     @Override
-    public <T> Invoker<T> invoker(Class<T> interfaceClass, URL url) {
+    protected <T> Invoker<T> doInvoker(Class<T> interfaceClass, URL url) {
         TcpInvoker<T> invoker = new TcpInvoker<>(getClients(url));
         return invoker;
     }

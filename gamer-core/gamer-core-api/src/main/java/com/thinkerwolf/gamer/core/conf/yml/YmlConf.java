@@ -151,6 +151,11 @@ public class YmlConf extends AbstractConf<YmlConf> {
             parameters.put(URL.OPTIONS, MapUtils.getMap(nettyConf, URL.OPTIONS, Collections.EMPTY_MAP));
             parameters.put(URL.CHILD_OPTIONS, MapUtils.getMap(nettyConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
             parameters.put(URL.CHANNEL_HANDLERS, MapUtils.getString(nettyConf, URL.CHANNEL_HANDLERS, ""));
+
+            String rpcHost = MapUtils.getString(nettyConf, URL.RPC_HOST);
+            if (StringUtils.isNotBlank(rpcHost)) {
+                parameters.put(URL.RPC_HOST, rpcHost);
+            }
             url.setParameters(parameters);
             initSslConfig(url, MapUtils.getMap(nettyConf, "ssl", null));
             urls.add(url);
