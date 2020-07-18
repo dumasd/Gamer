@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
@@ -116,14 +117,14 @@ public class YmlConf extends AbstractConf<YmlConf> {
             throw new ConfigurationException("Missing netty config");
         }
         final List<URL> urls = new ArrayList<>();
-        for (Map<String, Object> nettyConf : netConfs) {
+        for (Map<String, Object> netConf : netConfs) {
             URL url = new URL();
-            if (!nettyConf.containsKey(URL.PROTOCOL)) {
+            if (!netConf.containsKey(URL.PROTOCOL)) {
                 throw new ConfigurationException("Netty config missing protocol");
             }
-            url.setProtocol(MapUtils.getString(nettyConf, URL.PROTOCOL).toLowerCase());
-            if (nettyConf.containsKey(URL.PORT)) {
-                url.setPort(MapUtils.getInteger(nettyConf, URL.PORT));
+            url.setProtocol(MapUtils.getString(netConf, URL.PROTOCOL).toLowerCase());
+            if (netConf.containsKey(URL.PORT)) {
+                url.setPort(MapUtils.getInteger(netConf, URL.PORT));
             } else {
                 if (Protocol.TCP.getName().equals(url.getProtocol())) {
                     url.setPort(URL.DEFAULT_TCP_PORT);
@@ -131,33 +132,39 @@ public class YmlConf extends AbstractConf<YmlConf> {
                     url.setPort(URL.DEFAULT_HTTP_PORT);
                 }
             }
+            final InetAddress localAddress = NetUtils.getLocalAddress();
             String host;
-            if (nettyConf.containsKey(URL.HOST)) {
-                host = MapUtils.getString(nettyConf, URL.HOST);
+            if (netConf.containsKey(URL.HOST)) {
+                host = MapUtils.getString(netConf, URL.HOST);
             } else {
-                host = NetUtils.getLocalAddress().getHostAddress();
+                host = localAddress.getHostAddress();
             }
 
             url.setHost(host);
-            url.setUsername(MapUtils.getString(nettyConf, URL.USERNAME));
-            url.setPassword(MapUtils.getString(nettyConf, URL.PASSWORD));
+            url.setUsername(MapUtils.getString(netConf, URL.USERNAME));
+            url.setPassword(MapUtils.getString(netConf, URL.PASSWORD));
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put(URL.BOSS_THREADS, MapUtils.getInteger(nettyConf, URL.BOSS_THREADS, 1));
-            parameters.put(URL.WORKER_THREADS, MapUtils.getInteger(nettyConf, URL.WORKER_THREADS, 3));
-            parameters.put(URL.CORE_THREADS, MapUtils.getInteger(nettyConf, URL.CORE_THREADS, 5));
-            parameters.put(URL.MAX_THREADS, MapUtils.getInteger(nettyConf, URL.MAX_THREADS, 8));
-            parameters.put(URL.COUNT_PER_CHANNEL, MapUtils.getInteger(nettyConf, URL.COUNT_PER_CHANNEL, 50));
-            parameters.put(URL.OPTIONS, MapUtils.getMap(nettyConf, URL.OPTIONS, Collections.EMPTY_MAP));
-            parameters.put(URL.CHILD_OPTIONS, MapUtils.getMap(nettyConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
-            parameters.put(URL.CHANNEL_HANDLERS, MapUtils.getString(nettyConf, URL.CHANNEL_HANDLERS, ""));
+            parameters.put(URL.BOSS_THREADS, MapUtils.getInteger(netConf, URL.BOSS_THREADS, 1));
+            parameters.put(URL.WORKER_THREADS, MapUtils.getInteger(netConf, URL.WORKER_THREADS, 3));
+            parameters.put(URL.CORE_THREADS, MapUtils.getInteger(netConf, URL.CORE_THREADS, 5));
+            parameters.put(URL.MAX_THREADS, MapUtils.getInteger(netConf, URL.MAX_THREADS, 8));
+            parameters.put(URL.COUNT_PER_CHANNEL, MapUtils.getInteger(netConf, URL.COUNT_PER_CHANNEL, 50));
+            parameters.put(URL.OPTIONS, MapUtils.getMap(netConf, URL.OPTIONS, Collections.EMPTY_MAP));
+            parameters.put(URL.CHILD_OPTIONS, MapUtils.getMap(netConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
+            parameters.put(URL.CHANNEL_HANDLERS, MapUtils.getString(netConf, URL.CHANNEL_HANDLERS, ""));
 
-            String rpcHost = MapUtils.getString(nettyConf, URL.RPC_HOST);
-            if (StringUtils.isNotBlank(rpcHost)) {
-                parameters.put(URL.RPC_HOST, rpcHost);
+            if (MapUtils.getBoolean(netConf, URL.RPC_USE_LOCAL, false)) {
+                parameters.put(URL.RPC_HOST, localAddress.getHostAddress());
+            } else {
+                String rpcHost = MapUtils.getString(netConf, URL.RPC_HOST);
+                if (StringUtils.isNotBlank(rpcHost)) {
+                    parameters.put(URL.RPC_HOST, rpcHost);
+                }
             }
+
             url.setParameters(parameters);
-            initSslConfig(url, MapUtils.getMap(nettyConf, "ssl", null));
+            initSslConfig(url, MapUtils.getMap(netConf, "ssl", null));
             urls.add(url);
         }
         this.setUrls(urls);
