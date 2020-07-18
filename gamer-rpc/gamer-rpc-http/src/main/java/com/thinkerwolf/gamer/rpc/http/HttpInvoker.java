@@ -40,7 +40,7 @@ import static com.thinkerwolf.gamer.common.URL.RPC_CLIENT_NUM;
 public class HttpInvoker<T> implements Invoker<T> {
     private static final Logger LOG = InternalLoggerFactory.getLogger(HttpInvoker.class);
 
-    private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 100;
+    private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 10;
     private static final int DEFAULT_READ_TIMEOUT_MILLISECONDS = (60 * 1000);
     private static final Map<String, CloseableHttpClient> httpClientCache = new ConcurrentHashMap<>();
     private static final ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(2);
