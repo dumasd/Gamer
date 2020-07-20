@@ -44,4 +44,16 @@ public class DefaultServletContext implements ServletContext {
     public void setListeners(List<Object> listeners) {
         this.listeners = listeners;
     }
+
+    @Override
+    public void destroy() {
+        SessionManager sessionManager = getSessionManager();
+        if (sessionManager != null) {
+            try {
+                sessionManager.destroy();
+            } catch (Exception ignored) {
+
+            }
+        }
+    }
 }

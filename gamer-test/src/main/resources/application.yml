@@ -39,8 +39,6 @@ gamer:
         protocol: http
         ssl:
           enabled: true
-          keyStore: C:\Users\wukai\.keystore
-          keyStorePassword: 123456
         port: 80
         options:
           so_keepalive: true

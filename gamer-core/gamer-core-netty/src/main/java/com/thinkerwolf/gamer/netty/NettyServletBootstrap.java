@@ -2,6 +2,8 @@ package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.conf.yml.YmlConf;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
@@ -10,23 +12,30 @@ import com.thinkerwolf.gamer.netty.http.HttpServletHandler;
 import com.thinkerwolf.gamer.netty.tcp.TcpServletHandler;
 import com.thinkerwolf.gamer.netty.websocket.WebsocketServletHandler;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
+import com.thinkerwolf.gamer.remoting.Server;
 import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 /**
  * NettyServlet启动器
  *
  * @author wukai
  */
-public class NettyServletBootstrap implements ServletBootstrap {
+public class NettyServletBootstrap extends AbstractServletBootstrap {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(NettyServletBootstrap.class);
 
     private String configFile;
 
     private ServletConfig servletConfig;
 
     private List<URL> urls;
+
+    private final Map<URL, Server> runningServers = new ConcurrentHashMap<>(2, 1.0F);
 
     public NettyServletBootstrap() {
         init();
@@ -68,12 +77,25 @@ public class NettyServletBootstrap implements ServletBootstrap {
     }
 
     @Override
+    protected void doClose() {
+        runningServers.forEach((url, server) -> {
+            try {
+                server.close();
+            } catch (Exception e) {
+                LOG.warn("Close", e);
+            }
+        });
+        runningServers.clear();
+        servletConfig.getServletContext().destroy();
+    }
+
+    @Override
     public List<URL> getUrls() {
         return urls;
     }
 
     @Override
-    public void startup() throws Exception {
+    protected void doStartup() throws Exception {
         Servlet servlet = ClassUtils.newInstance(servletConfig.servletClass());
         servlet.init(servletConfig);
         notifyServletContextListener();
@@ -81,6 +103,7 @@ public class NettyServletBootstrap implements ServletBootstrap {
             url.setAttach(URL.SERVLET_CONFIG, servletConfig);
             ChannelHandler[] handlers = createHandlers(url);
             NettyServer server = new NettyServer(url, handlers[0], handlers.length > 1 ? handlers[1] : null);
+            runningServers.put(url, server);
             server.startup();
         }
     }

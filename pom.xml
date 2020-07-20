@@ -48,6 +48,7 @@
         <maven_enforce_version>3.0.0-M2</maven_enforce_version>
 
         <junit_version>4.12</junit_version>
+        <spring_boot_version>2.0.3.RELEASE</spring_boot_version>
         <spring_version>5.0.7.RELEASE</spring_version>
         <netty-all_version>4.1.50.Final</netty-all_version>
         <hessian_version>4.0.38</hessian_version>
@@ -222,6 +223,23 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-autoconfigure</artifactId>
+                <version>${spring_boot_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+                <version>${spring_boot_version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-devtools</artifactId>
+                <version>${spring_boot_version}</version>
+                <scope>runtime</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

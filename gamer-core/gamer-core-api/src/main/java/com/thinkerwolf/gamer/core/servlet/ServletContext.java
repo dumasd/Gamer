@@ -25,6 +25,8 @@ public interface ServletContext {
 
     void setListeners(List<Object> listeners);
 
+    void destroy();
+
     default SessionManager  getSessionManager() {
         return (SessionManager) getAttribute(ROOT_SESSION_MANAGER_ATTRIBUTE);
     }

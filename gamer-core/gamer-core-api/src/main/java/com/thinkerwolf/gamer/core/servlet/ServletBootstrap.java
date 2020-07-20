@@ -30,4 +30,8 @@ public interface ServletBootstrap {
      * @return ServletConfig
      */
     ServletConfig getServletConfig();
+
+    void close();
+
+    boolean isClosed();
 }
