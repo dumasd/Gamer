@@ -28,7 +28,7 @@ git clone https://github.com/thinkerwolf/Gamer.git
 
 #### 打开gamer-test工程
 
-![SpringApplicationMain](https://github.com/thinkerwolf/doc/test_main.png "optional title")
+![SpringApplicationMain](https://github.com/thinkerwolf/Gamer/tree/master/doc/test_main.png "optional title")
 
 #### 运行SpringApplicationMain
 

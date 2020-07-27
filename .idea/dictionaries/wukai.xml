@@ -10,9 +10,14 @@
       <w>deflater</w>
       <w>dgamer</w>
       <w>envs</w>
+      <w>etcd</w>
       <w>fastjson</w>
       <w>gamerpidfile</w>
+      <w>grpc</w>
       <w>handshaker</w>
+      <w>jetcd</w>
+      <w>ketama</w>
+      <w>objs</w>
       <w>perchannel</w>
       <w>protobuf</w>
       <w>springframework</w>
