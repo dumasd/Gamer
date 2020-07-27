@@ -1,20 +1,17 @@
-
 # servlet 配置
 servlet:
-  servletName: gamer
-  servletClass: com.thinkerwolf.gamer.core.mvc.DispatcherServlet   # servlet类名
-  initParams: # 参数列表
-    componentScanPackage: com.thinkerwolf # 组件扫描包名
-    compress: true # 传输压缩(仅http生效)
-    #sessionManager: com.thinkerwolf.gamer.core.servlet.RedisSessionManager
-    sessionRedisHost: localhost
-    sessionRedisPort: 6379
-    sessionTimeout: 120 # session超时时间(s)
-    sessionTickTime: 5 # session检查tick(s)
-    resourceLocation: META-INF/resources
-    filters: com.thinkerwolf.gamer.test.filter.ExceptionFilter
-    # ;com.thinkerwolf.gamer.test.filter.LoginSessionFilter
-
+  servletName: gamer                                               # Servlet名称
+  servletClass: com.thinkerwolf.gamer.core.mvc.DispatcherServlet   # Servlet类名
+  initParams:                                                      # 参数列表
+    componentScanPackage: com.thinkerwolf                          # 组件扫描包名
+    compress: true                                                 # 传输压缩(仅http生效)
+    #    sessionManager: com.thinkerwolf.gamer.core.servlet.RedisSessionManager
+    #    sessionRedisHost: localhost
+    #    sessionRedisPort: 6379
+    sessionTimeout: 120                                            # Session超时时间(s)
+    sessionTickTime: 5                                             # Session检查tick(s)
+    resourceLocation: META-INF/resources                           # 静态资源位置
+    filters: com.thinkerwolf.gamer.test.filter.ExceptionFilter     # Filter列表，以;为间隔
 
 # 监听器配置列表
 listeners:
@@ -23,31 +20,25 @@ listeners:
   - com.thinkerwolf.gamer.rpc.mvc.RpcServiceLoadListener
   - com.thinkerwolf.gamer.swagger.SwaggerEnableListener
 
-# Netty配置列表
-netty:
-  -
-    bossThreads: 1 # boss线程数
-    workerThreads: 5 # worker线程数
-    coreThreads: 10 # tcp业务核心线程
-    maxThreads: 11 # tpc业务最大线程
-    countPerChannel: 100 # 客户端最大并发数量
-    protocol: tcp # 协议
-    port: 8090 # 段口
-    options: # netty option
+# Net配置列表
+net:
+  - workerThreads: 5     # worker线程数
+    coreThreads: 10      # Servlet业务核心线程
+    maxThreads: 11       # Servlet业务最大线程
+    countPerChannel: 100 # 每个Channel最大并发数量
+    protocol: tcp        # 协议
+    port: 8090           # 端口口
+    options:             # Options
       so_keepalive: true
-    childOptions: # netty childOptions
+    childOptions:        # ChildOptions
       tcp_nodelay: true
-  -
-    bossThreads: 1
-    workerThreads: 5
+  - workerThreads: 5
     coreThreads: 10
     maxThreads: 11
     countPerChannel: 100 # 客户端最大并发数量
     protocol: http
-    ssl:
+    ssl:                 # ssl配置
       enabled: true
-      keyStore: C:\Users\wukai\.keystore
-      keyStorePassword: 123456
     port: 80
     options:
       so_keepalive: true

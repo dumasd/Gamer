@@ -55,4 +55,8 @@ public final class SymbolConstants {
      * Equal(等于号)(=)
      */
     public static final String EQUAL = "=";
+    /**
+     * And(且)(&)
+     */
+    public static final String AND = "&";
 }
