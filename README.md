@@ -16,4 +16,4 @@ A game server framework in Java.
 
 ## Documentation
 
-- [中文文档](https://github.com/thinkerwolf/doc/DOC_ZH.md)
+- [中文文档](https://github.com/thinkerwolf/Gamer/tree/master/doc/DOC_ZH.md)
