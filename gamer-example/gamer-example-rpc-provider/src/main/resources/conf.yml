@@ -1,0 +1,24 @@
+# servlet 配置
+servlet:
+  servletName: gamer                                               # Servlet名称
+  servletClass: com.thinkerwolf.gamer.core.mvc.DispatcherServlet   # Servlet类名
+  initParams:                                                      # 参数列表
+    componentScanPackage: com.thinkerwolf                          # 组件扫描包名
+    compress: true                                                 # 传输压缩(仅http生效)
+    sessionTimeout: 120                                            # Session超时时间(s)
+    sessionTickTime: 5                                             # Session检查tick(s)
+
+# 监听器配置列表
+listeners:
+  - com.thinkerwolf.gamer.rpc.mvc.RpcServiceLoadListener
+
+# Net配置列表
+net:
+  - workerThreads: 5     # worker线程数
+    protocol: tcp        # 协议
+    port: 9090           # 端口口
+  - workerThreads: 5
+    protocol: http
+    ssl:                 # ssl配置
+      enabled: true
+    port: 8088

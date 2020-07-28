@@ -21,6 +21,7 @@
         <module>gamer-spring-boot-starter</module>
         <module>gamer-swagger</module>
         <module>gamer-remoting</module>
+        <module>gamer-example</module>
     </modules>
 
     <properties>
@@ -54,6 +55,8 @@
         <hessian_version>4.0.38</hessian_version>
         <kryo_version>4.0.0</kryo_version>
         <slf4j_version>1.7.25</slf4j_version>
+        <log4j_version>1.2.17</log4j_version>
+        <logback_version>1.2.3</logback_version>
         <freemarker_version>2.3.28</freemarker_version>
         <swagger_version>1.5.24</swagger_version>
         <guava_version>29.0-jre</guava_version>
@@ -138,6 +141,16 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback_version}</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>

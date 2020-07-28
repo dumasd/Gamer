@@ -8,11 +8,12 @@ A game server framework in Java.
 
 ## Features
 
-- Easy to use
-- Multi-protocol support
-- Low Latency and high concurrency
-- Integrated with Spring Boot
-- Modularity
+- Easy to use.
+- Perfect MVC and push mechanism.
+- Multi-protocol support.(tcp, http, websocket)
+- Low Latency and high concurrency.
+- Integrated with Spring Boot.
+- Modularity.
 
 ## Documentation
 
