@@ -137,17 +137,7 @@ public abstract class AbstractRegistry implements Registry {
 
     @Override
     public List<URL> lookup(URL url) {
-        // 1.Find from cache
         List<URL> urls = getCacheUrls(url);
-        // 2.Find from registry server
-//        if (urls == null) {
-//            urls = doLookup(url);
-//            if (urls != null && urls.size() > 0) {
-//                for (URL u : urls) {
-//                    saveToCache(u);
-//                }
-//            }
-//        }
         return urls == null ? Collections.emptyList() : urls;
     }
 
@@ -172,7 +162,7 @@ public abstract class AbstractRegistry implements Registry {
         } else {
             properties.setProperty(event.getSource(), event.getUrl().toString());
         }
-        LOG.debug("Notify data " + event);
+        LOG.info("Fire data change " + event);
         Set<INotifyListener> listeners = listenerMap.get(event.getSource());
         if (listeners != null) {
             for (INotifyListener listener : listeners) {
@@ -192,20 +182,23 @@ public abstract class AbstractRegistry implements Registry {
      */
     protected void fireChildChange(final ChildEvent event) {
         // 子节点变化
-        LOG.debug("Notify children " + event);
-        Set<String> rks = new HashSet<>();
-        for (Object k : properties.keySet()) {
-            int idx = k.toString().indexOf(event.getSource());
-            if (idx == 0 && k.toString().length() > event.getSource().length()) {
-                rks.add(k.toString());
+        LOG.debug("Fire child change " + event);
+        synchronized (properties) {
+            Set<String> rks = new HashSet<>();
+            for (Object k : properties.keySet()) {
+                int idx = k.toString().indexOf(event.getSource());
+                if (idx == 0 && k.toString().length() > event.getSource().length()) {
+                    rks.add(k.toString());
+                }
+            }
+            for (String rk : rks) {
+                properties.remove(rk);
+            }
+            for (URL url : event.getChildUrls()) {
+                saveToCache(url);
             }
         }
-        for (String rk : rks) {
-            properties.remove(rk);
-        }
-        for (URL url : event.getChildUrls()) {
-            saveToCache(url);
-        }
+
         Set<INotifyListener> listeners = listenerMap.get(event.getSource());
         if (listeners != null) {
             for (INotifyListener listener : listeners) {
