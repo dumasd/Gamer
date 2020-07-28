@@ -46,7 +46,7 @@ public class NettyClient extends AbstractClient {
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
                 .channel(NioSocketChannel.class);
-        bootstrap.handler(ChannelHandlers.createChannelInitializer0(getUrl(), getHandler()));
+        bootstrap.handler(ChannelHandlers.createChannelInitializer(false, getUrl(), getHandler()));
     }
 
     @Override

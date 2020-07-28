@@ -14,7 +14,8 @@ public class TcpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
     private ChannelHandler handler;
     private URL url;
 
-    public TcpChannelHandlerConfiger(ChannelHandler handler) {
+    public TcpChannelHandlerConfiger(boolean server, ChannelHandler handler) {
+        super(server);
         this.handler = handler;
     }
 
@@ -28,7 +29,7 @@ public class TcpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
         ChannelPipeline pipe = ch.pipeline();
         pipe.addLast("decoder", new PacketDecoder());
         pipe.addLast("encoder", new PacketEncoder());
-        if (ch instanceof ServerChannel) {
+        if (isServer()) {
             pipe.addLast("handler", new NettyServerHandler(url, handler));
         } else {
             pipe.addLast("handler", new NettyClientHandler(url, handler));

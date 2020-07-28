@@ -17,6 +17,18 @@ public class NettyClientHandler extends ChannelDuplexHandler {
     private final ChannelHandler handler;
     private boolean autoRelease;
 
+    public URL getUrl() {
+        return url;
+    }
+
+    public ChannelHandler getHandler() {
+        return handler;
+    }
+
+    public boolean isAutoRelease() {
+        return autoRelease;
+    }
+
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         Channel ch = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);

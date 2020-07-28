@@ -25,14 +25,14 @@ public class Http2Response extends AbstractChResponse {
         Promise<Channel> promise;
         if (message instanceof Http2HeadersAndDataFrames) {
             final Http2HeadersAndDataFrames frames = (Http2HeadersAndDataFrames) message;
-            final boolean keepAlive = InternalHttpUtil.isKeepAlive(frames.headersFrame().headers());
+//            final boolean keepAlive = InternalHttpUtil.isKeepAlive(frames.headersFrame().headers());
             Promise<Channel> p = super.write(frames.headersFrame());
             if (frames.dataFrame() != null) {
                 promise = super.write(frames.dataFrame());
-                p.addListener(f -> checkCloseChannel(promise, keepAlive));
+                p.addListener(f -> checkCloseChannel(promise, true));
             } else {
                 promise = p;
-                checkCloseChannel(promise, keepAlive);
+                checkCloseChannel(promise, true);
             }
         } else {
             promise = super.write(message);

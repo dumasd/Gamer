@@ -4,18 +4,16 @@
         xsi:noNamespaceSchemaLocation="http://www.padual.com/java/logback.xsd"
         debug="false" scan="true" scanPeriod="30 second">
 
-    <property name="PROJECT" value="GamerExampleSpring"/>
+    <property name="PROJECT" value="gamer-example-spring"/>
     <property name="ROOT" value="/opt/logs/${PROJECT}/"/>
     <property name="FILESIZE" value="50MB"/>
     <property name="MAXHISTORY" value="100"/>
     <property name="myspecial" value="myspecial"/>
 
-    <timestamp key="DATETIME" datePattern="yyyy-MM-dd HH:mm:ss"/>
-
     <!-- 控制台打印 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder charset="utf-8">
-            <pattern>%d{${DATETIME}} [%-5level] [%thread] %logger{36} - %m%n
+            <pattern>%d{ISO8601} [%-5level] [%thread] %logger{36} - %m%n
             </pattern>
         </encoder>
     </appender>
@@ -23,7 +21,7 @@
     <!-- ERROR 输入到文件，按日期和文件大小 -->
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
-            <pattern>[%-5level] %d{${DATETIME}} [%thread] %logger{36} - %m%n
+            <pattern>[%-5level] %d{ISO8601} [%thread] %logger{36} - %m%n
             </pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -44,7 +42,7 @@
     <!-- WARN 输入到文件，按日期和文件大小 -->
     <appender name="WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
-            <pattern>[%-5level] %d{${DATETIME}} [%thread] %logger{36} - %m%n
+            <pattern>[%-5level] %d{ISO8601} [%thread] %logger{36} - %m%n
             </pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -64,7 +62,7 @@
     <!-- INFO 输入到文件，按日期和文件大小 -->
     <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
-            <pattern>[%-5level] %d{${DATETIME}} [%thread] %logger{36} - %m%n
+            <pattern>[%-5level] %d{ISO8601} [%thread] %logger{36} - %m%n
             </pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -84,7 +82,7 @@
     <!-- DEBUG 输入到文件，按日期和文件大小 -->
     <appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
-            <pattern>[%-5level] %d{${DATETIME}} [%thread] %logger{36} - %m%n
+            <pattern>[%-5level] %d{ISO8601} [%thread] %logger{36} - %m%n
             </pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -105,7 +103,7 @@
     <!-- TRACE 输入到文件，按日期和文件大小 -->
     <appender name="TRACE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
-            <pattern>[%-5level] %d{${DATETIME}} [%thread] %logger{36} - %m%n
+            <pattern>[%-5level] %d{ISO8601} [%thread] %logger{36} - %m%n
             </pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -126,7 +124,7 @@
 
     <appender name="myspecial" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
-            <pattern>[%-5level] %d{${DATETIME}} %logger{36} - %m%n
+            <pattern>[%-5level] %d{ISO8601} %logger{36} - %m%n
             </pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -156,7 +154,7 @@
     </logger>
 
     <!-- Logger 根目录 -->
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="DEBUG"/>
         <appender-ref ref="ERROR"/>

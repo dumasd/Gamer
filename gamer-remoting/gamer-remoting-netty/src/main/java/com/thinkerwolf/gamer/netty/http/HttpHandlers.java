@@ -3,22 +3,21 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.HttpMessage;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.HttpServerUpgradeHandler;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.HttpServerUpgradeHandler.UpgradeCodecFactory;
-import io.netty.handler.ssl.OptionalSslHandler;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.codec.http2.*;
+import io.netty.handler.ssl.*;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import static com.thinkerwolf.gamer.netty.util.InternalHttpUtil.DEFAULT_KEEP_ALIVE_TIMEOUT;
@@ -35,7 +34,7 @@ public final class HttpHandlers {
     public static final String WEBSOCKET_HANDLER_NAME = "websocket-handler";
 
     /**
-     * Http2 plain text config
+     * Http2 server plain text config
      *
      * @param pipeline
      * @param upgradeCodecFactory
@@ -61,7 +60,7 @@ public final class HttpHandlers {
     }
 
     /**
-     * Http2 ssl config
+     * Http2 server ssl config
      *
      * @param pipeline
      * @param upgradeCodecFactory
@@ -87,7 +86,62 @@ public final class HttpHandlers {
     }
 
     /**
-     * Http1配置
+     * Http2 client plain text config
+     *
+     * @param pipeline
+     * @param url
+     * @param handlers
+     */
+    public static void configHttp2PlainTextClient(ChannelPipeline pipeline, URL url, final ChannelHandler... handlers) {
+        Http2ConnectionHandler connectionHandler = newHttp2ConnectionHandler(false, 65536);
+        HttpClientCodec sourceCodec = new HttpClientCodec();
+        Http2ClientUpgradeCodec upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler);
+        HttpClientUpgradeHandler upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, 65536);
+
+        pipeline.addLast(sourceCodec, upgradeHandler);
+        pipeline.addLast(HANDLER_NAME, new Http2ClientHandler(url, handlers[0]));
+    }
+
+
+    /**
+     * Http2 server ssl config
+     *
+     * @param pipeline
+     * @param url
+     * @param handlers
+     */
+    public static void configHttp2SslClient(ChannelPipeline pipeline, SslContext sslContext, URL url, final ChannelHandler... handlers) {
+        pipeline.addLast(SSL_NAME, sslContext.newHandler(pipeline.channel().alloc(), url.getHost(), url.getPort()));
+        pipeline.addLast(new ApplicationProtocolNegotiationHandler("") {
+            @Override
+            protected void configurePipeline(ChannelHandlerContext ctx, String protocol) {
+                if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
+                    ChannelPipeline p = ctx.pipeline();
+                    p.addLast(newHttp2ConnectionHandler(false, 65536));
+                    ctx.pipeline().addLast(HANDLER_NAME, new Http2ClientHandler(url, handlers[0]));
+                    return;
+                }
+                ctx.close();
+                throw new IllegalStateException("unknown protocol: " + protocol);
+            }
+        });
+    }
+
+    private static Http2ConnectionHandler newHttp2ConnectionHandler(boolean server, int maxContentLength) {
+        final Http2Connection connection = new DefaultHttp2Connection(server);
+        return new HttpToHttp2ConnectionHandlerBuilder()
+                .frameListener(new DelegatingDecompressorFrameListener(
+                        connection,
+                        new InboundHttp2ToHttpAdapterBuilder(connection)
+                                .maxContentLength(maxContentLength)
+                                .propagateSettings(true)
+                                .build()))
+                .connection(connection)
+                .build();
+    }
+
+    /**
+     * Http1 server config
      *
      * @param pipeline
      * @param sslContext
@@ -104,6 +158,29 @@ public final class HttpHandlers {
         pipeline.addLast(AGGREGATOR_NAME, new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
         pipeline.addLast(CHUNK_NAME, new ChunkedWriteHandler());
         pipeline.addLast(HANDLER_NAME, new Http1ServerHandler(url, handlers[0], websocketHandler));
+    }
+
+
+    public static void configHttp1Client(ChannelPipeline pipeline, SslContext sslContext, URL url, ChannelHandler... handlers) {
+        ChannelHandler websocketHandler = handlers.length > 1 ? handlers[1] : null;
+        if (sslContext != null) {
+            pipeline.addLast(SSL_NAME, new OptionalSslHandler(sslContext));
+        }
+        pipeline.addLast(CODEC_NAME, new HttpClientCodec());
+        pipeline.addLast(AGGREGATOR_NAME, new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
+        pipeline.addLast(CHUNK_NAME, new ChunkedWriteHandler());
+        pipeline.addLast(HANDLER_NAME, new Http1ClientHandler(url, handlers[0], websocketHandler));
+    }
+
+    /**
+     * Class that logs any User Events triggered on this channel.
+     */
+    private static class UserEventLogger extends ChannelInboundHandlerAdapter {
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            System.out.println("User Event Triggered: " + evt);
+            ctx.fireUserEventTriggered(evt);
+        }
     }
 
     public static class MyReadTimeoutHandler extends ReadTimeoutHandler {

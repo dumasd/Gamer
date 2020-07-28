@@ -81,7 +81,7 @@ public class NettyServer implements Server {
         }
 
         sb.handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(ChannelHandlers.createChannelInitializer0(url, handler, secondHandler));
+                .childHandler(ChannelHandlers.createChannelInitializer(true, url, handler, secondHandler));
         ChannelFuture future = sb.bind(new InetSocketAddress(url.getPort()));
         this.channel = future.channel();
         future.addListener((ChannelFutureListener) f -> {

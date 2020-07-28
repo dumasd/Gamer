@@ -114,7 +114,7 @@ public class NettyChannel extends AbstractChannel {
         try {
             ChannelFuture future = ch.writeAndFlush(message);
             if (sent) {
-                future.await(3000);
+                future.await(DEFAULT_SENT_TIMEOUT);
                 success = future.isSuccess();
             }
             Throwable thrown = future.cause();

@@ -19,20 +19,16 @@ Gamer是用Java语言编写的游戏服务器，使用Netty4进行底层网络�
 - gamer-spring-boot-starter SpringBoot集成
 - gamer-swagger Swagger2文档实现
 
-## 使用Gamer开发游戏服务器
-
-#### 获取Gamer
+## 使用Gamer
+### 快速开始
+#### 获取Gamer:
 ```
 git clone https://github.com/thinkerwolf/Gamer.git
 ```
 
-#### 打开gamer-test工程
+#### 服务端启动
 
-![SpringApplicationMain](https://github.com/thinkerwolf/Gamer/tree/master/doc/test_main.png "optional title")
-
-#### 运行SpringApplicationMain
-
-#### 运行效果
+使用IDEA打开项目，在`gamer-example/gamer-example-spring`下找到`ExampleSpringApplication`并运行，如果顺利的话，可以看到控制有如下打印:
 
 ```
  ________  ________  _____ ______   _______   ________     
@@ -43,4 +39,26 @@ git clone https://github.com/thinkerwolf/Gamer.git
    \ \_______\ \__\ \__\ \__\    \ \__\ \_______\ \__\\ _\ 
     \|_______|\|__|\|__|\|__|     \|__|\|_______|\|__|\|__|
    :: Gamer ::                                   (v1.0.0)
+...
+2020-07-28 14:36:32 [INFO ] [NettyBoss_tcp-1-1] c.t.gamer.netty.NettyServer - Listen @tcp on @9080 success
+...
+2020-07-28 14:36:32 [INFO ] [NettyBoss_http-4-1] c.t.gamer.netty.NettyServer - Listen @http on @8070 success
+...
+```
+服务端已经启动完毕，tcp端口是`9080`，http端口是 `8070`。
+
+#### http测试
+打开浏览器，输入`http://localhost:8070/hello/index?name=gamer`:
+
+[image](https://github.com/thinkerwolf/Gamer/blob/master/doc/hello_index.png)
+
+打开浏览器，输入`http://localhost:8070/hello/api?name=gamer`:
+```json
+{"say":"Hello gamer"}
+```
+
+#### tcp测试
+在`gamer-example/gamer-example-spring`下找到`ExampleTcpClient`并运行:
+```
+Received {"say":"Hello gamer"}
 ```

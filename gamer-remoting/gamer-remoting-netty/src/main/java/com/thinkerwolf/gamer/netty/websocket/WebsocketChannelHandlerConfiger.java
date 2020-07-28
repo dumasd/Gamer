@@ -21,7 +21,8 @@ public class WebsocketChannelHandlerConfiger extends ChannelHandlerConfiger<Chan
     private URL url;
     private final ChannelHandler handler;
 
-    public WebsocketChannelHandlerConfiger(ChannelHandler handler) {
+    public WebsocketChannelHandlerConfiger(boolean server, ChannelHandler handler) {
+        super(server);
         this.handler = handler;
     }
 
@@ -33,7 +34,7 @@ public class WebsocketChannelHandlerConfiger extends ChannelHandlerConfiger<Chan
     @Override
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
-        boolean server = ch instanceof ServerChannel;
+        boolean server = isServer();
         pipeline.addLast(server ? new HttpServerCodec() : new HttpClientCodec());
 
         pipeline.addLast(new HttpObjectAggregator(65536));
