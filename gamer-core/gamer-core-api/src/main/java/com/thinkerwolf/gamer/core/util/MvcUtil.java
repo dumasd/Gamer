@@ -30,7 +30,7 @@ public final class MvcUtil {
         List<Invocation> invos = new ArrayList<>();
         Method[] methods = obj.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            Invocation invocation = createInvocation(urlPrefix, method, obj, viewManager, objectFactory);
+            Invocation invocation = createInvocation(action, urlPrefix, method, obj, viewManager, objectFactory);
             if (invocation != null) {
                 invos.add(invocation);
             }
@@ -47,7 +47,7 @@ public final class MvcUtil {
         }
     }
 
-    public static ActionInvocation createInvocation(String prefix, Method method, Object obj, ViewManager vm, ObjectFactory objectFactory) {
+    public static ActionInvocation createInvocation(Action action, String prefix, Method method, Object obj, ViewManager vm, ObjectFactory objectFactory) {
         Command command = method.getAnnotation(Command.class);
         if (command == null) {
             return null;
@@ -62,7 +62,8 @@ public final class MvcUtil {
         if (view != null) {
             responseView = createView(view, objectFactory);
         }
-        return new ActionInvocation(prefix + comm, method, obj, vm, responseView);
+        boolean enabled = action.enabled() && command.enabled();
+        return new ActionInvocation(enabled, prefix + comm, method, obj, vm, responseView);
     }
 
 }

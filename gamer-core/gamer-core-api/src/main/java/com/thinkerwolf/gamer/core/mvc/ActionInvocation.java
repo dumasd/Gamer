@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer.core.mvc;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
+import com.thinkerwolf.gamer.core.AbstractInvocation;
 import com.thinkerwolf.gamer.core.exception.MvcException;
 import com.thinkerwolf.gamer.core.mvc.adaptor.DefaultParamAdaptor;
 import com.thinkerwolf.gamer.core.mvc.adaptor.ParamAdaptor;
@@ -17,19 +18,19 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-public class ActionInvocation implements Invocation {
+public class ActionInvocation extends AbstractInvocation {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(ActionInvocation.class);
 
-    private String command;
+    private final String command;
 
-    private Method method;
+    private final Method method;
 
-    private Object obj;
+    private final Object obj;
 
-    private ViewManager viewManager;
+    private final ViewManager viewManager;
 
-    private View view;
+    private final View view;
 
     private ParamAdaptor paramAdaptor;
     /**
@@ -38,6 +39,11 @@ public class ActionInvocation implements Invocation {
     private Pattern matcher;
 
     public ActionInvocation(String command, Method method, Object obj, ViewManager viewManager, View view) {
+        this(true, command, method, obj, viewManager, view);
+    }
+
+    public ActionInvocation(boolean enabled, String command, Method method, Object obj, ViewManager viewManager, View view) {
+        super(enabled);
         this.command = command;
         this.method = method;
         this.obj = obj;
@@ -71,7 +77,7 @@ public class ActionInvocation implements Invocation {
     }
 
     @Override
-    public void handle(Request request, Response response) throws Exception {
+    protected void doHandle(Request request, Response response) throws Exception {
         Object[] params = this.paramAdaptor.convert(request, response);
         Model model = (Model) method.invoke(obj, params);
         View responseView;

@@ -113,15 +113,17 @@ public abstract class AbstractRegistry implements Registry {
         String lk = createCacheKey(url);
         List<URL> urls = null;
         // 1.Find from cache
-        for (Map.Entry entry : properties.entrySet()) {
-            String k = entry.getKey().toString();
-            String v = entry.getValue().toString();
-            int idx = k.indexOf(lk);
-            if (idx == 0 && k.indexOf('.', lk.length() + 1) < 0) {
-                if (urls == null) {
-                    urls = new ArrayList<>();
+        synchronized (properties) {
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                String k = entry.getKey().toString();
+                String v = entry.getValue().toString();
+                int idx = k.indexOf(lk);
+                if (idx == 0 && k.indexOf('.', lk.length() + 1) < 0) {
+                    if (urls == null) {
+                        urls = new ArrayList<>();
+                    }
+                    urls.add(URL.parse(v));
                 }
-                urls.add(URL.parse(v));
             }
         }
         return urls;
@@ -182,7 +184,7 @@ public abstract class AbstractRegistry implements Registry {
      */
     protected void fireChildChange(final ChildEvent event) {
         // 子节点变化
-        LOG.debug("Fire child change " + event);
+        LOG.info("Fire child change " + event);
         synchronized (properties) {
             Set<String> rks = new HashSet<>();
             for (Object k : properties.keySet()) {
