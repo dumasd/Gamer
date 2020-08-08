@@ -16,6 +16,7 @@
     <modules>
         <module>gamer-remoting-api</module>
         <module>gamer-remoting-netty</module>
+        <module>gamer-remoting-grizzly</module>
     </modules>
 
 </project>
