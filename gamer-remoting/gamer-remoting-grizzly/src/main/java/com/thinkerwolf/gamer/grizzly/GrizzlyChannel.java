@@ -123,7 +123,7 @@ public class GrizzlyChannel extends AbstractChannel {
 
     @Override
     public boolean isConnected() {
-        return connection.isOpen();
+        return !isClosed() && connection.isOpen();
     }
 
     @Override
@@ -144,22 +144,20 @@ public class GrizzlyChannel extends AbstractChannel {
     }
 
     @Override
-    public void close() {
-        connection.close();
-    }
-
-    @Override
-    public boolean isClosed() {
-        return connection.isOpen();
+    protected void doClose() {
+        try {
+            connection.close();
+        } catch (Exception e) {
+            LOG.warn("", e);
+        }
+        removeChannelIfDisconnected(connection);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         GrizzlyChannel that = (GrizzlyChannel) o;
-
         return connection.equals(that.connection);
     }
 

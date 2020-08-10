@@ -4,18 +4,16 @@ import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class AbstractClient implements Client {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractClient.class);
-
+    private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final ReentrantLock connLock = new ReentrantLock(false);
     private URL url;
     private ChannelHandler handler;
-
-    private volatile boolean closed;
-
-    private final ReentrantLock connLock = new ReentrantLock(false);
 
     public AbstractClient(URL url, ChannelHandler handler) {
         this.url = url;
@@ -72,7 +70,7 @@ public abstract class AbstractClient implements Client {
     }
 
     protected void connect() throws RemotingException {
-        if (closed) {
+        if (closed.get()) {
             return;
         }
         LOG.info("Connect to [" + url + "]");
@@ -92,25 +90,23 @@ public abstract class AbstractClient implements Client {
 
     @Override
     public void close() {
-        if (closed) {
-            return;
-        }
-        closed = true;
-        try {
-            disconnect();
-        } catch (Exception e) {
-            LOG.warn("Disconnect err", e);
-        }
-        try {
-            doClose();
-        } catch (Exception e) {
-            LOG.warn("Do Close err", e);
+        if (closed.compareAndSet(false, true)) {
+            try {
+                disconnect();
+            } catch (Exception e) {
+                LOG.warn("Disconnect err", e);
+            }
+            try {
+                doClose();
+            } catch (Exception e) {
+                LOG.warn("Do Close err", e);
+            }
         }
     }
 
     @Override
     public boolean isClosed() {
-        return closed;
+        return closed.get();
     }
 
     @Override

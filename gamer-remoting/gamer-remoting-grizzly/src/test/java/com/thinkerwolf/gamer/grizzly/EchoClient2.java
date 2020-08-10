@@ -25,7 +25,7 @@ public class EchoClient2 {
     public static void main(String[] args)
             throws IOException, ExecutionException, InterruptedException, TimeoutException {
         try {
-            startConnection(1);
+            startConnection(100);
         } catch (Exception e) {
             e.printStackTrace();
         }

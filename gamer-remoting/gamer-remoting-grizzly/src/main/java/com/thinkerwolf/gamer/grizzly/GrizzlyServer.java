@@ -73,12 +73,12 @@ public class GrizzlyServer implements Server {
 
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void send(Object message) throws RemotingException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override

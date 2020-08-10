@@ -140,18 +140,13 @@ public class NettyChannel extends AbstractChannel {
     }
 
     @Override
-    public void close() {
+    protected void doClose() {
         try {
             ch.close();
         } catch (Exception e) {
             LOG.warn("", e);
         }
         removeChannelIfDisconnected(ch);
-    }
-
-    @Override
-    public boolean isClosed() {
-        return !ch.isOpen();
     }
 
     @Override
