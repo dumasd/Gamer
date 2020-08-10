@@ -15,6 +15,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.thinkerwolf</groupId>
             <artifactId>gamer-remoting-api</artifactId>
             <version>${project.parent.version}</version>
@@ -22,7 +27,6 @@
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-framework</artifactId>
-            <version>2.4.4</version>
         </dependency>
     </dependencies>
 

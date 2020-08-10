@@ -73,6 +73,7 @@
         <commons-collections_version>3.2.2</commons-collections_version>
         <snakeyaml_version>1.25</snakeyaml_version>
         <grpc_version>1.28.1</grpc_version>
+        <grizzly_version>2.4.4</grizzly_version>
     </properties>
 
     <dependencies>
@@ -253,6 +254,11 @@
                 <artifactId>spring-boot-devtools</artifactId>
                 <version>${spring_boot_version}</version>
                 <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-framework</artifactId>
+                <version>${grizzly_version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

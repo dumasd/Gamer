@@ -9,8 +9,6 @@ import com.thinkerwolf.gamer.remoting.*;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.util.AttributeKey;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.net.SocketAddress;
 import java.util.Objects;
@@ -35,22 +33,20 @@ public class NettyChannel extends AbstractChannel {
         this.handler = handler;
     }
 
-    public static NettyChannel getOrAddChannel(io.netty.channel.Channel channel, URL url, ChannelHandler handler) {
+    public static NettyChannel getOrAddChannel(io.netty.channel.Channel channel, final URL url, final ChannelHandler handler) {
         if (channel == null) {
             return null;
         }
-        NettyChannel nettyChannel = channelMap.get(channel);
-        if (nettyChannel == null) {
-            nettyChannel = new NettyChannel(channel, url, handler);
-            NettyChannel oldChannel = channelMap.putIfAbsent(channel, nettyChannel);
-            if (oldChannel != null) {
-                nettyChannel = oldChannel;
+        return channelMap.compute(channel, (ch, oldChannel) -> {
+            if (!ch.isOpen()) {
+                return null;
             }
-        }
-        if (!channel.isOpen()) {
-            channelMap.remove(channel);
-        }
-        return nettyChannel;
+            NettyChannel nc = oldChannel;
+            if (oldChannel == null) {
+                nc = new NettyChannel(ch, url, handler);
+            }
+            return nc;
+        });
     }
 
     public static void removeChannelIfDisconnected(io.netty.channel.Channel ch) {

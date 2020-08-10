@@ -1,36 +1,31 @@
 package com.thinkerwolf.gamer.grizzly;
 
+import com.thinkerwolf.gamer.grizzly.tcp.PacketFilter;
+import com.thinkerwolf.gamer.remoting.tcp.Packet;
+import org.glassfish.grizzly.Connection;
+import org.glassfish.grizzly.filterchain.*;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
+import org.glassfish.grizzly.utils.StringFilter;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.logging.Logger;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.glassfish.grizzly.Connection;
-import org.glassfish.grizzly.Grizzly;
-import org.glassfish.grizzly.filterchain.FilterChainBuilder;
-import org.glassfish.grizzly.filterchain.TransportFilter;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
-import org.glassfish.grizzly.utils.StringFilter;
-
-/**
- * The simple client, which sends a message to the echo server and waits for
- * response
- */
-public class EchoClient {
-    private static final Logger logger = Grizzly.logger(EchoClient.class);
+public class EchoClient2 {
 
     static Connection[] connections;
 
     public static void main(String[] args)
             throws IOException, ExecutionException, InterruptedException, TimeoutException {
         try {
-            startConnection(10);
+            startConnection(1);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,14 +38,21 @@ public class EchoClient {
                 if (userInput == null || "q".equals(userInput)) {
                     break;
                 }
-                int idx=  0;
+                int idx = 0;
                 for (Connection connection : connections) {
-                    connection.write(userInput + "-" + idx++);
+                    Packet packet = new Packet();
+                    packet.setCommand("echo");
+                    packet.setRequestId(0);
+                    packet.setOpcode(0);
+                    packet.setContent(userInput.getBytes(StandardCharsets.UTF_8));
+                    connection.write(packet);
                 }
 
             } while (true);
         } finally {
-
+            for (Connection connection : connections) {
+                connection.close();
+            }
         }
     }
 
@@ -65,10 +67,17 @@ public class EchoClient {
             // for reading and writing data to the connection
             filterChainBuilder.add(new TransportFilter());
             // StringFilter is responsible for Buffer <-> String conversion
-            filterChainBuilder.add(new StringFilter(Charset.forName("UTF-8")));
+            filterChainBuilder.add(new PacketFilter());
             // ClientFilter is responsible for redirecting server responses to the
             // standard output
-            filterChainBuilder.add(new ClientFilter());
+            filterChainBuilder.add(new BaseFilter() {
+                @Override
+                public NextAction handleRead(final FilterChainContext ctx) throws IOException {
+                    final Packet serverResponse = ctx.getMessage();
+                    System.out.println("Server echo: " + serverResponse);
+                    return ctx.getStopAction();
+                }
+            });
 
             // Create TCP transport
             final TCPNIOTransport transport = TCPNIOTransportBuilder.newInstance().build();
@@ -84,6 +93,5 @@ public class EchoClient {
         }
 
     }
-
 
 }
