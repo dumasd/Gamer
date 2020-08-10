@@ -61,6 +61,7 @@ public class GrizzlyServer implements Server {
                                 .setThreadFactory(new DefaultThreadFactory("Grizzly_worker"))
                                 .setCorePoolSize(workerThreads)
                                 .setMaxPoolSize(workerThreads)).build();
+        this.transport.configureBlocking(false);
         this.transport.setProcessor(FilterChains.createProcessor(true, url, handler));
         this.connection = transport.bind(url.getPort());
         transport.start();

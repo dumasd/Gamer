@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 public class EchoServer2 {
     public static void main(String[] args) {
-        URL url = URL.parse("tcp://127.0.0.1:7777");
+        URL url = URL.parse("http://127.0.0.1:7777");
         GrizzlyServer server = new GrizzlyServer(url, new ChannelHandlerAdapter() {
             @Override
             public void received(Channel channel, Object message) throws RemotingException {
@@ -63,6 +63,11 @@ public class EchoServer2 {
 
                     }
                 }
+            }
+
+            @Override
+            public void event(Channel channel, Object evt) throws RemotingException {
+                System.out.println(evt);
             }
         });
         try {
