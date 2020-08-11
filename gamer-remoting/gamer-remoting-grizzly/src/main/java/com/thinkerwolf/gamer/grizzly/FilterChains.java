@@ -26,18 +26,20 @@ public final class FilterChains {
         if (protocol.equals(Protocol.TCP)) {
             builder.addLast(new TransportFilter());
             builder.addLast(new PacketFilter());
-            builder.addLast(new GrizzlyServerFilter(url, handler));
+            builder.addLast(server ? new GrizzlyServerFilter(url, handler) : new GrizzlyClientFilter(url, handler));
         } else if (protocol.equals(Protocol.HTTP)
                 || protocol.equals(Protocol.WEBSOCKET)) {
+            if (server) {
+                WebSocketEngine.getEngine().register("", "/*", new DefaultApplication(url, handler));
+            }
             final DelayedExecutor timeoutExecutor = IdleTimeoutFilter.createDefaultIdleDelayedExecutor();
             timeoutExecutor.start();
             builder.addLast(new TransportFilter());
             builder.addLast(server ? new HttpServerFilter() : new HttpClientFilter());
-            builder.addLast(server ? new WebSocketServerFilter() : new WebSocketClientFilter());
-            builder.addLast(new GrizzlyServerFilter(url, handler));
-            if (server) {
-                WebSocketEngine.getEngine().register("", "/*", new DefaultApplication(url, handler));
+            if (server || protocol.equals(Protocol.WEBSOCKET)) {
+                builder.addLast(server ? new WebSocketServerFilter() : new WebSocketClientFilter());
             }
+            builder.addLast(server ? new GrizzlyServerFilter(url, handler) : new GrizzlyClientFilter(url, handler));
         }
         return builder.build();
     }

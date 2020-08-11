@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.netty;
 
+import com.thinkerwolf.gamer.common.DefaultThreadFactory;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.remoting.AbstractClient;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
@@ -12,11 +13,13 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class NettyClient extends AbstractClient {
 
-    private static final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() * 2, 32));
+    private static final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() * 2, 32)
+            , new DefaultThreadFactory("Netty-client"));
 
     private Channel ch;
 
@@ -44,7 +47,7 @@ public class NettyClient extends AbstractClient {
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, DEFAULT_CONNECT_TIMEOUT)
                 .channel(NioSocketChannel.class);
         bootstrap.handler(ChannelHandlers.createChannelInitializer(false, getUrl(), getHandler()));
     }
@@ -53,7 +56,7 @@ public class NettyClient extends AbstractClient {
     protected void doConnect() throws RemotingException {
         this.connectFuture = bootstrap.connect(getUrl().getHost(), getUrl().getPort());
         try {
-            connectFuture.await(3000, TimeUnit.MILLISECONDS);
+            connectFuture.await(DEFAULT_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignored) {
         }
         if (connectFuture.isSuccess()) {
@@ -89,4 +92,16 @@ public class NettyClient extends AbstractClient {
         return NettyChannel.getOrAddChannel(ch, getUrl(), getHandler());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NettyClient that = (NettyClient) o;
+        return Objects.equals(ch, that.ch);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ch);
+    }
 }

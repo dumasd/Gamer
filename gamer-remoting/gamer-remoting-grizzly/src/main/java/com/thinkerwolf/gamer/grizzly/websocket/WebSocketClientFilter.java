@@ -38,7 +38,6 @@ public class WebSocketClientFilter extends AbstractWebSocketFilter {
             // if not - pass processing to a next filter
             return ctx.getInvokeAction();
         }
-
         WebSocketHolder.get(connection).handshake.initiate(ctx);
         // call the next filter in the chain
         return ctx.getInvokeAction();

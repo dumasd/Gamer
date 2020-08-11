@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.netty;
 
-import com.sun.xml.bind.v2.runtime.reflect.Lister;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.core.servlet.AbstractServletHandler;
 import com.thinkerwolf.gamer.core.servlet.Request;

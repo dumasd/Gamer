@@ -10,6 +10,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class AbstractClient implements Client {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractClient.class);
+
+    public static final int DEFAULT_CONNECT_TIMEOUT = 3000;
+
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final ReentrantLock connLock = new ReentrantLock(false);
     private URL url;

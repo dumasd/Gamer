@@ -10,13 +10,12 @@ import org.glassfish.grizzly.filterchain.NextAction;
 
 import java.io.IOException;
 
-public class GrizzlyServerFilter extends BaseFilter {
+public class GrizzlyClientFilter extends BaseFilter {
 
-    private URL url;
-    private ChannelHandler handler;
+    private final URL url;
+    private final ChannelHandler handler;
 
-
-    public GrizzlyServerFilter(URL url, ChannelHandler handler) {
+    public GrizzlyClientFilter(URL url, ChannelHandler handler) {
         this.url = url;
         this.handler = handler;
     }

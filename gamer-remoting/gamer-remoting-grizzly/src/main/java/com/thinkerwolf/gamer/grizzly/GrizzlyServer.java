@@ -11,7 +11,6 @@ import com.thinkerwolf.gamer.remoting.Server;
 import org.glassfish.grizzly.nio.transport.TCPNIOConnection;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
-import org.glassfish.grizzly.strategies.LeaderFollowerNIOStrategy;
 import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 
@@ -40,6 +39,7 @@ public class GrizzlyServer implements Server {
         this.handler = handler;
     }
 
+    @Override
     public synchronized void startup() throws Exception {
         if (started.get()) {
             return;
@@ -57,7 +57,7 @@ public class GrizzlyServer implements Server {
         }
         ThreadPoolConfig config = ThreadPoolConfig.defaultConfig();
         config.setCorePoolSize(workerThreads).setMaxPoolSize(workerThreads)
-                .setThreadFactory(new DefaultThreadFactory("Grizzly-worker"));
+                .setThreadFactory(new DefaultThreadFactory("GrizzlyWorker_" + url.getProtocol()));
 
         this.transport = builder
                 .setKeepAlive(true)
@@ -90,8 +90,12 @@ public class GrizzlyServer implements Server {
         if (closed.get()) {
             return;
         }
-        this.connection.close();
-        this.transport.shutdown();
+        if (transport != null) {
+            this.transport.shutdown();
+        }
+        if (connection != null) {
+            this.connection.close();
+        }
     }
 
     @Override

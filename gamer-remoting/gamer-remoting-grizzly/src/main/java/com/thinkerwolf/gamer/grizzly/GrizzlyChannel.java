@@ -123,7 +123,7 @@ public class GrizzlyChannel extends AbstractChannel {
 
     @Override
     public boolean isConnected() {
-        return !isClosed() && connection.isOpen();
+        return !isClosed() && connection != null && connection.isOpen();
     }
 
     @Override
