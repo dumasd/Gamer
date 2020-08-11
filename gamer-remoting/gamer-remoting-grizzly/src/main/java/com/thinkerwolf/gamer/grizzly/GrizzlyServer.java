@@ -12,6 +12,7 @@ import org.glassfish.grizzly.nio.transport.TCPNIOConnection;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.strategies.LeaderFollowerNIOStrategy;
+import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 
 import java.util.Collections;
@@ -54,13 +55,15 @@ public class GrizzlyServer implements Server {
                 builder.setKeepAlive(Boolean.getBoolean(op.getValue().toString()));
             }
         }
+        ThreadPoolConfig config = ThreadPoolConfig.defaultConfig();
+        config.setCorePoolSize(workerThreads).setMaxPoolSize(workerThreads)
+                .setThreadFactory(new DefaultThreadFactory("Grizzly-worker"));
+
         this.transport = builder
-                .setIOStrategy(LeaderFollowerNIOStrategy.getInstance())
-                .setWorkerThreadPoolConfig(
-                        ThreadPoolConfig.defaultConfig()
-                                .setThreadFactory(new DefaultThreadFactory("Grizzly_worker"))
-                                .setCorePoolSize(workerThreads)
-                                .setMaxPoolSize(workerThreads)).build();
+                .setKeepAlive(true)
+                .setReuseAddress(false)
+                .setIOStrategy(SameThreadIOStrategy.getInstance())
+                .setWorkerThreadPoolConfig(config).build();
         this.transport.configureBlocking(false);
         this.transport.setProcessor(FilterChains.createProcessor(true, url, handler));
         this.connection = transport.bind(url.getPort());

@@ -1,7 +1,6 @@
 package com.thinkerwolf.gamer.grizzly;
 
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.grizzly.http.InternalHttpUtils;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.ChannelHandlerAdapter;
 import com.thinkerwolf.gamer.remoting.RemotingException;

@@ -8,9 +8,6 @@ import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.conf.yml.YmlConf;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.servlet.*;
-import com.thinkerwolf.gamer.netty.http.HttpServletHandler;
-import com.thinkerwolf.gamer.netty.tcp.TcpServletHandler;
-import com.thinkerwolf.gamer.netty.websocket.WebsocketServletHandler;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.Server;
 import org.apache.commons.lang.StringUtils;
@@ -102,7 +99,7 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
         for (URL url : urls) {
             url.setAttach(URL.SERVLET_CONFIG, servletConfig);
             ChannelHandler[] handlers = createHandlers(url);
-            NettyServer server = new NettyServer(url, handlers[0], handlers.length > 1 ? handlers[1] : null);
+            NettyServer server = new NettyServer(url, handlers[0]);
             runningServers.put(url, server);
             server.startup();
         }
@@ -133,18 +130,9 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
             }
             return handlers.toArray(new ChannelHandler[0]);
         }
+        handlers.add(new NettyServletHandler(url));
 
-        switch (Protocol.parseOf(url.getProtocol())) {
-            case TCP:
-                handlers.add(new TcpServletHandler(url));
-                break;
-            case HTTP:
-                url.setAttach(URL.EXEC_GROUP_NAME, "HttpOrWs");
-                handlers.add(new HttpServletHandler(url));
-            case WEBSOCKET:
-                handlers.add(new WebsocketServletHandler(url));
-                break;
-        }
+
         return handlers.toArray(new ChannelHandler[0]);
     }
 

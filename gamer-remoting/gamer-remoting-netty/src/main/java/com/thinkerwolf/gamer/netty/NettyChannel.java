@@ -97,11 +97,7 @@ public class NettyChannel extends AbstractChannel {
     }
 
     private static AttributeKey<Object> parseKey(String key) {
-        if (!AttributeKey.exists(key)) {
-            return AttributeKey.newInstance(key);
-        } else {
-            return AttributeKey.valueOf(key);
-        }
+        return AttributeKey.valueOf(key);
     }
 
     @Override

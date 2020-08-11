@@ -31,7 +31,8 @@ public final class HttpHandlers {
     public static final String HANDLER_NAME = "http-handler";
     public static final String SSL_NAME = "http-ssl";
     public static final String NEGOTIATION_NAME = "http-negotiation";
-    public static final String WEBSOCKET_HANDLER_NAME = "websocket-handler";
+    public static final String WEBSOCKET_HANDLER_NAME = "ws-handler";
+    public static final String WEBSOCKET_COMPRESS_HANDLER = "ws-compress";
 
     /**
      * Http2 server plain text config
@@ -53,7 +54,7 @@ public final class HttpHandlers {
                 pipe.addFirst(TIMEOUT_NAME, new MyReadTimeoutHandler(DEFAULT_KEEP_ALIVE_TIMEOUT));
                 pipe.replace(this, AGGREGATOR_NAME, new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
                 pipe.addLast(CHUNK_NAME, new ChunkedWriteHandler());
-                pipe.addLast(HANDLER_NAME, new Http1ServerHandler(url, handlers[0], handlers.length > 1 ? handlers[1] : null));
+                pipe.addLast(HANDLER_NAME, new Http1ServerHandler(url, handlers[0]));
                 ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
             }
         });
@@ -149,7 +150,6 @@ public final class HttpHandlers {
      * @param handlers
      */
     public static void configHttp1(ChannelPipeline pipeline, SslContext sslContext, URL url, ChannelHandler... handlers) {
-        ChannelHandler websocketHandler = handlers.length > 1 ? handlers[1] : null;
         pipeline.addLast(TIMEOUT_NAME, new MyReadTimeoutHandler(DEFAULT_KEEP_ALIVE_TIMEOUT));
         if (sslContext != null) {
             pipeline.addLast(SSL_NAME, new OptionalSslHandler(sslContext));
@@ -157,19 +157,18 @@ public final class HttpHandlers {
         pipeline.addLast(CODEC_NAME, new HttpServerCodec());
         pipeline.addLast(AGGREGATOR_NAME, new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
         pipeline.addLast(CHUNK_NAME, new ChunkedWriteHandler());
-        pipeline.addLast(HANDLER_NAME, new Http1ServerHandler(url, handlers[0], websocketHandler));
+        pipeline.addLast(HANDLER_NAME, new Http1ServerHandler(url, handlers[0]));
     }
 
 
     public static void configHttp1Client(ChannelPipeline pipeline, SslContext sslContext, URL url, ChannelHandler... handlers) {
-        ChannelHandler websocketHandler = handlers.length > 1 ? handlers[1] : null;
         if (sslContext != null) {
             pipeline.addLast(SSL_NAME, new OptionalSslHandler(sslContext));
         }
         pipeline.addLast(CODEC_NAME, new HttpClientCodec());
         pipeline.addLast(AGGREGATOR_NAME, new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
         pipeline.addLast(CHUNK_NAME, new ChunkedWriteHandler());
-        pipeline.addLast(HANDLER_NAME, new Http1ClientHandler(url, handlers[0], websocketHandler));
+        pipeline.addLast(HANDLER_NAME, new Http1ClientHandler(url, handlers[0]));
     }
 
     /**

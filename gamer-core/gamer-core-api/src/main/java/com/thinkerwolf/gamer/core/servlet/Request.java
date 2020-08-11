@@ -2,6 +2,8 @@ package com.thinkerwolf.gamer.core.servlet;
 
 import java.util.Map;
 
+import com.thinkerwolf.gamer.remoting.Protocol;
+
 /**
  * Servlet Request
  *

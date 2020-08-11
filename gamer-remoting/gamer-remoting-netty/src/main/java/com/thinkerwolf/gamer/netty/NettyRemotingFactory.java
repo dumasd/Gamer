@@ -9,7 +9,7 @@ import com.thinkerwolf.gamer.remoting.Server;
 public class NettyRemotingFactory implements RemotingFactory {
     @Override
     public Server newServer(URL url, ChannelHandler... handlers) {
-        return new NettyServer(url, handlers[0], handlers[1]);
+        return new NettyServer(url, handlers[0]);
     }
 
     @Override

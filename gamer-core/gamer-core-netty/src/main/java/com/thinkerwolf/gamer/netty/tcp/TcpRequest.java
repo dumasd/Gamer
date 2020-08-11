@@ -1,8 +1,12 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
-import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.servlet.AbstractChRequest;
+import com.thinkerwolf.gamer.core.servlet.Push;
+import com.thinkerwolf.gamer.core.servlet.ServletConfig;
+import com.thinkerwolf.gamer.core.servlet.Session;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.remoting.Channel;
+import com.thinkerwolf.gamer.remoting.Protocol;
 
 /**
  * TCP
@@ -29,6 +33,7 @@ public class TcpRequest extends AbstractChRequest {
         return content;
     }
 
+    @Override
     public Protocol getProtocol() {
         return Protocol.TCP;
     }

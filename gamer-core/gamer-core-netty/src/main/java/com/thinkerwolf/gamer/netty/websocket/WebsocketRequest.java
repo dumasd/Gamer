@@ -3,7 +3,6 @@ package com.thinkerwolf.gamer.netty.websocket;
 import com.thinkerwolf.gamer.core.servlet.Session;
 import com.thinkerwolf.gamer.core.servlet.AbstractChRequest;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
-import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.Push;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
 import com.thinkerwolf.gamer.remoting.Channel;
@@ -29,8 +28,8 @@ public class WebsocketRequest extends AbstractChRequest {
     }
 
     @Override
-    public Protocol getProtocol() {
-        return Protocol.WEBSOCKET;
+    public com.thinkerwolf.gamer.remoting.Protocol getProtocol() {
+        return com.thinkerwolf.gamer.remoting.Protocol.WEBSOCKET;
     }
 
     @Override

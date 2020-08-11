@@ -12,6 +12,7 @@ import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.common.util.CompressUtil;
 import com.thinkerwolf.gamer.core.mvc.view.View;
 import com.thinkerwolf.gamer.core.mvc.view.ViewManager;
+import com.thinkerwolf.gamer.remoting.Protocol;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -94,7 +95,7 @@ public class ActionInvocation extends AbstractInvocation {
 
         // 压缩判断
         Model result = model;
-        if (request.getProtocol() == Protocol.HTTP) {
+        if (Protocol.HTTP.equals(request.getProtocol())) {
             if (request.getEncoding() != null && request.getEncoding().length() > 0) {
                 byte[] data = model.getBytes();
                 byte[] compressedData;

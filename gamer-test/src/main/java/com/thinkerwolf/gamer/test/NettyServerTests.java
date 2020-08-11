@@ -9,6 +9,7 @@ import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
 import com.thinkerwolf.gamer.test.listener.LocalSessionAttributeListener;
 import com.thinkerwolf.gamer.test.listener.LocalSessionListener;
+import com.thinkerwolf.gamer.remoting.Protocol;
 
 import java.util.*;
 
@@ -29,6 +30,7 @@ public class NettyServerTests {
     private static void startupTcp(ServletConfig servletConfig) throws Exception {
         URL url = new URL();
         url.setPort(8090);
+
         url.setProtocol(Protocol.TCP.getName());
         NettyServletBootstrap bootstrap = new NettyServletBootstrap(url, servletConfig);
         bootstrap.startup();

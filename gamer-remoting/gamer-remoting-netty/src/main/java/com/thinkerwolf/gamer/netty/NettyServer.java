@@ -32,23 +32,14 @@ public class NettyServer implements Server {
     private final URL url;
 
     private final ChannelHandler handler;
-    /**
-     * 第二个Handler，目前用于从Http升级到Websocket时的处理器
-     */
-    private final ChannelHandler secondHandler;
 
     private Channel channel;
 
     private volatile boolean started;
 
     public NettyServer(URL url, ChannelHandler handler) {
-        this(url, handler, null);
-    }
-
-    public NettyServer(URL url, ChannelHandler handler, ChannelHandler secondHandler) {
         this.url = url;
         this.handler = handler;
-        this.secondHandler = secondHandler;
     }
 
     public synchronized void startup() throws Exception {
@@ -81,7 +72,7 @@ public class NettyServer implements Server {
         }
 
         sb.handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(ChannelHandlers.createChannelInitializer(true, url, handler, secondHandler));
+                .childHandler(ChannelHandlers.createChannelInitializer(true, url, handler));
         ChannelFuture future = sb.bind(new InetSocketAddress(url.getPort()));
         this.channel = future.channel();
         future.addListener((ChannelFutureListener) f -> {

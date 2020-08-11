@@ -1,11 +1,6 @@
 package com.thinkerwolf.gamer.core;
 
-import com.thinkerwolf.gamer.core.servlet.Session;
-import com.thinkerwolf.gamer.core.servlet.SessionAttributeListener;
-import com.thinkerwolf.gamer.core.servlet.StandardSession;
 import org.junit.Test;
-
-import java.util.ArrayList;
 
 public class SessionTests {
 

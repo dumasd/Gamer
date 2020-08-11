@@ -6,11 +6,8 @@ import com.thinkerwolf.gamer.remoting.ChannelHandler;
 
 public class Http1ClientHandler extends NettyClientHandler {
 
-    private final ChannelHandler websocketHandler;
-
-    public Http1ClientHandler(URL url, ChannelHandler handler, ChannelHandler websocketHandler) {
+    public Http1ClientHandler(URL url, ChannelHandler handler) {
         super(url, handler);
-        this.websocketHandler = websocketHandler;
     }
 
 

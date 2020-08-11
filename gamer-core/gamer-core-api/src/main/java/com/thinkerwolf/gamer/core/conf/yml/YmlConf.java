@@ -11,6 +11,7 @@ import com.thinkerwolf.gamer.core.conf.AbstractConf;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.remoting.Protocol;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -126,7 +127,8 @@ public class YmlConf extends AbstractConf<YmlConf> {
             if (netConf.containsKey(URL.PORT)) {
                 url.setPort(MapUtils.getInteger(netConf, URL.PORT));
             } else {
-                if (Protocol.TCP.getName().equals(url.getProtocol())) {
+                Protocol p = Protocol.parseOf(url.getProtocol());
+                if (p == Protocol.TCP) {
                     url.setPort(URL.DEFAULT_TCP_PORT);
                 } else {
                     url.setPort(URL.DEFAULT_HTTP_PORT);

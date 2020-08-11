@@ -8,6 +8,8 @@ import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.Protocol;
 import io.netty.channel.Channel;
 
+import static com.thinkerwolf.gamer.remoting.Protocol.*;
+
 /**
  * Channel Handlers
  *
@@ -25,16 +27,15 @@ public class ChannelHandlers {
     public static ChannelHandlerConfiger<Channel> createChannelInitializer(boolean server, URL url, ChannelHandler... handlers) throws Exception {
         Protocol protocol = Protocol.parseOf(url.getProtocol());
         ChannelHandlerConfiger<Channel> initializer = null;
-        switch (protocol) {
-            case TCP:
-                initializer = new TcpChannelHandlerConfiger(server, handlers[0]);
-                break;
-            case HTTP:
-                initializer = new HttpChannelHandlerConfiger(server, handlers[0], handlers.length > 1 ? handlers[1] : null);
-                break;
-            case WEBSOCKET:
-                initializer = new WebsocketChannelHandlerConfiger(server, handlers[0]);
-                break;
+        if (protocol.equals(TCP)) {
+            initializer = new TcpChannelHandlerConfiger(server, handlers[0]);
+        } else if (protocol.equals(HTTP)) {
+            initializer = new HttpChannelHandlerConfiger(server, handlers[0], handlers.length > 1 ? handlers[1] : null);
+        } else if (protocol.equals(WEBSOCKET)) {
+            initializer = new WebsocketChannelHandlerConfiger(server, handlers[0]);
+        }
+        if (initializer == null) {
+            throw new UnsupportedOperationException(url.getProtocol());
         }
         initializer.init(url);
         return initializer;

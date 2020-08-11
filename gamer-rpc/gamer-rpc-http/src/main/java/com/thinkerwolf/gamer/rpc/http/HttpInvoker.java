@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.rpc.http;
 
-import com.thinkerwolf.gamer.common.DefaultThreadFactory;
 import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.concurrent.DefaultPromise;
@@ -8,7 +7,6 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
-import com.thinkerwolf.gamer.common.util.ConcurrentUtils;
 import com.thinkerwolf.gamer.rpc.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;

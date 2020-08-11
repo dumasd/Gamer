@@ -7,6 +7,7 @@ import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
+import com.thinkerwolf.gamer.remoting.Content;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -16,10 +17,10 @@ public class WebsocketDecorator implements Decorator {
 
     private static final Set<Object> SUPPORTED_CONTENTS = new HashSet<>();
     static {
-        SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_BYTES);
-        SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_TEXT);
-        SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_JSON);
-        SUPPORTED_CONTENTS.add(ResponseUtil.CONTENT_EXCEPTION);
+        SUPPORTED_CONTENTS.add(Content.CONTENT_BYTES);
+        SUPPORTED_CONTENTS.add(Content.CONTENT_TEXT);
+        SUPPORTED_CONTENTS.add(Content.CONTENT_JSON);
+        SUPPORTED_CONTENTS.add(Content.CONTENT_EXCEPTION);
     }
 
     @Override

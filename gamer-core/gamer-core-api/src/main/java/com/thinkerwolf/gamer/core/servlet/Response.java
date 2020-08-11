@@ -3,6 +3,8 @@ package com.thinkerwolf.gamer.core.servlet;
 import java.io.IOException;
 import java.util.Map;
 
+import com.thinkerwolf.gamer.remoting.Protocol;
+
 /**
  * Servlet Response
  *

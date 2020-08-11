@@ -2,8 +2,8 @@ package com.thinkerwolf.gamer.netty.websocket;
 
 import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.core.servlet.AbstractChResponse;
-import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.remoting.Channel;
+import com.thinkerwolf.gamer.remoting.Protocol;
 
 import java.io.IOException;
 import java.util.Map;

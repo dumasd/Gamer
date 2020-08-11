@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.netty.http;
 
-import com.thinkerwolf.gamer.core.servlet.Protocol;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -9,6 +8,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.cookie.Cookie;
+import com.thinkerwolf.gamer.remoting.Protocol;
 
 import java.io.IOException;
 import java.util.HashMap;

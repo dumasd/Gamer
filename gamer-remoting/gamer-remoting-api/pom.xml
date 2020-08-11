@@ -15,6 +15,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.thinkerwolf</groupId>
             <artifactId>gamer-common</artifactId>
             <version>${project.parent.version}</version>

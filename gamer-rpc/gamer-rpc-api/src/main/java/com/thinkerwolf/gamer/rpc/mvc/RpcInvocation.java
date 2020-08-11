@@ -11,7 +11,7 @@ import com.thinkerwolf.gamer.core.mvc.Invocation;
 import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
 import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
 import com.thinkerwolf.gamer.core.servlet.Response;
-import com.thinkerwolf.gamer.core.util.ResponseUtil;
+import com.thinkerwolf.gamer.remoting.Content;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
@@ -61,7 +61,7 @@ public class RpcInvocation implements Invocation {
         ChannelBuffer buf = ChannelBuffers.buffer(4 + bytes.length);
         buf.writeInt(request.getRequestId());
         buf.writeBytes(bytes);
-        response.setContentType(ResponseUtil.CONTENT_BYTES);
+        response.setContentType(Content.CONTENT_BYTES);
         Decorator decorator = ServiceLoader.getService(request.getAttribute(com.thinkerwolf.gamer.core.servlet.Request.DECORATOR_ATTRIBUTE).toString(), Decorator.class);
         response.write(decorator.decorate(new ByteModel(buf.array()), request, response));
     }

@@ -10,6 +10,7 @@ import com.thinkerwolf.gamer.core.mvc.view.HtmlView;
 import com.thinkerwolf.gamer.core.mvc.view.JsonView;
 import com.thinkerwolf.gamer.core.servlet.Session;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
+import com.thinkerwolf.gamer.remoting.Content;
 import com.thinkerwolf.gamer.test.service.ITestService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -73,7 +74,7 @@ public class TestAction {
         Session session = request.getSession(true);
 
         JsonModel j = new JsonModel(JsonBuilder.getPushJson("push@test", testService.getUser(9)));
-        session.push(ResponseUtil.CONTENT_JSON, "push@test", j.getBytes());
+        session.push(Content.CONTENT_JSON, "push@test", j.getBytes());
 
         return new JsonModel(JsonBuilder.getSucJson(request, testService.tpush(msg)));
     }

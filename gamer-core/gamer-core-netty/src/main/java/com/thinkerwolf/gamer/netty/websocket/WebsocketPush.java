@@ -2,6 +2,7 @@ package com.thinkerwolf.gamer.netty.websocket;
 
 import com.thinkerwolf.gamer.core.servlet.AbstractChPush;
 import com.thinkerwolf.gamer.core.util.ResponseUtil;
+import com.thinkerwolf.gamer.remoting.Content;
 import com.thinkerwolf.gamer.remoting.RemotingException;
 import com.thinkerwolf.gamer.remoting.Channel;
 import io.netty.buffer.ByteBuf;
@@ -22,12 +23,12 @@ public class WebsocketPush extends AbstractChPush {
         buf.writeBytes(content);
 
         WebSocketFrame frame;
-        if (opcode == ResponseUtil.CONTENT_TEXT ||
-                opcode == ResponseUtil.CONTENT_JSON) {
+        if (opcode == Content.CONTENT_TEXT ||
+                opcode == Content.CONTENT_JSON) {
             frame = new TextWebSocketFrame(buf);
-        } else if (opcode == ResponseUtil.CONTENT_BYTES) {
+        } else if (opcode == Content.CONTENT_BYTES) {
             frame = new BinaryWebSocketFrame(buf);
-        } else if (opcode == ResponseUtil.CONTENT_EXCEPTION) {
+        } else if (opcode == Content.CONTENT_EXCEPTION) {
             frame = new TextWebSocketFrame(buf);
         } else {
             throw new UnsupportedOperationException("Unsupported websocket content type " + opcode);

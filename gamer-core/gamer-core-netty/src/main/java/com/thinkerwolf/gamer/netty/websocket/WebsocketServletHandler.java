@@ -4,10 +4,10 @@ import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.buffer.ChannelBuffer;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
-import com.thinkerwolf.gamer.core.util.ResponseUtil;
 import com.thinkerwolf.gamer.core.servlet.AbstractServletHandler;
 import com.thinkerwolf.gamer.netty.NettyConstants;
 import com.thinkerwolf.gamer.remoting.Channel;
+import com.thinkerwolf.gamer.remoting.Content;
 import com.thinkerwolf.gamer.remoting.RemotingException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -67,9 +67,9 @@ public class WebsocketServletHandler extends AbstractServletHandler {
             byteBuffer.flip();
             ByteBuf nettyBuf = Unpooled.wrappedBuffer(byteBuffer);
 
-            if (opcode == ResponseUtil.CONTENT_TEXT
-                    || opcode == ResponseUtil.CONTENT_JSON
-                    || opcode == ResponseUtil.CONTENT_EXCEPTION) {
+            if (opcode == Content.CONTENT_TEXT
+                    || opcode == Content.CONTENT_JSON
+                    || opcode == Content.CONTENT_EXCEPTION) {
                 return new TextWebSocketFrame(nettyBuf);
             } else {
                 return new BinaryWebSocketFrame(nettyBuf);

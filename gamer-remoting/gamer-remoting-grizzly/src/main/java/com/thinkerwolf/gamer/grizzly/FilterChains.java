@@ -20,29 +20,24 @@ import org.glassfish.grizzly.websockets.WebSocketEngine;
 
 public final class FilterChains {
 
-
     public static Processor createProcessor(boolean server, URL url, ChannelHandler handler) {
         Protocol protocol = Protocol.parseOf(url.getProtocol());
         FilterChainBuilder builder = FilterChainBuilder.stateless();
-        switch (protocol) {
-            case TCP:
-                builder.addLast(new TransportFilter());
-                builder.addLast(new PacketFilter());
-                builder.addLast(new GrizzlyServerFilter(url, handler));
-                break;
-            case HTTP:
-            case WEBSOCKET:
-                final DelayedExecutor timeoutExecutor = IdleTimeoutFilter.createDefaultIdleDelayedExecutor();
-                timeoutExecutor.start();
-                builder.addLast(new TransportFilter());
-                builder.addLast(server ? new HttpServerFilter() : new HttpClientFilter());
-                builder.addLast(server ? new WebSocketServerFilter() : new WebSocketClientFilter());
-                builder.addLast(new GrizzlyServerFilter(url, handler));
-
-                if (server) {
-                    WebSocketEngine.getEngine().register("", "/*", new DefaultApplication(url, handler));
-                }
-                break;
+        if (protocol.equals(Protocol.TCP)) {
+            builder.addLast(new TransportFilter());
+            builder.addLast(new PacketFilter());
+            builder.addLast(new GrizzlyServerFilter(url, handler));
+        } else if (protocol.equals(Protocol.HTTP)
+                || protocol.equals(Protocol.WEBSOCKET)) {
+            final DelayedExecutor timeoutExecutor = IdleTimeoutFilter.createDefaultIdleDelayedExecutor();
+            timeoutExecutor.start();
+            builder.addLast(new TransportFilter());
+            builder.addLast(server ? new HttpServerFilter() : new HttpClientFilter());
+            builder.addLast(server ? new WebSocketServerFilter() : new WebSocketClientFilter());
+            builder.addLast(new GrizzlyServerFilter(url, handler));
+            if (server) {
+                WebSocketEngine.getEngine().register("", "/*", new DefaultApplication(url, handler));
+            }
         }
         return builder.build();
     }

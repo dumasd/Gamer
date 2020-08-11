@@ -2,9 +2,8 @@ package com.thinkerwolf.gamer.netty.http;
 
 import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.core.servlet.AbstractChResponse;
-import com.thinkerwolf.gamer.core.servlet.Protocol;
-import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
 import com.thinkerwolf.gamer.remoting.Channel;
+import com.thinkerwolf.gamer.remoting.Protocol;
 import io.netty.handler.codec.http.cookie.Cookie;
 
 import java.io.IOException;

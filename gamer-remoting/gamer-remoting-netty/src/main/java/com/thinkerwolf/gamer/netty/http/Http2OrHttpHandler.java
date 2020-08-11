@@ -11,6 +11,11 @@ import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
+import static com.thinkerwolf.gamer.netty.http.HttpHandlers.HANDLER_NAME;
+import static com.thinkerwolf.gamer.netty.http.HttpHandlers.TIMEOUT_NAME;
+import static com.thinkerwolf.gamer.netty.http.HttpHandlers.AGGREGATOR_NAME;
+import static com.thinkerwolf.gamer.netty.http.HttpHandlers.CHUNK_NAME;
+
 import static com.thinkerwolf.gamer.netty.util.InternalHttpUtil.DEFAULT_KEEP_ALIVE_TIMEOUT;
 
 public class Http2OrHttpHandler extends ApplicationProtocolNegotiationHandler {
@@ -33,10 +38,10 @@ public class Http2OrHttpHandler extends ApplicationProtocolNegotiationHandler {
 
         if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
             ChannelPipeline pipeline = ctx.pipeline();
-            pipeline.addFirst("http-timeout", new HttpHandlers.MyReadTimeoutHandler(DEFAULT_KEEP_ALIVE_TIMEOUT));
-            pipeline.addLast("http-aggregator", new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
-            pipeline.addLast("http-chunk", new ChunkedWriteHandler());
-            pipeline.addLast("http-handler", new Http1ServerHandler(url, handlers[0], handlers.length > 1 ? handlers[1] : null));
+            pipeline.addFirst(TIMEOUT_NAME, new HttpHandlers.MyReadTimeoutHandler(DEFAULT_KEEP_ALIVE_TIMEOUT));
+            pipeline.addLast(AGGREGATOR_NAME, new HttpObjectAggregator(InternalHttpUtil.DEFAULT_MAX_CONTENT_LENGTH));
+            pipeline.addLast(CHUNK_NAME, new ChunkedWriteHandler());
+            pipeline.addLast(HANDLER_NAME, new Http1ServerHandler(url, handlers[0]));
             return;
         }
 

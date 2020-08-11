@@ -5,7 +5,10 @@ import com.thinkerwolf.gamer.core.exception.MvcException;
 import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.mvc.model.ResourceModel;
-import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.servlet.Request;
+import com.thinkerwolf.gamer.core.servlet.Response;
+import com.thinkerwolf.gamer.core.servlet.ResponseStatus;
+import com.thinkerwolf.gamer.remoting.Protocol;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +57,7 @@ public class ResourceView extends AbstractView {
     @Override
     protected void doRender(Model model, Request request, Response response) throws Exception {
 
-        if (request.getProtocol() == Protocol.TCP) {
+        if (Protocol.TCP.equals(request.getProtocol())) {
             throw new UnsupportedOperationException("Tcp not supported");
         }
 

@@ -14,6 +14,7 @@ import java.util.Arrays;
 
 public class SerializerTests {
 
+
     public static void main(String[] args) throws Exception {
         Serializer serializer = ServiceLoader.getDefaultService(Serializer.class);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

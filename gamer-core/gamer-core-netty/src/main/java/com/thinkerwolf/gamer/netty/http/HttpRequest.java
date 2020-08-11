@@ -107,8 +107,8 @@ public class HttpRequest extends AbstractRequest {
     }
 
     @Override
-    public Protocol getProtocol() {
-        return Protocol.HTTP;
+    public com.thinkerwolf.gamer.remoting.Protocol getProtocol() {
+        return com.thinkerwolf.gamer.remoting.Protocol.HTTP;
     }
 
     @Override

@@ -14,11 +14,6 @@ import com.thinkerwolf.gamer.core.servlet.*;
  */
 public final class ResponseUtil {
 
-    public static Integer CONTENT_TEXT = 1;
-    public static Integer CONTENT_JSON = 2;
-    public static Integer CONTENT_BYTES = 3;
-    public static Integer CONTENT_EXCEPTION = 4;
-
     public static ByteModel EXCEPTION_MODEL = new ByteModel("E0010".getBytes());
 
     public static View JSON_VIEW = new JsonView();
