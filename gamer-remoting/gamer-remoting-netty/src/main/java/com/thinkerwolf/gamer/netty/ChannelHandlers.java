@@ -30,7 +30,7 @@ public class ChannelHandlers {
         if (protocol.equals(TCP)) {
             initializer = new TcpChannelHandlerConfiger(server, handlers[0]);
         } else if (protocol.equals(HTTP)) {
-            initializer = new HttpChannelHandlerConfiger(server, handlers[0], handlers.length > 1 ? handlers[1] : null);
+            initializer = new HttpChannelHandlerConfiger(server, handlers[0]);
         } else if (protocol.equals(WEBSOCKET)) {
             initializer = new WebsocketChannelHandlerConfiger(server, handlers[0]);
         }

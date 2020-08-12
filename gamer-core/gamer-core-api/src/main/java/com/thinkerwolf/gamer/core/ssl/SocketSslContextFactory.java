@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.core.ssl;
 
 import com.thinkerwolf.gamer.common.util.ResourceUtils;
+import com.thinkerwolf.gamer.remoting.ssl.SslConfig;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -24,9 +25,9 @@ public final class SocketSslContextFactory {
             if (algorithm == null) {
                 algorithm = "SunX509";
             }
-            char[] passpharse = cfg.getKeyStorePassword().toCharArray();
-            KeyStore ksKeys = KeyStore.getInstance("JKS");
-            ksKeys.load(ResourceUtils.findInputStream("", cfg.getKeyStore()), passpharse);
+            char[] passpharse = cfg.getKeystorePass().toCharArray();
+            KeyStore ksKeys = KeyStore.getInstance(KeyStore.getDefaultType());
+            ksKeys.load(ResourceUtils.findInputStream("", cfg.getKeystoreFile()), passpharse);
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
             kmf.init(ksKeys, passpharse);
             SSLContext sslContext = SSLContext.getInstance(PROTOCOL);
@@ -47,9 +48,9 @@ public final class SocketSslContextFactory {
             algorithm = "SunX509";
         }
         try {
-            char[] password = cfg.getKeyStorePassword().toCharArray();
+            char[] password = cfg.getKeystorePass().toCharArray();
             KeyStore ksTrust = KeyStore.getInstance("JKS");
-            ksTrust.load(ResourceUtils.findInputStream("", cfg.getTrustStore()), password);
+            ksTrust.load(ResourceUtils.findInputStream("", cfg.getTruststoreFile()), password);
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(algorithm);
             tmf.init(ksTrust);
             SSLContext sslContext = SSLContext.getInstance(PROTOCOL);

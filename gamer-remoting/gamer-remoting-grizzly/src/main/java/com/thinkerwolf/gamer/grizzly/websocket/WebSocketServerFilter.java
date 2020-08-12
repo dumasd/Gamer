@@ -13,9 +13,6 @@ import java.io.IOException;
 public class WebSocketServerFilter extends AbstractWebSocketFilter {
 
 
-    // ------------------------------------------------------------ Constructors
-
-
     public WebSocketServerFilter() {
         super();
     }
@@ -25,22 +22,12 @@ public class WebSocketServerFilter extends AbstractWebSocketFilter {
     }
 
 
-    // ---------------------------------------- Methods from BaseWebSocketFilter
-
     @Override
     protected NextAction handleHandshake(FilterChainContext ctx, HttpContent content) throws IOException {
         return handleServerHandshake(ctx, content);
     }
 
-    // --------------------------------------------------------- Private Methods
 
-    /**
-     * Handle server-side websocket handshake
-     *
-     * @param ctx            {@link FilterChainContext}
-     * @param requestContent HTTP message
-     * @throws {@link IOException}
-     */
     private NextAction handleServerHandshake(final FilterChainContext ctx,
                                              final HttpContent requestContent)
             throws IOException {

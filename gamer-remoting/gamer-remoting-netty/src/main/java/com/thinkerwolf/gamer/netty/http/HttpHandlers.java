@@ -29,8 +29,9 @@ public final class HttpHandlers {
     public static final String CHUNK_NAME = "http-chunk";
     public static final String AGGREGATOR_NAME = "http-aggregator";
     public static final String HANDLER_NAME = "http-handler";
+    public static final String OPTIONAL_SSL_NAME = "optional-ssl";
     public static final String SSL_NAME = "http-ssl";
-    public static final String NEGOTIATION_NAME = "http-negotiation";
+    public static final String NEGOTIATION_NAME = "http-alpn";
     public static final String WEBSOCKET_HANDLER_NAME = "ws-handler";
     public static final String WEBSOCKET_COMPRESS_HANDLER = "ws-compress";
 
@@ -69,7 +70,7 @@ public final class HttpHandlers {
      * @param handlers
      */
     public static void configHttp2Ssl(ChannelPipeline pipeline, SslContext sslContext, UpgradeCodecFactory upgradeCodecFactory, URL url, final ChannelHandler... handlers) {
-        pipeline.addLast(SSL_NAME, new OptionalSslHandler(sslContext) {
+        pipeline.addLast(OPTIONAL_SSL_NAME, new OptionalSslHandler(sslContext) {
 
             @Override
             protected io.netty.channel.ChannelHandler newNonSslHandler(ChannelHandlerContext context) {
@@ -79,9 +80,13 @@ public final class HttpHandlers {
 
             @Override
             protected SslHandler newSslHandler(ChannelHandlerContext context, SslContext sslContext) {
-                ChannelHandler websocketHandler = handlers.length > 1 ? handlers[1] : null;
-                context.pipeline().addLast(NEGOTIATION_NAME, new Http2OrHttpHandler(url, handlers[0], websocketHandler));
+                context.pipeline().addLast(NEGOTIATION_NAME, new Http2OrHttpHandler(url, handlers[0]));
                 return super.newSslHandler(context, sslContext);
+            }
+
+            @Override
+            protected String newSslHandlerName() {
+                return SSL_NAME;
             }
         });
     }

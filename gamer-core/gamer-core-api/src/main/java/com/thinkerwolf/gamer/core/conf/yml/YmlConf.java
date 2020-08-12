@@ -12,6 +12,7 @@ import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.remoting.Protocol;
+import com.thinkerwolf.gamer.remoting.ssl.SslConfig;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -173,6 +174,15 @@ public class YmlConf extends AbstractConf<YmlConf> {
     }
 
     private void initSslConfig(URL url, Map<String, Object> sslConf) {
+        boolean enabled = MapUtils.getBoolean(sslConf, Constants.SSL_ENABLED, Boolean.FALSE);
+        SslConfig sslConfig = SslConfig.builder()
+                .setEnabled(enabled)
+                .setKeystoreFile(MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_FILE))
+                .setKeystorePass(MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_PASS))
+                .setTruststoreFile(MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_FILE))
+                .setTruststorePass(MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_PASS))
+                .build();
+        url.setAttach(URL.SSL, sslConfig);
         url.getParameters().put(URL.SSL, sslConf);
     }
 

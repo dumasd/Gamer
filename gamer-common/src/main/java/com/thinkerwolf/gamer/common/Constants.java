@@ -29,9 +29,9 @@ public final class Constants {
      * <p>
      * 获取应用ID优先级
      * <ul>
-     *     <li><strong>环境变量:GAMER_MY_ID</strong></li>
-     *     <li>虚拟机参数:-Dgamer.my.id</li>
-     *     <li>随机生成的8位字符串</li>
+     * <li><strong>环境变量:GAMER_MY_ID</strong></li>
+     * <li>虚拟机参数:-Dgamer.my.id</li>
+     * <li>随机生成的8位字符串</li>
      * </ul>
      * </p>
      *
@@ -43,9 +43,9 @@ public final class Constants {
      * <p>
      * 获取应用ID优先级
      * <ul>
-     *     <li>环境变量:GAMER_MY_ID</li>
-     *     <li><strong>虚拟机参数:-Dgamer.my.id</strong></li>
-     *     <li>随机生成的8位字符串</li>
+     * <li>环境变量:GAMER_MY_ID</li>
+     * <li><strong>虚拟机参数:-Dgamer.my.id</strong></li>
+     * <li>随机生成的8位字符串</li>
      * </ul>
      * </p>
      *
@@ -80,9 +80,31 @@ public final class Constants {
      * 优先选择的网络接口名称
      */
     public static final String GAMER_PREFERRED_NETWORK_INTERFACE = "gamer.network.interface.preferred";
-
+    /**
+     * KeepAlive time
+     */
     public static final String EXECUTOR_KEEP_ALIVE_TIME = "executor.keepAlive.time";
 
+    /**
+     * Enabled
+     */
+    public static final String SSL_ENABLED = "enabled";
+    /**
+     * KeyStore 文件位置
+     */
+    public static final String SSL_KEYSTORE_FILE = "keystoreFile";
+    /**
+     * KeyStore 密码
+     */
+    public static final String SSL_KEYSTORE_PASS = "keystorePass";
+    /**
+     * TrustStore 文件位置
+     */
+    public static final String SSL_TRUSTSTORE_FILE = "truststoreFile";
+    /**
+     * TrustStore 密码
+     */
+    public static final String SSL_TRUSTSTORE_PASS = "truststorePass";
 
     /**
      * ;

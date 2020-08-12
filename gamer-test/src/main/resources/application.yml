@@ -41,6 +41,8 @@ gamer:
         protocol: http
         ssl:                 # ssl配置
           enabled: true
+          #keystoreFile: C:/Users/wukai/keystore.jks
+          #keystorePass: Wk1234lc
         port: 80
         options:
           so_keepalive: true

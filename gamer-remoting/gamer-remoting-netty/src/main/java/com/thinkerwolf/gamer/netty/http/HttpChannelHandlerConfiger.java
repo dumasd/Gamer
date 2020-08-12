@@ -3,6 +3,8 @@ package com.thinkerwolf.gamer.netty.http;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.netty.ChannelHandlerConfiger;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
+import com.thinkerwolf.gamer.remoting.ssl.SslConfig;
+import com.thinkerwolf.gamer.remoting.ssl.SslUtils;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http2.*;
@@ -12,6 +14,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.AsciiString;
 import org.apache.commons.collections.MapUtils;
 
+import javax.net.ssl.KeyManagerFactory;
 import java.util.Map;
 
 /**
@@ -22,34 +25,34 @@ import java.util.Map;
  */
 public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
 
-    private URL url;
     private final ChannelHandler handler;
-    private final ChannelHandler websocketHandler;
-
-    private SslContext sslContext;
-
     protected HttpServerUpgradeHandler.UpgradeCodecFactory upgradeCodecFactory;
+    private URL url;
+    private SslContext sslContext;
 
 
     public HttpChannelHandlerConfiger(boolean server, ChannelHandler handler) {
-        this(server, handler, null);
-    }
-
-    public HttpChannelHandlerConfiger(boolean server, ChannelHandler handler, ChannelHandler websocketHandler) {
         super(server);
         this.handler = handler;
-        this.websocketHandler = websocketHandler;
     }
 
     @Override
     public void init(URL url) throws Exception {
         this.url = url;
-        Map<String, Object> sslConfig = url.getObject(URL.SSL);
-        if (MapUtils.getBoolean(sslConfig, "enabled", false)) {
+        // Map<String, Object> sslConfig = url.getObject(URL.SSL);
+        SslConfig sslCfg = url.getAttach(URL.SSL);
+        if (sslCfg != null && sslCfg.isEnabled()) {
             SslProvider provider = SslProvider.isAlpnSupported(SslProvider.OPENSSL) ? SslProvider.OPENSSL : SslProvider.JDK;
             if (isServer()) {
-                SelfSignedCertificate ssc = new SelfSignedCertificate();
-                this.sslContext = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
+                KeyManagerFactory kmf = SslUtils.createKmf(sslCfg);
+                SslContextBuilder ctxBuilder;
+                if (kmf != null) {
+                    ctxBuilder = SslContextBuilder.forServer(kmf);
+                } else {
+                    SelfSignedCertificate ssc = new SelfSignedCertificate();
+                    ctxBuilder = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey());
+                }
+                this.sslContext = ctxBuilder
                         .sslProvider(provider)
                         /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2 specification.
                          * Please refer to the HTTP/2 specification for cipher requirements. */
@@ -80,9 +83,7 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
                                 ApplicationProtocolNames.HTTP_1_1))
                         .build();
             }
-
         }
-
 
         url.setAttach(URL.EXEC_GROUP_NAME, "HttpToWs");
         this.upgradeCodecFactory = protocol -> {
@@ -109,10 +110,10 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
         final ChannelPipeline pipeline = ch.pipeline();
         if (sslContext == null) {
             // Plain text
-            HttpHandlers.configHttp2Plaintext(pipeline, upgradeCodecFactory, url, handler, websocketHandler);
+            HttpHandlers.configHttp2Plaintext(pipeline, upgradeCodecFactory, url, handler);
         } else {
             // Ssl
-            HttpHandlers.configHttp2Ssl(pipeline, sslContext, upgradeCodecFactory, url, handler, websocketHandler);
+            HttpHandlers.configHttp2Ssl(pipeline, sslContext, upgradeCodecFactory, url, handler);
 
         }
     }
@@ -120,9 +121,9 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
     protected void initHttp2ClientChannel(Channel ch) {
         final ChannelPipeline pipeline = ch.pipeline();
         if (sslContext == null) {
-            HttpHandlers.configHttp2PlainTextClient(pipeline, url, handler, websocketHandler);
+            HttpHandlers.configHttp2PlainTextClient(pipeline, url, handler);
         } else {
-            HttpHandlers.configHttp2SslClient(pipeline, sslContext, url, handler, websocketHandler);
+            HttpHandlers.configHttp2SslClient(pipeline, sslContext, url, handler);
         }
 
     }
