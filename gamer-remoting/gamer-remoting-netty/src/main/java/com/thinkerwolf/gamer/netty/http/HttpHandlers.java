@@ -83,11 +83,6 @@ public final class HttpHandlers {
                 context.pipeline().addLast(NEGOTIATION_NAME, new Http2OrHttpHandler(url, handlers[0]));
                 return super.newSslHandler(context, sslContext);
             }
-
-            @Override
-            protected String newSslHandlerName() {
-                return SSL_NAME;
-            }
         });
     }
 

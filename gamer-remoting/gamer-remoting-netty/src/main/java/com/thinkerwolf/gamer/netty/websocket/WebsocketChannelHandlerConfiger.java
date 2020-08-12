@@ -5,21 +5,28 @@ import com.thinkerwolf.gamer.netty.ChannelHandlerConfiger;
 import com.thinkerwolf.gamer.netty.NettyClientHandler;
 import com.thinkerwolf.gamer.netty.NettyServerHandler;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
+import com.thinkerwolf.gamer.remoting.ssl.SslConfig;
+import com.thinkerwolf.gamer.remoting.ssl.SslUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.ServerChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
+import io.netty.handler.codec.http2.Http2SecurityUtil;
+import io.netty.handler.ssl.*;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 
+import javax.net.ssl.KeyManagerFactory;
 import java.net.URI;
 
 public class WebsocketChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
-    private URL url;
     private final ChannelHandler handler;
+    private URL url;
+    private SslContext sslContext;
 
     public WebsocketChannelHandlerConfiger(boolean server, ChannelHandler handler) {
         super(server);
@@ -29,14 +36,60 @@ public class WebsocketChannelHandlerConfiger extends ChannelHandlerConfiger<Chan
     @Override
     public void init(URL url) throws Exception {
         this.url = url;
+        SslConfig sslCfg = url.getAttach(URL.SSL);
+        if (sslCfg != null && sslCfg.isEnabled()) {
+            SslProvider provider = SslProvider.isAlpnSupported(SslProvider.OPENSSL) ? SslProvider.OPENSSL : SslProvider.JDK;
+            if (isServer()) {
+                KeyManagerFactory kmf = SslUtils.createKmf(sslCfg);
+                SslContextBuilder ctxBuilder;
+                if (kmf != null) {
+                    ctxBuilder = SslContextBuilder.forServer(kmf);
+                } else {
+                    SelfSignedCertificate ssc = new SelfSignedCertificate();
+                    ctxBuilder = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey());
+                }
+                this.sslContext = ctxBuilder
+                        .sslProvider(provider)
+                        /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2 specification.
+                         * Please refer to the HTTP/2 specification for cipher requirements. */
+                        .ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE)
+                        .applicationProtocolConfig(new ApplicationProtocolConfig(
+                                ApplicationProtocolConfig.Protocol.ALPN,
+                                // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
+                                ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
+                                // ACCEPT is currently the only mode supported by both OpenSsl and JDK providers.
+                                ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
+                                ApplicationProtocolNames.HTTP_2,
+                                ApplicationProtocolNames.HTTP_1_1))
+                        .build();
+            } else {
+                this.sslContext = SslContextBuilder.forClient()
+                        .sslProvider(provider)
+                        /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2 specification.
+                         * Please refer to the HTTP/2 specification for cipher requirements. */
+                        .ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE)
+                        .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                        .applicationProtocolConfig(new ApplicationProtocolConfig(
+                                ApplicationProtocolConfig.Protocol.ALPN,
+                                // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
+                                ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
+                                // ACCEPT is currently the only mode supported by both OpenSsl and JDK providers.
+                                ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
+                                ApplicationProtocolNames.HTTP_2,
+                                ApplicationProtocolNames.HTTP_1_1))
+                        .build();
+            }
+        }
     }
 
     @Override
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
-        boolean server = isServer();
+        final boolean server = isServer();
         pipeline.addLast(server ? new HttpServerCodec() : new HttpClientCodec());
-
+        if (sslContext != null) {
+            pipeline.addLast(new OptionalSslHandler(sslContext));
+        }
         pipeline.addLast(new HttpObjectAggregator(65536));
         pipeline.addLast(server ? new WebSocketServerCompressionHandler() : WebSocketClientCompressionHandler.INSTANCE);
         if (server) {

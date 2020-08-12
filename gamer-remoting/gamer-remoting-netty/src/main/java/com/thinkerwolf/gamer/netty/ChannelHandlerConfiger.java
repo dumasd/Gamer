@@ -1,15 +1,12 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 
 public abstract class ChannelHandlerConfiger<C extends Channel> extends ChannelInitializer<C> {
 
     private boolean server;
-
-    private ChannelHandler handler;
 
     public ChannelHandlerConfiger(boolean server) {
         this.server = server;
