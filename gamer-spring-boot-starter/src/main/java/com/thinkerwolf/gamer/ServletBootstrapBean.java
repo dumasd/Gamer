@@ -44,4 +44,8 @@ public class ServletBootstrapBean implements ServletBootstrap, DisposableBean {
     public void destroy() throws Exception {
         close();
     }
+
+    public ServletBootstrap getDelegate() {
+        return delegate;
+    }
 }

@@ -22,17 +22,11 @@ import java.util.Map;
 public class NettyServer implements Server {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(NettyServer.class);
-
+    private final URL url;
+    private final ChannelHandler handler;
     private ServerBootstrap serverBootstrap;
-
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
-
-
-    private final URL url;
-
-    private final ChannelHandler handler;
-
     private Channel channel;
 
     private volatile boolean started;
@@ -91,12 +85,12 @@ public class NettyServer implements Server {
 
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
-        // TODO
+        NettyServerHandler.send(url, message, sent);
     }
 
     @Override
     public void send(Object message) throws RemotingException {
-        // TODO
+        send(message, false);
     }
 
     @Override
@@ -104,8 +98,8 @@ public class NettyServer implements Server {
         NettyChannel nc = NettyChannel.getOrAddChannel(channel, url, handler);
         if (nc != null && !nc.isClosed()) {
             nc.close();
-
         }
+        NettyServerHandler.remove(url);
         if (bossGroup != null && !bossGroup.isShutdown()) {
             bossGroup.shutdownGracefully();
         }

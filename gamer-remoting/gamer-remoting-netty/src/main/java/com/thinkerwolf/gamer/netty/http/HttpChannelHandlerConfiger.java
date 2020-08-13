@@ -12,10 +12,8 @@ import io.netty.handler.ssl.*;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.AsciiString;
-import org.apache.commons.collections.MapUtils;
 
 import javax.net.ssl.KeyManagerFactory;
-import java.util.Map;
 
 /**
  * Http\Http2
@@ -29,7 +27,6 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
     protected HttpServerUpgradeHandler.UpgradeCodecFactory upgradeCodecFactory;
     private URL url;
     private SslContext sslContext;
-
 
     public HttpChannelHandlerConfiger(boolean server, ChannelHandler handler) {
         super(server);
@@ -53,6 +50,7 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
                     ctxBuilder = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey());
                 }
                 this.sslContext = ctxBuilder
+                        .protocols("TLSv1.3", "TLSv1.2")
                         .sslProvider(provider)
                         /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2 specification.
                          * Please refer to the HTTP/2 specification for cipher requirements. */
@@ -68,6 +66,7 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
                         .build();
             } else {
                 this.sslContext = SslContextBuilder.forClient()
+                        .protocols("TLSv1.3", "TLSv.1.2")
                         .sslProvider(provider)
                         /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2 specification.
                          * Please refer to the HTTP/2 specification for cipher requirements. */

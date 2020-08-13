@@ -7,12 +7,11 @@ import com.thinkerwolf.gamer.netty.NettyServerHandler;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.ServerChannel;
 
 public class TcpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
 
     private ChannelHandler handler;
-    private URL url;
+    private io.netty.channel.ChannelHandler lastHandler;
 
     public TcpChannelHandlerConfiger(boolean server, ChannelHandler handler) {
         super(server);
@@ -21,7 +20,11 @@ public class TcpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
 
     @Override
     public void init(URL url) throws Exception {
-        this.url = url;
+        if (isServer()) {
+            lastHandler = new NettyServerHandler(url, handler);
+        } else {
+            lastHandler = new NettyClientHandler(url, handler);
+        }
     }
 
     @Override
@@ -29,12 +32,7 @@ public class TcpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> {
         ChannelPipeline pipe = ch.pipeline();
         pipe.addLast("decoder", new PacketDecoder());
         pipe.addLast("encoder", new PacketEncoder());
-        if (isServer()) {
-            pipe.addLast("handler", new NettyServerHandler(url, handler));
-        } else {
-            pipe.addLast("handler", new NettyClientHandler(url, handler));
-        }
+        pipe.addLast("handler", lastHandler);
     }
-
 
 }

@@ -1,30 +1,83 @@
 package com.thinkerwolf.gamer.netty;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.ReferenceCountUtil;
 
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyServerHandler extends ChannelDuplexHandler {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(NettyServerHandler.class);
+
+    private static Map<URL, Map<String, Channel>> serverClientMap = new ConcurrentHashMap<>();
+
     private final URL url;
     private final ChannelHandler handler;
-
-    private final Map<String, Channel> channelMap = new ConcurrentHashMap<>();
+    private final Map<String, Channel> channelMap;
 
     private boolean autoRelease = true;
 
     public NettyServerHandler(URL url, ChannelHandler handler) {
         this.url = url;
         this.handler = handler;
+        this.channelMap = serverClientMap.computeIfAbsent(url, u -> new ConcurrentHashMap<>());
+    }
+
+    /**
+     * 给所有的客户端发送消息
+     *
+     * @param url
+     * @param msg
+     */
+    public static void send(URL url, Object msg, boolean sent) {
+        Map<String, Channel> clients = serverClientMap.get(url);
+        if (clients != null) {
+            Set<Channel> clientSet = new HashSet<>(clients.values());
+            if (sent) {
+                final CountDownLatch latch = new CountDownLatch(clientSet.size());
+                for (Channel ch : clientSet) {
+                    ch.sendPromise(msg).addListener(future -> {
+                        latch.countDown();
+                        if (!future.isSuccess()) {
+                            LOG.error("", future.cause());
+                        }
+                    });
+                }
+                try {
+                    latch.await(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    LOG.error("Send interrupted", e);
+                }
+            } else {
+                for (Channel ch : clientSet) {
+                    try {
+                        ch.send(msg);
+                    } catch (Exception e) {
+                        LOG.error("", e);
+                    }
+                }
+            }
+
+        }
+    }
+
+
+    public static void remove(URL url) {
+        serverClientMap.remove(url);
     }
 
     public URL getUrl() {
@@ -70,7 +123,6 @@ public class NettyServerHandler extends ChannelDuplexHandler {
         }
     }
 
-
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         ctx.fireChannelInactive();
@@ -92,10 +144,6 @@ public class NettyServerHandler extends ChannelDuplexHandler {
         Channel ch = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
             ctx.fireExceptionCaught(cause);
-            if (cause instanceof ReadTimeoutException) {
-                // read timeout
-
-            }
             handler.caught(ch, cause);
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
@@ -140,4 +188,6 @@ public class NettyServerHandler extends ChannelDuplexHandler {
         }
 
     }
+
+
 }
