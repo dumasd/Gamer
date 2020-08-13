@@ -35,6 +35,7 @@ public class DefaultParamAdaptor implements ParamAdaptor {
                 SessionParam sessionParam = getParameterAnnotation(annotations, SessionParam.class);
                 if (sessionParam != null) {
                     injectors[i] = new SessionNameBinder(sessionParam.value(), type);
+                    continue;
                 }
 
                 injectors[i] = new NullBinder(type);
