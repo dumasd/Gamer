@@ -14,6 +14,7 @@
     <modules>
         <module>gamer-core-api</module>
         <module>gamer-core-netty</module>
+        <module>gamer-core-grizzly</module>
     </modules>
     <dependencyManagement>
         <dependencies>
