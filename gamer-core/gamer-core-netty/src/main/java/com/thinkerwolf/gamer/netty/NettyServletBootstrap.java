@@ -135,14 +135,5 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
         return handlers.toArray(new ChannelHandler[0]);
     }
 
-    private void notifyServletContextListener() {
-        ServletContextEvent event = new ServletContextEvent(servletConfig.getServletContext());
-        for (Object listener : servletConfig.getServletContext().getListeners()) {
-            if (listener instanceof ServletContextListener) {
-                ((ServletContextListener) listener).contextInitialized(event);
-            }
-        }
-    }
-
 
 }

@@ -36,20 +36,24 @@ public class GrizzlyServletHandler extends AbstractServletHandler {
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
         if (message instanceof Packet) {
-            Packet packet = (Packet) message;
-            TcpRequest request = new TcpRequest(packet.getRequestId(), packet.getCommand(), channel, packet.getContent(), getServletConfig());
-            request.setAttribute(Request.DECORATOR_ATTRIBUTE, GrizzlyConstants.TCP_DECORATOR);
-            TcpResponse response = new TcpResponse(channel);
-            service(request, response, channel, message);
+            processTcp(channel, (Packet) message);
         } else if (message instanceof HttpContent) {
             processHttpContent(channel, (HttpContent) message);
         } else if (message instanceof DataFrame) {
             processDataFrame(channel, (DataFrame) message);
+        } else {
+            processOtherMessage(channel, message);
         }
     }
 
+    protected void processTcp(Channel channel, Packet packet) throws RemotingException {
+        TcpRequest request = new TcpRequest(packet.getRequestId(), packet.getCommand(), channel, packet.getContent(), getServletConfig());
+        request.setAttribute(Request.DECORATOR_ATTRIBUTE, GrizzlyConstants.TCP_DECORATOR);
+        TcpResponse response = new TcpResponse(channel);
+        service(request, response, channel, packet);
+    }
 
-    private void processHttpContent(Channel channel, HttpContent httpContent) throws RemotingException {
+    protected void processHttpContent(Channel channel, HttpContent httpContent) throws RemotingException {
         HttpRequest request = InternalHttpUtil.createRequest(httpContent, channel, getServletConfig());
         HttpResponse response = new HttpResponse(channel);
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, GrizzlyConstants.HTTP_DECORATOR);
@@ -91,6 +95,17 @@ public class GrizzlyServletHandler extends AbstractServletHandler {
         } else if (frame.getType() instanceof PingFrameType) {
             channel.send(new PongFrameType().create(true, frame.getBytes()));
         }
+    }
+
+    /**
+     * 处理其他类型消息
+     *
+     * @param channel
+     * @param message
+     * @throws RemotingException
+     */
+    protected void processOtherMessage(Channel channel, Object message) throws RemotingException {
+        throw new UnsupportedOperationException();
     }
 
 }

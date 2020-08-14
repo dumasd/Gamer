@@ -60,11 +60,13 @@ public class NettyServletHandler extends AbstractServletHandler {
             service(request, response, channel, message);
         } else if (message instanceof WebSocketFrame) {
             processWebSocketFrame(channel, (WebSocketFrame) message);
+        } else {
+            processOtherMessage(channel, message);
         }
     }
 
 
-    private void processWebSocketFrame(Channel channel, WebSocketFrame frame) throws RemotingException {
+    protected void processWebSocketFrame(Channel channel, WebSocketFrame frame) throws RemotingException {
         if (frame instanceof CloseWebSocketFrame) {
             channel.send(new CloseWebSocketFrame());
         } else if (frame instanceof PingWebSocketFrame) {
@@ -78,7 +80,7 @@ public class NettyServletHandler extends AbstractServletHandler {
         }
     }
 
-    private void processBinaryFrame(BinaryWebSocketFrame frame, final Channel channel) {
+    protected void processBinaryFrame(BinaryWebSocketFrame frame, final Channel channel) {
         ByteBuf buf = frame.content();
 
         buf.readInt();
@@ -99,7 +101,7 @@ public class NettyServletHandler extends AbstractServletHandler {
     }
 
 
-    private void processTextFrame(TextWebSocketFrame frame, final Channel channel) {
+    protected void processTextFrame(TextWebSocketFrame frame, final Channel channel) {
         String text = frame.text();
         Map<String, Object> params = RequestUtil.parseParams(text);
         String command = MapUtils.getString(params, "command");
@@ -113,5 +115,16 @@ public class NettyServletHandler extends AbstractServletHandler {
 
         request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.WEBSOCKET_DECORATOR);
         service(request, response, channel, frame);
+    }
+
+    /**
+     * 处理其他类型消息
+     *
+     * @param channel
+     * @param message
+     * @throws RemotingException
+     */
+    protected void processOtherMessage(Channel channel, Object message) throws RemotingException {
+        throw new UnsupportedOperationException();
     }
 }

@@ -6,8 +6,10 @@ public abstract class AbstractServletBootstrap implements ServletBootstrap {
 
     @Override
     public void startup() throws Exception {
-        if (closed) {
-            throw new IllegalStateException("Closed");
+        synchronized (this) {
+            if (closed) {
+                throw new IllegalStateException("Closed");
+            }
         }
         doStartup();
     }
@@ -29,7 +31,18 @@ public abstract class AbstractServletBootstrap implements ServletBootstrap {
 
     @Override
     public boolean isClosed() {
-        return closed;
+        synchronized (this) {
+            return closed;
+        }
+    }
+
+    protected void notifyServletContextListener() {
+        ServletContextEvent event = new ServletContextEvent(getServletConfig().getServletContext());
+        for (Object listener : getServletConfig().getServletContext().getListeners()) {
+            if (listener instanceof ServletContextListener) {
+                ((ServletContextListener) listener).contextInitialized(event);
+            }
+        }
     }
 
 }

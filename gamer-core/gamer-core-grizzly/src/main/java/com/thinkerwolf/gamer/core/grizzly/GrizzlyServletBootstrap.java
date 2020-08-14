@@ -110,12 +110,4 @@ public class GrizzlyServletBootstrap extends AbstractServletBootstrap {
         return servletConfig;
     }
 
-    private void notifyServletContextListener() {
-        ServletContextEvent event = new ServletContextEvent(servletConfig.getServletContext());
-        for (Object listener : servletConfig.getServletContext().getListeners()) {
-            if (listener instanceof ServletContextListener) {
-                ((ServletContextListener) listener).contextInitialized(event);
-            }
-        }
-    }
 }

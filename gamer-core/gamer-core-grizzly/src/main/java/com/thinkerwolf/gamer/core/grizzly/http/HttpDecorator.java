@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.core.mvc.model.Model;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import org.glassfish.grizzly.http.HttpResponsePacket;
+import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.memory.Buffers;
 
 public class HttpDecorator implements Decorator {
@@ -14,11 +15,13 @@ public class HttpDecorator implements Decorator {
         HttpRequest servletRequest = (HttpRequest) request;
         int status = response.getStatus() == null ? 200 : (int) response.getStatus();
         final byte[] bs = model.getBytes();
+        String conn = servletRequest.getRequestPacket().getHeader(Header.Connection);
         HttpResponsePacket responsePacket = HttpResponsePacket.builder(servletRequest.getRequestPacket())
                 .status(status)
                 .contentLength(bs.length)
                 .contentType(response.getContentType().toString())
                 .protocol(servletRequest.getRequestPacket().getProtocol())
+                .header(Header.Connection, conn)
                 .build();
         return responsePacket
                 .httpContentBuilder()
