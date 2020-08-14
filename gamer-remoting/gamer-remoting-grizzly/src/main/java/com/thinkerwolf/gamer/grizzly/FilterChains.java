@@ -14,7 +14,9 @@ import org.glassfish.grizzly.Processor;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.filterchain.TransportFilter;
 import org.glassfish.grizzly.http.HttpClientFilter;
+import org.glassfish.grizzly.http.HttpCodecFilter;
 import org.glassfish.grizzly.http.HttpServerFilter;
+import org.glassfish.grizzly.http.KeepAlive;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.ssl.SSLFilter;
@@ -37,16 +39,12 @@ public final class FilterChains {
             if (server) {
                 WebSocketEngine.getEngine().register("", "/*", new DefaultApplication(url, handler));
             }
-            final DelayedExecutor timeoutExecutor = IdleTimeoutFilter.createDefaultIdleDelayedExecutor();
-            timeoutExecutor.start();
             builder.addLast(new TransportFilter());
-
             SSLEngineConfigurator cfg = initializeSSL(url);
             if (cfg != null) {
                 builder.addLast(new SSLFilter(cfg, cfg.copy().setClientMode(true)));
             }
-
-            builder.addLast(server ? new HttpServerFilter() : new HttpClientFilter());
+            builder.addLast(server ? newHttpServerFilter(url) : new HttpClientFilter());
             if (server || protocol.equals(Protocol.WEBSOCKET)) {
                 builder.addLast(server ? new WebSocketServerFilter() : new WebSocketClientFilter());
             }
@@ -73,6 +71,13 @@ public final class FilterChains {
             sslContextConfig.setTrustStorePass(cfg.getTruststorePass());
         }
         return new SSLEngineConfigurator(sslContextConfig.createSSLContext(false), false, false, false);
+    }
+
+    private static HttpServerFilter newHttpServerFilter(URL url) {
+        final DelayedExecutor delayedExecutor = IdleTimeoutFilter.createDefaultIdleDelayedExecutor();
+        delayedExecutor.start();
+        KeepAlive keepAlive = new KeepAlive();
+        return new HttpServerFilter(true, HttpCodecFilter.DEFAULT_MAX_HTTP_PACKET_HEADER_SIZE, keepAlive, delayedExecutor);
     }
 
 

@@ -18,6 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.*;
@@ -102,7 +103,7 @@ public class YmlConf extends AbstractConf<YmlConf> {
                 is = ResourceUtils.findInputStream("", Constants.DEFAULT_CONFIG_FILE_YAML);
             }
             if (is == null) {
-                throw new ConfigurationException("No config file!!");
+                throw new FileNotFoundException("No config file!!");
             }
             Map<String, Object> conf = yaml.load(is);
             return load(conf);

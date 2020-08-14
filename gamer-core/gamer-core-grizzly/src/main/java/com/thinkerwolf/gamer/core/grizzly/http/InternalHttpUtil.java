@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.Method;
+import org.glassfish.grizzly.http.util.Header;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ public final class InternalHttpUtil {
 
     public static HttpRequest createRequest(HttpContent httpContent, Channel channel, ServletConfig servletConfig) {
         HttpRequestPacket requestPacket = (HttpRequestPacket) httpContent.getHttpHeader();
+        requestPacket.getProcessingState().setKeepAlive(isKeepAlive(requestPacket));
         Method httpMethod = requestPacket.getMethod();
         byte[] content = parseContent(httpContent);
         Map<String, Object> params = new HashMap<>();
@@ -37,6 +39,10 @@ public final class InternalHttpUtil {
                 .setAttributes(params)
                 .setContent(content)
                 .build();
+    }
+
+    public static boolean isKeepAlive(HttpRequestPacket requestPacket) {
+        return "keep-alive".equalsIgnoreCase(requestPacket.getHeader(Header.Connection));
     }
 
     public static byte[] parseContent(HttpContent httpContent) {
