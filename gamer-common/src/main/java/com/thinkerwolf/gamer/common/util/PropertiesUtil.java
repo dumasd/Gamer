@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.common.util;
 
+import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -11,6 +12,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author wukai
  */
 public final class PropertiesUtil {
+
+    private static Locale DEFAULT_LOCALE;
+
+    static {
+        try {
+            Method method = Locale.class.getDeclaredMethod("initDefault");
+            DEFAULT_LOCALE = (Locale) method.invoke(null);
+        } catch (Exception e) {
+            DEFAULT_LOCALE = Locale.CHINA;
+        }
+    }
 
     private static final String PACKAGE = "package";
 
@@ -25,23 +37,23 @@ public final class PropertiesUtil {
     }
 
     public static String getString(Class<?> clazz, String key) {
-        return getString(clazz, key, Locale.getDefault());
+        return getString(clazz, key, DEFAULT_LOCALE);
     }
 
     public static Integer getInteger(Class<?> clazz, String key) {
-        return getInteger(clazz, key, Locale.getDefault());
+        return getInteger(clazz, key, DEFAULT_LOCALE);
     }
 
     public static Long getLong(Class<?> clazz, String key) {
-        return getLong(clazz, key, Locale.getDefault());
+        return getLong(clazz, key, DEFAULT_LOCALE);
     }
 
     public static Double getDouble(Class<?> clazz, String key) {
-        return getDouble(clazz, key, Locale.getDefault());
+        return getDouble(clazz, key, DEFAULT_LOCALE);
     }
 
     public static Boolean getBoolean(Class<?> clazz, String key) {
-        return getBoolean(clazz, key, Locale.getDefault());
+        return getBoolean(clazz, key, DEFAULT_LOCALE);
     }
 
 
@@ -64,7 +76,6 @@ public final class PropertiesUtil {
         String t = getString(clazz, key, locale);
         return Boolean.parseBoolean(t);
     }
-
 
     /**
      * @param clazz
