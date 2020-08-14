@@ -77,7 +77,7 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter {
             executor.execute(new ChannelRunnable(channel, message) {
                 @Override
                 public void run() {
-                    service(servlet, request, response, (Channel) channel);
+                    service(servlet, request, response, channel);
                 }
             });
         } else {

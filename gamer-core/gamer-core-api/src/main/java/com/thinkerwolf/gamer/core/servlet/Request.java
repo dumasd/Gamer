@@ -11,7 +11,7 @@ import com.thinkerwolf.gamer.remoting.Protocol;
  */
 public interface Request {
 
-    String DECORATOR_ATTRIBUTE = Request.class + ".decorator";
+    String DECORATOR_ATTRIBUTE = Request.class.getName() + ".decorator";
 
     /**
      * Get request channel

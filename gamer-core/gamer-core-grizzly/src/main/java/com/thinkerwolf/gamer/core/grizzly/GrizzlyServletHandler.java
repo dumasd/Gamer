@@ -3,6 +3,9 @@ package com.thinkerwolf.gamer.core.grizzly;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.buffer.ChannelBuffer;
 import com.thinkerwolf.gamer.common.buffer.ChannelBuffers;
+import com.thinkerwolf.gamer.core.grizzly.http.HttpRequest;
+import com.thinkerwolf.gamer.core.grizzly.http.HttpResponse;
+import com.thinkerwolf.gamer.core.grizzly.http.InternalHttpUtil;
 import com.thinkerwolf.gamer.core.grizzly.tcp.TcpRequest;
 import com.thinkerwolf.gamer.core.grizzly.tcp.TcpResponse;
 import com.thinkerwolf.gamer.core.grizzly.websocket.WebsocketRequest;
@@ -15,8 +18,6 @@ import com.thinkerwolf.gamer.remoting.RemotingException;
 import com.thinkerwolf.gamer.remoting.tcp.Packet;
 import org.apache.commons.collections.MapUtils;
 import org.glassfish.grizzly.http.HttpContent;
-import org.glassfish.grizzly.http.HttpRequestPacket;
-import org.glassfish.grizzly.http.Method;
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.frametypes.BinaryFrameType;
 import org.glassfish.grizzly.websockets.frametypes.PingFrameType;
@@ -49,14 +50,10 @@ public class GrizzlyServletHandler extends AbstractServletHandler {
 
 
     private void processHttpContent(Channel channel, HttpContent httpContent) throws RemotingException {
-        HttpRequestPacket requestPacket = (HttpRequestPacket) httpContent.getHttpHeader();
-        Method httpMethod = requestPacket.getMethod();
-        if ("GET".equalsIgnoreCase(httpMethod.getMethodString())) {
-
-        } else if ("PUT".equalsIgnoreCase(httpMethod.getMethodString())) {
-
-        }
-        requestPacket.getRequestURI();
+        HttpRequest request = InternalHttpUtil.createRequest(httpContent, channel, getServletConfig());
+        HttpResponse response = new HttpResponse(channel);
+        request.setAttribute(Request.DECORATOR_ATTRIBUTE, GrizzlyConstants.HTTP_DECORATOR);
+        service(request, response, channel, httpContent);
     }
 
     private void processDataFrame(Channel channel, DataFrame frame) throws RemotingException {
