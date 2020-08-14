@@ -23,7 +23,7 @@ public class NettyServerHandler extends ChannelDuplexHandler {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(NettyServerHandler.class);
 
-    private static Map<URL, Map<String, Channel>> serverClientMap = new ConcurrentHashMap<>();
+    private static final Map<URL, Map<String, Channel>> serverClientMap = new ConcurrentHashMap<>();
 
     private final URL url;
     private final ChannelHandler handler;

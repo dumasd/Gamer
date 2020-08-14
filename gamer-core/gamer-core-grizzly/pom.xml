@@ -10,6 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>gamer-core-grizzly</artifactId>
+    <packaging>jar</packaging>
+    <name>Gamer/CoreGrizzly</name>
 
     <dependencies>
         <dependency>

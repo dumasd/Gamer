@@ -11,12 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author wukai
  */
 public final class Protocol implements Serializable {
-
-    public static final Protocol TCP = new Protocol("tcp");
-    public static final Protocol HTTP = new Protocol("http");
-    public static final Protocol WEBSOCKET = new Protocol("ws");
-
     private static final Map<String, Protocol> protocolMap = new ConcurrentHashMap<>();
+
+    public static final Protocol TCP = valueOf("tcp");
+    public static final Protocol HTTP = valueOf("http");
+    public static final Protocol WEBSOCKET = valueOf("ws");
 
     static {
         protocolMap.put(TCP.getName(), TCP);
@@ -37,20 +36,6 @@ public final class Protocol implements Serializable {
     @Override
     public String toString() {
         return name;
-    }
-
-    /**
-     * 注册新协议
-     *
-     * @param name
-     * @return
-     */
-    public static Protocol register(String name) {
-        Protocol p = find(name);
-        if (p != null) {
-            return p;
-        }
-        return protocolMap.computeIfAbsent(name, Protocol::new);
     }
 
     @Override
@@ -85,4 +70,9 @@ public final class Protocol implements Serializable {
         return p;
     }
 
+    public static Protocol valueOf(final String name) {
+        Objects.requireNonNull(name);
+        final String lowerName = name.toLowerCase();
+        return protocolMap.computeIfAbsent(name, s -> new Protocol(lowerName));
+    }
 }

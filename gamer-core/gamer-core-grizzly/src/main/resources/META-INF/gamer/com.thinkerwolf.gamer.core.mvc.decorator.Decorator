@@ -1,3 +1,2 @@
-grizzlyTcp=com.thinkerwolf.gamer.netty.tcp.TcpDecorator
-grizzlyHttp=com.thinkerwolf.gamer.netty.http.HttpDecorator
-grizzlyWebSocket=com.thinkerwolf.gamer.netty.websocket.WebsocketDecorator
+grizzlyTcp=com.thinkerwolf.gamer.core.grizzly.tcp.TcpDecorator
+grizzlyWebSocket=com.thinkerwolf.gamer.core.grizzly.websocket.WebsocketDecorator

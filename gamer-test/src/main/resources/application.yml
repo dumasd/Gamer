@@ -1,5 +1,6 @@
 gamer:
   id: 1001
+  servlet-boot: grizzly
   conf:
     servlet:
       servletName: DispatcherServlet                                   # Servlet名称

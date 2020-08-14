@@ -50,7 +50,8 @@ public class NettyServer implements Server {
         this.bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory(bossName));
         this.workerGroup = new NioEventLoopGroup(workerThreads, new DefaultThreadFactory(workerName));
         sb.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
-
+        sb.option(ChannelOption.SO_KEEPALIVE, true);
+        sb.option(ChannelOption.TCP_NODELAY, true);
         Map<String, Object> options = url.getObject(URL.OPTIONS, Collections.emptyMap());
         for (Map.Entry<String, Object> op : options.entrySet()) {
             if (ChannelOption.exists(op.getKey())) {

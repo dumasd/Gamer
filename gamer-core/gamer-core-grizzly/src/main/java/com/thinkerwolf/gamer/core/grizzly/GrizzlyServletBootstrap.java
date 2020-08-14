@@ -1,15 +1,19 @@
 package com.thinkerwolf.gamer.core.grizzly;
 
+import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.conf.yml.YmlConf;
+import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.grizzly.GrizzlyServer;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.Server;
+import org.apache.commons.lang.StringUtils;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +60,30 @@ public class GrizzlyServletBootstrap extends AbstractServletBootstrap {
 
     private ChannelHandler[] createHandlers(URL url) {
         List<ChannelHandler> handlers = new ArrayList<>();
-        
+        String handlerClasses = url.getObject(URL.CHANNEL_HANDLERS);
+        if (StringUtils.isNotEmpty(handlerClasses)) {
+            String[] cls = Constants.SEMICOLON_SPLIT_PATTERN.split(handlerClasses);
+            for (String cl : cls) {
+                Class<?> clazz = ClassUtils.forName(cl);
+                if (!ChannelHandler.class.isAssignableFrom(clazz)) {
+                    throw new ConfigurationException(cl + " is not a ChannelHandler");
+                }
+                Constructor<?> cont = clazz.getConstructors()[0];
+                ChannelHandler handler;
+                try {
+                    if (cont.getParameters().length <= 0) {
+                        handler = (ChannelHandler) cont.newInstance();
+                    } else {
+                        handler = (ChannelHandler) cont.newInstance(url);
+                    }
+                    handlers.add(handler);
+                } catch (Exception e) {
+                    throw new ConfigurationException(e);
+                }
+            }
+            return handlers.toArray(new ChannelHandler[0]);
+        }
+        handlers.add(new GrizzlyServletHandler(url));
         return handlers.toArray(new ChannelHandler[0]);
     }
 

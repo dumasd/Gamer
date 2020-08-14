@@ -14,7 +14,7 @@ public abstract class AbstractChRequest implements Request {
     private int requestId;
     private final String command;
     private final Channel ch;
-    private Map<String, Object> attributes;
+    private volatile Map<String, Object> attributes;
     private final ServletConfig servletConfig;
 
     public AbstractChRequest(int requestId, String command, Channel ch, ServletConfig servletConfig) {
