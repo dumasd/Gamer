@@ -1,25 +1,37 @@
 package com.thinkerwolf.gamer.registry.zookeeper;
 
+import com.thinkerwolf.gamer.common.SymbolConstants;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
-import com.thinkerwolf.gamer.registry.AbstractRegistry;
-import com.thinkerwolf.gamer.registry.ChildEvent;
-import com.thinkerwolf.gamer.registry.DataEvent;
-import com.thinkerwolf.gamer.registry.RegistryState;
+import com.thinkerwolf.gamer.common.retry.RetryLoops;
+import com.thinkerwolf.gamer.common.retry.RetryNTimes;
+import com.thinkerwolf.gamer.registry.*;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.IZkStateListener;
 import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.exception.ZkNodeExistsException;
+import org.I0Itec.zkclient.serialize.ZkSerializer;
+import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.ACL;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static com.thinkerwolf.gamer.common.URL.RETRY;
+import static com.thinkerwolf.gamer.common.URL.RETRY_MILLIS;
+import static com.thinkerwolf.gamer.common.URL.NODE_EPHEMERAL;
+import static com.thinkerwolf.gamer.common.URL.CONNECTION_TIMEOUT;
+import static com.thinkerwolf.gamer.common.URL.SESSION_TIMEOUT;
+import static com.thinkerwolf.gamer.common.URL.BACKUP;
+import static com.thinkerwolf.gamer.common.URL.NODE_NAME;
 
 /**
- * Zookeeper注册中心
+ * Zookeeper Registry Center
  * <lu>
  * <li>/gamer/rpc</li>
  * <li>/eliminate/game/game_1001</li>
@@ -34,33 +46,43 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(ZookeeperRegistry.class);
 
-    private ZkClient client;
+    private ZkClient zkClient;
 
     public ZookeeperRegistry(URL url) {
         super(url);
-        init();
-    }
-
-    private void init() {
-        int connectionTimeout = url.getInteger(URL.CONNECTION_TIMEOUT, 5000);
-        int sessionTimeout = url.getInteger(URL.SESSION_TIMEOUT, 6000);
-        String backup = url.getString(URL.BACKUP);
-        String zkServers = url.toHostPort();
-        if (backup != null) {
-            zkServers = zkServers + ";" + backup;
-        }
-        this.client = new ZkClient(zkServers, sessionTimeout, connectionTimeout, new AdaptiveZkSerializer());
-        this.client.subscribeStateChanges(this);
+        this.zkClient = prepareClient();
+        this.zkClient.subscribeStateChanges(this);
         fetchAllChildren();
     }
 
+    private ZkClient prepareClient() {
+        final int connectionTimeout = url.getInteger(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
+        final int sessionTimeout = url.getInteger(SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT);
+
+        String backup = url.getString(BACKUP);
+        StringBuilder zkServersBuilder = new StringBuilder(url.toHostPort());
+        if (StringUtils.isNotBlank(backup)) {
+            zkServersBuilder.append(SymbolConstants.SEMICOLON).append(backup);
+        }
+
+        String zkServers = zkServersBuilder.toString();
+        final ZkSerializer serializer = new AdaptiveZkSerializer();
+        int retry = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
+        try {
+            return RetryLoops.invokeWithRetry(() -> new ZkClient(zkServers, sessionTimeout, connectionTimeout, serializer), new RetryNTimes(retry, connectionTimeout + 100, TimeUnit.MILLISECONDS));
+        } catch (Exception e) {
+            throw new RegistryException(e);
+        }
+    }
+
+
     private void fetchAllChildren() {
-        List<String> childs = ZkUtils.getAllChildren(client, ZkUtils.toPath(url));
+        List<String> childs = ZkClientUtils.getAllChildren(zkClient, ZkClientUtils.toPath(url));
         if (LOG.isDebugEnabled()) {
             LOG.debug("Zk all children : " + childs);
         }
         for (String child : childs) {
-            URL url = client.readData(child);
+            URL url = zkClient.readData(child, true);
             if (url != null) {
                 saveToCache(url);
                 doSubscribe(url);
@@ -73,8 +95,8 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
     }
 
     private String toDataPath(URL url) {
-        String p = ZkUtils.toPath(url);
-        String nodeName = url.getString(URL.NODE_NAME);
+        String p = ZkClientUtils.toPath(url);
+        String nodeName = url.getString(NODE_NAME);
         String append = nodeName == null ? "" : ("/" + nodeName);
         return p + append;
     }
@@ -82,53 +104,61 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
     @Override
     protected void doRegister(URL url) {
         String path = toDataPath(url);
-        boolean ephemeral = url.getBoolean(URL.NODE_EPHEMERAL, true);
+        int retry = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
+        long retryMillis = url.getLong(RETRY_MILLIS, DEFAULT_RETRY_MILLIS);
+        final boolean ephemeral = url.getBoolean(NODE_EPHEMERAL, true);
+        final List<ACL> acl = ZkClientUtils.createACLs(url);
         try {
-            ZkUtils.createRecursive(client, path);
+            RetryLoops.invokeWithRetry(() -> {
+                try {
+                    ZkClientUtils.createParent(zkClient, path);
+                } catch (ZkNodeExistsException ignored) {
+                }
+                if (!zkClient.exists(path)) {
+                    if (ephemeral) {
+                        zkClient.createEphemeral(path, url, acl);
+                    } else {
+                        zkClient.createPersistent(path, url, acl);
+                    }
+                } else {
+                    zkClient.writeData(path, url);
+                }
+                return Boolean.TRUE;
+            }, new RetryNTimes(retry, retryMillis, TimeUnit.MILLISECONDS));
         } catch (Exception e) {
-            LOG.warn("Zk recursive create", e);
+            throw new RegistryException("Zk register [" + path + "]", e);
         }
 
-        if (!client.exists(path)) {
-            List<ACL> acls = ZkUtils.createACLs(url);
-            if (ephemeral) {
-                client.createEphemeral(path, url, acls);
-            } else {
-                client.createPersistent(path, url, acls);
-            }
-        } else {
-            client.writeData(path, url);
-        }
     }
 
     @Override
     public void doUnRegister(URL url) {
         String path = toDataPath(url);
-        client.delete(path);
+        zkClient.delete(path);
     }
 
     @Override
     protected void doSubscribe(URL url) {
         String path = toDataPath(url);
-        client.subscribeDataChanges(path, this);
-        client.subscribeChildChanges(path, this);
+        zkClient.subscribeDataChanges(path, this);
+        zkClient.subscribeChildChanges(path, this);
     }
 
     @Override
     protected void doUnSubscribe(URL url) {
         String path = toDataPath(url);
-        client.unsubscribeChildChanges(path, this);
-        client.unsubscribeDataChanges(path, this);
+        zkClient.unsubscribeChildChanges(path, this);
+        zkClient.unsubscribeDataChanges(path, this);
     }
 
 
     @Override
     protected List<URL> doLookup(URL url) {
         String path = toDataPath(url);
-        List<String> childrenPaths = client.getChildren(path);
+        List<String> childrenPaths = zkClient.getChildren(path);
         List<URL> urls = new ArrayList<>();
         for (String cp : childrenPaths) {
-            URL u = client.readData(path + "/" + cp, false);
+            URL u = zkClient.readData(path + "/" + cp, false);
             if (u != null) {
                 urls.add(u);
             }
@@ -138,7 +168,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
 
     @Override
     public void close() {
-        client.close();
+        zkClient.close();
     }
 
     @Override
@@ -176,7 +206,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
         List<URL> childs = new LinkedList<>();
         if (currentChilds != null) {
             for (String c : currentChilds) {
-                URL url = client.readData(parentPath + "/" + c);
+                URL url = zkClient.readData(parentPath + "/" + c);
                 if (url != null) {
                     childs.add(url);
                 }

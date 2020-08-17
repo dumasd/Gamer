@@ -5,44 +5,49 @@ import com.thinkerwolf.gamer.common.URL;
 import java.util.List;
 
 /**
- * 注册中心
+ * This is an interface used to abstract different registry operations. Like zookeeper, etcd etc.
  *
  * @author wukai
- * @date 2020/5/14 15:41
+ * @since 2020/5/14 15:41
  */
 public interface Registry extends AutoCloseable {
     /**
-     * 注册中心地址
+     * Obtain registry url
      *
-     * @return
+     * @return url
      */
     URL url();
 
     /**
-     * 往注册中心注册
+     * Register an url to registry.
      *
-     * @param
+     * @param url The url to register.
      */
     void register(URL url);
 
     /**
-     * 从注册中心解除注册
+     * Unregister an url to registry.
      *
-     * @param
+     * @param url The url to unregister.
      */
     void unregister(URL url);
 
     /**
-     * 关闭注册中心
+     * Close the registry.
      */
     @Override
     void close();
 
-
+    /**
+     * Lookup all urls below the given url.
+     *
+     * @param url The url to lookup.
+     * @return All children urls.
+     */
     List<URL> lookup(URL url);
 
     /**
-     * 订阅节点
+     * Subscribe a listener to the give url.
      *
      * @param url
      * @param listener
@@ -50,7 +55,7 @@ public interface Registry extends AutoCloseable {
     void subscribe(URL url, INotifyListener listener);
 
     /**
-     * 取消订阅节点
+     * Subscribe a listener from the give url.
      *
      * @param url
      * @param listener
@@ -58,16 +63,19 @@ public interface Registry extends AutoCloseable {
     void unsubscribe(URL url, INotifyListener listener);
 
     /**
-     * 订阅Registry客户端状态
+     * Add a state listener.
      *
      * @param listener
+     * @see RegistryState
+     * @see IStateListener
      */
     void subscribeState(IStateListener listener);
 
     /**
-     * 取消订阅Registry客户端状态
+     * Remove the state listener.
      *
      * @param listener
+     * @see IStateListener
      */
     void unsubscribeState(IStateListener listener);
 }

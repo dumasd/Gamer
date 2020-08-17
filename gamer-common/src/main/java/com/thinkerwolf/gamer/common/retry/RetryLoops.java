@@ -4,23 +4,28 @@ package com.thinkerwolf.gamer.common.retry;
 import java.util.concurrent.Callable;
 
 /**
- * 重试
+ * Retry Loop
  *
- * @param <V>
  * @author wukai
  */
-public class RetryLoops<V> {
-
-    private int retries;
+public final class RetryLoops {
+    /**
+     * The loop start millis
+     */
     private final long startMillis;
-    private boolean done;
+    /**
+     * Current retry times
+     */
+    private int retries;
 
-    public RetryLoops() {
+    private volatile boolean done;
+
+    private RetryLoops() {
         this.startMillis = System.currentTimeMillis();
     }
 
     public static <V> V invokeWithRetry(Callable<V> callable, IRetryPolicy policy) throws Exception {
-        RetryLoops<V> loop = new RetryLoops<>();
+        RetryLoops loop = new RetryLoops();
         V result = null;
         while (loop.shouldContinue()) {
             try {
@@ -37,7 +42,7 @@ public class RetryLoops<V> {
         return callable.call();
     }
 
-    private static <V> void fireException(RetryLoops<V> loop, IRetryPolicy policy, Exception exp) throws Exception {
+    private static void fireException(RetryLoops loop, IRetryPolicy policy, Exception exp) throws Exception {
         boolean sr = policy.shouldRetry(loop.retries, System.currentTimeMillis() - loop.startMillis, true);
         if (!sr) {
             throw exp;

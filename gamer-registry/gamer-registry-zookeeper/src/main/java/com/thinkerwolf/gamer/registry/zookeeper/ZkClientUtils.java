@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.registry.zookeeper;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.registry.RegistryException;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.ZooDefs;
@@ -13,23 +14,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ZkUtils {
+/**
+ * ZkClient工具
+ *
+ * @author wukai
+ */
+public final class ZkClientUtils {
 
-    public static void createRecursive(ZkClient zkClient, String path) {
-        int index = 0;
-        for (; ; ) {
-            index = path.indexOf('/', index);
-            if (index < 0) {
-                break;
-            }
-            String p = path.substring(0, index);
-            if (StringUtils.isNotBlank(p)) {
-                if (!zkClient.exists(p)) {
-                    zkClient.createPersistent(p);
-                }
-            }
-            index++;
+    /**
+     * Create parent persistent path
+     *
+     * @param zkc  ZkClint
+     * @param path path
+     * @throws RuntimeException If any other exception occurs
+     */
+    public static void createParent(ZkClient zkc, String path) throws RuntimeException {
+        int idx = path.lastIndexOf('/');
+        if (idx <= 0) {
+            return;
         }
+        String parent = path.substring(0, idx);
+        zkc.createPersistent(parent, true);
     }
 
     public static List<ACL> createACLs(URL url) {
@@ -49,10 +54,16 @@ public class ZkUtils {
             ACL acl = new ACL(ZooDefs.Perms.ALL, id);
             return Collections.singletonList(acl);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            throw new RegistryException(e);
         }
     }
 
+    /**
+     * Convert a url to a zookeeper path.
+     *
+     * @param url url
+     * @return A zookeeper path
+     */
     public static String toPath(URL url) {
         if (StringUtils.isBlank(url.getPath())) {
             return "/";
@@ -72,24 +83,31 @@ public class ZkUtils {
         }
     }
 
-    public static List<String> getAllChildren(ZkClient client, String startPath) {
+    /**
+     * Start with the given path. Obtain all children path.
+     *
+     * @param zkc       ZkClient
+     * @param startPath Start path
+     * @return All children path
+     */
+    public static List<String> getAllChildren(ZkClient zkc, String startPath) {
         List<String> children = new ArrayList<>();
-        addChildrenPath(client, startPath, children);
+        addChildrenPath(zkc, startPath, children);
         return children;
     }
 
-    private static void addChildrenPath(ZkClient client, String startPath, List<String> paths) {
-        if (!client.exists(startPath)) {
+    private static void addChildrenPath(ZkClient zkc, String startPath, List<String> paths) {
+        if (!zkc.exists(startPath)) {
             return;
         }
-        List<String> children = client.getChildren(startPath);
+        List<String> children = zkc.getChildren(startPath);
         if (children.size() == 0) {
             return;
         }
         for (String child : children) {
             String childPath = startPath + "/" + child;
             paths.add(childPath);
-            addChildrenPath(client, childPath, paths);
+            addChildrenPath(zkc, childPath, paths);
         }
     }
 

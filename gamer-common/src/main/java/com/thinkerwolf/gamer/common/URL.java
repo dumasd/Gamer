@@ -42,6 +42,9 @@ public class URL implements Serializable {
     public static final String NODE_NAME = "nodeName";
     public static final String REQUEST_TIMEOUT = "requestTimeout";
     public static final String RPC_CLIENT_NUM = "rpcClientNum";
+    public static final String RETRY = "retry";
+    public static final String RETRY_MILLIS = "retryMillis";
+
     /**
      * RPC通信时是否使用本地地址
      */

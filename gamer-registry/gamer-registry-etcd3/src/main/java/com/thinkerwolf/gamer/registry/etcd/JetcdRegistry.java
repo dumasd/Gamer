@@ -34,6 +34,10 @@ import java.util.function.Supplier;
 
 import static com.thinkerwolf.gamer.registry.etcd.JetcdUtil.*;
 
+import static com.thinkerwolf.gamer.common.URL.RETRY;
+import static com.thinkerwolf.gamer.common.URL.RETRY_MILLIS;
+import static com.thinkerwolf.gamer.common.URL.SESSION_TIMEOUT;
+
 /**
  * Etcd3注册中心
  *
@@ -43,23 +47,13 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(JetcdRegistry.class);
     private static final long DEFAULT_KEEP_ALIVE_DELAY = 1000;
-    private static final int DEFAULT_REQUEST_RETRY_TIMES = 1;
-    private static final long DEFAULT_REQUEST_DELAY = 1500;
-
-    private volatile Client client;
-
-    private volatile long globalLeaseId;
-
-    private IRetryPolicy retryPolicy;
-
-    private Supplier<Client> retry;
-
     private final ScheduledExecutorService retryExecutor = new ScheduledThreadPoolExecutor(1, new DefaultThreadFactory("EtcdRetry"));
-
     private final ScheduledExecutorService reconnectExecutor = new ScheduledThreadPoolExecutor(1, new DefaultThreadFactory("EtcdReconnect"));
-
     private final Set<URL> registryUrls = new CopyOnWriteArraySet<>();
-
+    private volatile Client client;
+    private volatile long globalLeaseId;
+    private IRetryPolicy retryPolicy;
+    private Supplier<Client> retry;
     private long lastKeepAliveTime;
     private int requestRetryTimes;
     private long requestTimeout;
@@ -73,9 +67,9 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
     }
 
     private void init(URL url) {
-        this.requestRetryTimes = url.getInteger("registryRetryTimes", DEFAULT_REQUEST_RETRY_TIMES);
-        this.requestTimeout = url.getLong(URL.REQUEST_TIMEOUT, DEFAULT_REQUEST_DELAY);
-        this.sessionTimeout = url.getLong(URL.SESSION_TIMEOUT, DEFAULT_KEEP_ALIVE_DELAY);
+        this.requestRetryTimes = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
+        this.requestTimeout = url.getLong(RETRY_MILLIS, DEFAULT_RETRY_MILLIS);
+        this.sessionTimeout = url.getLong(SESSION_TIMEOUT, DEFAULT_KEEP_ALIVE_DELAY);
         this.ttl = TimeUnit.MILLISECONDS.toSeconds(sessionTimeout + 1000);
 
         this.retryPolicy = new RetryNTimes(requestRetryTimes, requestTimeout, TimeUnit.MILLISECONDS);

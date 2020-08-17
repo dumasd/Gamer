@@ -6,30 +6,51 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wukai
  */
 public abstract class AbstractRegistry implements Registry {
+    /**
+     * default retry times
+     */
+    protected static final int DEFAULT_RETRY_TIMES = 1;
+    /**
+     * default retry interval millis
+     */
+    protected static final long DEFAULT_RETRY_MILLIS = 1500;
+    /**
+     * default connection timeout
+     */
+    protected static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
+    /**
+     * default session timeout
+     */
+    protected static final int DEFAULT_SESSION_TIMEOUT = 6000;
 
     private static final int DEFAULT_REGISTRY_TIMEOUT = 2000;
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractRegistry.class);
-
-    protected URL url;
-
     private final ConcurrentMap<String, Set<INotifyListener>> listenerMap = new ConcurrentHashMap<>();
-
     private final Set<IStateListener> stateListeners = new CopyOnWriteArraySet<>();
-
     /**
      * The local cache
      */
     private final Properties properties = new Properties();
+    protected URL url;
 
     public AbstractRegistry(URL url) {
         this.url = url;
+    }
+
+    private static void checkRegisterUrl(URL url) {
+        if (url.getString(URL.NODE_NAME) == null) {
+            throw new RuntimeException("Node name is blank");
+        }
     }
 
     @Override
@@ -48,9 +69,10 @@ public abstract class AbstractRegistry implements Registry {
         long timeout = url.getInteger(URL.REQUEST_TIMEOUT, DEFAULT_REGISTRY_TIMEOUT);
         try {
             doRegister(url);
-            promise.await(timeout, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            LOG.error("", e);
+            try {
+                promise.await(timeout, TimeUnit.MILLISECONDS);
+            } catch (Exception ignored) {
+            }
         } finally {
             unsubscribe(url, listener);
         }
@@ -67,17 +89,12 @@ public abstract class AbstractRegistry implements Registry {
         long timeout = url.getInteger(URL.REQUEST_TIMEOUT, DEFAULT_REGISTRY_TIMEOUT);
         try {
             doUnRegister(url);
-            promise.await(timeout, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            try {
+                promise.await(timeout, TimeUnit.MILLISECONDS);
+            } catch (Exception ignored) {
+            }
         } finally {
             unsubscribe(url, listener);
-        }
-    }
-
-    private static void checkRegisterUrl(URL url) {
-        if (url.getString(URL.NODE_NAME) == null) {
-            throw new RuntimeException("Node name is blank");
         }
     }
 

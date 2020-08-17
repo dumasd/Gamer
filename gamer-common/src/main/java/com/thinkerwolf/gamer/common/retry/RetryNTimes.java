@@ -2,13 +2,22 @@ package com.thinkerwolf.gamer.common.retry;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Retry N times with the given interval.
+ *
+ * @author wukai
+ * @see com.thinkerwolf.gamer.common.retry.IRetryPolicy
+ */
 public class RetryNTimes implements IRetryPolicy {
 
-    private int times;
+    private final int times;
+    private final TimeUnit timeUnit;
     private long interval;
-    private TimeUnit timeUnit;
 
     public RetryNTimes(int times, long interval, TimeUnit timeUnit) {
+        if (times < 0 || interval < 0 || timeUnit == null) {
+            throw new IllegalArgumentException();
+        }
         this.times = times;
         this.interval = interval;
         this.timeUnit = timeUnit;
