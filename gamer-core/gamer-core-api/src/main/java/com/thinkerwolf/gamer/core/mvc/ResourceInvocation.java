@@ -16,9 +16,14 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ResourceInvocation implements Invocation {
 
-    private ResourceManager resourceManager;
+    private final ResourceManager resourceManager;
 
-    private View resourceView;
+    private final View resourceView;
+
+    private static final MvcException PATH_IS_BLANK = new MvcException();
+    static {
+        PATH_IS_BLANK.setStackTrace(new StackTraceElement[]{new StackTraceElement(ResourceInvocation.class.getName(), "handle(request, response)", "", 60)});
+    }
 
     public ResourceInvocation(ResourceManager resourceManager, View resourceView) {
         this.resourceManager = resourceManager;
@@ -50,7 +55,7 @@ public class ResourceInvocation implements Invocation {
             }
             ResponseUtil.render(resourceView, resourceModel, request, response);
         } else {
-            throw new MvcException("Resource path is blank");
+            throw PATH_IS_BLANK;
         }
     }
 }

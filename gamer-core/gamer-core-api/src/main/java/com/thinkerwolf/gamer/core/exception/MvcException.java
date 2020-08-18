@@ -7,6 +7,9 @@ package com.thinkerwolf.gamer.core.exception;
  * @date 2020/5/18 13:42
  */
 public class MvcException extends Exception {
+    public MvcException() {
+    }
+
     public MvcException(String message) {
         super(message);
     }
