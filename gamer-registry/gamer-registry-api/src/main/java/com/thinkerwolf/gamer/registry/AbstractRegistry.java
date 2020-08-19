@@ -120,6 +120,7 @@ public abstract class AbstractRegistry implements Registry {
         String key = createCacheKey(url);
         listenerMap.computeIfPresent(key, (s, listeners) -> {
             listeners.remove(listener);
+            doUnSubscribe(url);
             return listeners;
         });
     }
@@ -157,7 +158,10 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public List<URL> lookup(URL url) {
         List<URL> urls = getCacheUrls(url);
-        return urls == null ? Collections.emptyList() : urls;
+        if (urls == null) {
+            return doLookup(url);
+        }
+        return urls;
     }
 
     protected abstract List<URL> doLookup(URL url);

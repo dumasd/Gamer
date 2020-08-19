@@ -42,7 +42,7 @@ import static com.thinkerwolf.gamer.common.URL.NODE_NAME;
  * @author wukai
  * @since 2020-05-21
  */
-public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListener, IZkDataListener, IZkChildListener {
+public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateListener, IZkDataListener, IZkChildListener {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(ZookeeperRegistry.class);
 
@@ -94,13 +94,6 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
         }
     }
 
-    private String toDataPath(URL url) {
-        String p = ZkClientUtils.toPath(url);
-        String nodeName = url.getString(NODE_NAME);
-        String append = nodeName == null ? "" : ("/" + nodeName);
-        return p + append;
-    }
-
     @Override
     protected void doRegister(URL url) {
         String path = toDataPath(url);
@@ -114,21 +107,25 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
                     ZkClientUtils.createParent(zkClient, path);
                 } catch (ZkNodeExistsException ignored) {
                 }
-                if (!zkClient.exists(path)) {
-                    if (ephemeral) {
+                if (ephemeral) {
+                    try {
                         zkClient.createEphemeral(path, url, acl);
-                    } else {
-                        zkClient.createPersistent(path, url, acl);
+                    } catch (ZkNodeExistsException e) {
+                        zkClient.delete(path);
+                        zkClient.createEphemeral(path, url, acl);
                     }
                 } else {
-                    zkClient.writeData(path, url);
+                    try {
+                        zkClient.createPersistent(path, url, acl);
+                    } catch (ZkNodeExistsException e) {
+                        zkClient.writeData(path, url);
+                    }
                 }
                 return Boolean.TRUE;
             }, new RetryNTimes(retry, retryMillis, TimeUnit.MILLISECONDS));
         } catch (Exception e) {
             throw new RegistryException("Zk register [" + path + "]", e);
         }
-
     }
 
     @Override
@@ -155,10 +152,11 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
     @Override
     protected List<URL> doLookup(URL url) {
         String path = toDataPath(url);
-        List<String> childrenPaths = zkClient.getChildren(path);
-        List<URL> urls = new ArrayList<>();
+        List<String> childrenPaths = ZkClientUtils.getAllChildren(zkClient, path);
+        childrenPaths.add(path);
+        List<URL> urls = new LinkedList<>();
         for (String cp : childrenPaths) {
-            URL u = zkClient.readData(path + "/" + cp, false);
+            URL u = zkClient.readData(cp, true);
             if (u != null) {
                 urls.add(u);
             }
@@ -227,18 +225,4 @@ public class ZookeeperRegistry extends AbstractRegistry implements IZkStateListe
         DataEvent event = new DataEvent(internalToKey(dataPath), null);
         fireDataChange(event);
     }
-
-    @Override
-    protected String createCacheKey(URL url) {
-        return internalToKey(toDataPath(url));
-    }
-
-    private String internalToKey(String path) {
-        String k = path.replace('/', '.');
-        if (k.charAt(0) == '.') {
-            return k.substring(1);
-        }
-        return k;
-    }
-
 }
