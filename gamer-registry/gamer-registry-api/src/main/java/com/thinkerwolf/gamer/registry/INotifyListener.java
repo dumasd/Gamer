@@ -3,14 +3,16 @@ package com.thinkerwolf.gamer.registry;
 import java.util.EventListener;
 
 /**
- * 注册中心监听器
+ * Registry data listener. <strong>Never do long-running operations</strong>.
  *
  * @author wukai
+ * @see com.thinkerwolf.gamer.registry.DataEvent
+ * @see com.thinkerwolf.gamer.registry.ChildEvent
  */
 public interface INotifyListener extends EventListener {
 
     /**
-     * 节点数据改变，删除或者修改
+     * Notify node data change.
      *
      * @param event
      * @throws Exception
@@ -18,7 +20,7 @@ public interface INotifyListener extends EventListener {
     void notifyDataChange(DataEvent event) throws Exception;
 
     /**
-     * 子节点改变
+     * Notify node children change.
      *
      * @param event
      * @throws Exception
