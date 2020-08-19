@@ -17,7 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.ACL;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +27,6 @@ import static com.thinkerwolf.gamer.common.URL.NODE_EPHEMERAL;
 import static com.thinkerwolf.gamer.common.URL.CONNECTION_TIMEOUT;
 import static com.thinkerwolf.gamer.common.URL.SESSION_TIMEOUT;
 import static com.thinkerwolf.gamer.common.URL.BACKUP;
-import static com.thinkerwolf.gamer.common.URL.NODE_NAME;
 
 /**
  * Zookeeper Registry Center

@@ -22,7 +22,7 @@ public abstract class AbstractRegistry implements Registry {
     /**
      * default retry interval millis
      */
-    protected static final long DEFAULT_RETRY_MILLIS = 1500;
+    protected static final long DEFAULT_RETRY_MILLIS = 1000;
     /**
      * default connection timeout
      */
@@ -30,7 +30,7 @@ public abstract class AbstractRegistry implements Registry {
     /**
      * default session timeout
      */
-    protected static final int DEFAULT_SESSION_TIMEOUT = 6000;
+    protected static final int DEFAULT_SESSION_TIMEOUT = 30000;
 
     private static final int DEFAULT_REGISTRY_TIMEOUT = 2000;
 
@@ -49,7 +49,7 @@ public abstract class AbstractRegistry implements Registry {
 
     private static void checkRegisterUrl(URL url) {
         if (url.getString(URL.NODE_NAME) == null) {
-            throw new RuntimeException("Node name is blank");
+            throw new IllegalArgumentException("Node name is blank");
         }
     }
 
@@ -61,7 +61,7 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public void register(URL url) {
         checkRegisterUrl(url);
-        String key = createCacheKey(url);
+        String key = toCacheKey(url);
         properties.remove(key);
         DefaultPromise<DataEvent> promise = new DefaultPromise<>();
         final INotifyListener listener = new DataChangeListener(promise);
@@ -102,7 +102,7 @@ public abstract class AbstractRegistry implements Registry {
 
     @Override
     public void subscribe(final URL url, final INotifyListener listener) {
-        String key = createCacheKey(url);
+        String key = toCacheKey(url);
         listenerMap.compute(key, (s, listeners) -> {
             if (listeners == null) {
                 listeners = new CopyOnWriteArraySet<>();
@@ -117,7 +117,7 @@ public abstract class AbstractRegistry implements Registry {
 
     @Override
     public void unsubscribe(final URL url, final INotifyListener listener) {
-        String key = createCacheKey(url);
+        String key = toCacheKey(url);
         listenerMap.computeIfPresent(key, (s, listeners) -> {
             listeners.remove(listener);
             doUnSubscribe(url);
@@ -128,7 +128,7 @@ public abstract class AbstractRegistry implements Registry {
     protected abstract void doUnSubscribe(URL url);
 
     public List<URL> getCacheUrls(URL url) {
-        String lk = createCacheKey(url);
+        String lk = toCacheKey(url);
         List<URL> urls = null;
         // 1.Find from cache
         synchronized (properties) {
@@ -148,11 +148,11 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     public void saveToCache(URL url) {
-        properties.setProperty(createCacheKey(url), url.toString());
+        properties.setProperty(toCacheKey(url), url.toString());
     }
 
     public boolean existsCache(URL url) {
-        return properties.containsKey(createCacheKey(url));
+        return properties.containsKey(toCacheKey(url));
     }
 
     @Override
@@ -167,12 +167,12 @@ public abstract class AbstractRegistry implements Registry {
     protected abstract List<URL> doLookup(URL url);
 
     /**
-     * 创建cache key，转化为aaa.bbb.ccc的形式
+     * Convert url to cache key
      *
      * @param url
      * @return
      */
-    protected abstract String createCacheKey(URL url);
+    protected abstract String toCacheKey(URL url);
 
     /**
      * 节点数据改变

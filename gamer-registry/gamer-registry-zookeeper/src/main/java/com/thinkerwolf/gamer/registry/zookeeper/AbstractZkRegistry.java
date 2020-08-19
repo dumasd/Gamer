@@ -10,6 +10,12 @@ public abstract class AbstractZkRegistry extends AbstractRegistry {
         super(url);
     }
 
+    /**
+     * Parse url to zk path
+     *
+     * @param url url
+     * @return url's zk path
+     */
     protected String toDataPath(URL url) {
         String p = ZkClientUtils.toPath(url);
         String nodeName = url.getString(NODE_NAME);
@@ -18,7 +24,7 @@ public abstract class AbstractZkRegistry extends AbstractRegistry {
     }
 
     @Override
-    protected String createCacheKey(URL url) {
+    protected String toCacheKey(URL url) {
         return internalToKey(toDataPath(url));
     }
 

@@ -194,7 +194,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
     }
 
     @Override
-    protected String createCacheKey(URL url) {
+    protected String toCacheKey(URL url) {
         return internalToKey(toPathString(url));
     }
 
