@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -186,27 +187,45 @@ public class ResourceUtils {
      * @throws IOException
      */
     public static InputStream findInputStream(String root, String file) throws IOException {
-        if (!org.apache.commons.lang.StringUtils.isBlank(root)) {
-            root = root.replace('.', '/');
-            root = root.replace('\\', '/');
-            if (root.charAt(root.length() - 1) != '/') {
-                root = root + '/';
+        String parent = root;
+        if (StringUtils.isNotBlank(parent)) {
+            parent = parent.replace('.', '/');
+            parent = parent.replace('\\', '/');
+            if (parent.charAt(parent.length() - 1) != '/') {
+                parent = parent + '/';
             }
         } else {
-            root = "";
+            parent = "";
         }
-        String path = root + file;
-        File f = new File(file);
+
+        String path = parent + file;
+        File f = new File(path);
         if (f.exists()) {
             try {
                 return new FileInputStream(f);
             } catch (FileNotFoundException ignored) {
             }
         }
+
         URL url = ClassUtils.getDefaultClassLoader().getResource(path);
         if (url != null) {
             return url.openStream();
         }
+
+        try {
+            parent = root;
+            if (StringUtils.isNotBlank(parent)) {
+                if (parent.charAt(parent.length() - 1) != '/') {
+                    parent = parent + '/';
+                }
+            } else {
+                parent = "";
+            }
+            url = new URL(parent + file);
+            return url.openStream();
+        } catch (MalformedURLException ignored) {
+        }
+
         return null;
     }
 

@@ -6,13 +6,13 @@ import com.thinkerwolf.gamer.common.log.jdk.JdkLoggerFactory;
  * 内部LoggerFactory
  *
  * @author wukai
- * @date 2020/5/14 13:44
+ * @since 2020/5/14 13:44
  */
 public abstract class InternalLoggerFactory {
 
     public static final String DEFAULT_LOGGER_FACTORY_CLASS_NAME = "com.thinkerwolf.gamer.common.log.slf4j.Slf4jLoggerFactory";
 
-    private static InternalLoggerFactory defaultLoggerFactory;
+    private static volatile InternalLoggerFactory defaultLoggerFactory;
 
     public static InternalLoggerFactory getDefaultLoggerFactory() {
         if (defaultLoggerFactory == null) {
