@@ -1,5 +1,8 @@
 package com.thinkerwolf.gamer.common.util;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
+
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Map;
@@ -13,20 +16,21 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class PropertiesUtil {
 
+    private static final Logger LOG = InternalLoggerFactory.getLogger(PropertiesUtil.class);
+    private static final String PACKAGE = "package";
+    private static final Map<String, ResourceBundle> class2Bundles = new ConcurrentHashMap<>();
     private static Locale DEFAULT_LOCALE;
 
     static {
         try {
             Method method = Locale.class.getDeclaredMethod("initDefault");
+            method.setAccessible(true);
             DEFAULT_LOCALE = (Locale) method.invoke(null);
         } catch (Exception e) {
+            LOG.warn("Locale.initDefault()", e);
             DEFAULT_LOCALE = Locale.CHINA;
         }
     }
-
-    private static final String PACKAGE = "package";
-
-    private static final Map<String, ResourceBundle> class2Bundles = new ConcurrentHashMap<>();
 
     public static String getString(Class<?> clazz, String key, Locale locale) {
         ResourceBundle bundle = getBundle(clazz, locale);
