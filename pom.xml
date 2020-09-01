@@ -74,6 +74,7 @@
         <snakeyaml_version>1.25</snakeyaml_version>
         <grpc_version>1.28.1</grpc_version>
         <grizzly_version>2.4.4</grizzly_version>
+        <eureka_version>1.9.3</eureka_version>
     </properties>
 
     <dependencies>
@@ -279,6 +280,16 @@
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>4.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.netflix.eureka</groupId>
+                <artifactId>eureka-core</artifactId>
+                <version>${eureka_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.netflix.eureka</groupId>
+                <artifactId>eureka-client</artifactId>
+                <version>${eureka_version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
