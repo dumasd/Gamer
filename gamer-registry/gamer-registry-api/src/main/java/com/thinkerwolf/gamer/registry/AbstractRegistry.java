@@ -172,7 +172,15 @@ public abstract class AbstractRegistry implements Registry {
      * @param url
      * @return
      */
-    protected abstract String toCacheKey(URL url);
+    protected String toCacheKey(URL url) {
+        return toPathString(url).replace('/', '.');
+    }
+
+    protected String toPathString(URL url) {
+        String nodeName = url.getString(URL.NODE_NAME);
+        String append = nodeName == null ? "" : ("/" + nodeName);
+        return URL.decode(url.getPath()) + append;
+    }
 
     /**
      * 节点数据改变

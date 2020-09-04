@@ -10,6 +10,7 @@ import com.thinkerwolf.gamer.common.retry.RetryLoops;
 import com.thinkerwolf.gamer.common.retry.RetryNTimes;
 import com.thinkerwolf.gamer.registry.AbstractRegistry;
 import com.thinkerwolf.gamer.registry.DataEvent;
+import com.thinkerwolf.gamer.registry.RegistryException;
 import com.thinkerwolf.gamer.registry.RegistryState;
 import io.etcd.jetcd.*;
 import io.etcd.jetcd.kv.GetResponse;
@@ -135,10 +136,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
             }, retryPolicy);
         } catch (Exception e) {
             LOG.error("Etcd registry error", e);
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            throw new RuntimeException(e);
+            throw new RegistryException(e);
         }
     }
 
@@ -162,7 +160,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
                 return globalLeaseId;
             }, retryPolicy);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RegistryException(e);
         }
     }
 

@@ -122,7 +122,7 @@ public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateLis
                 return Boolean.TRUE;
             }, new RetryNTimes(retry, retryMillis, TimeUnit.MILLISECONDS));
         } catch (Exception e) {
-            throw new RegistryException("Zk register [" + path + "]", e);
+            throw new RegistryException("Zk register [" + url + "]", e);
         }
     }
 

@@ -30,7 +30,7 @@ public final class NetUtils {
             assert ni != null;
             Enumeration<InetAddress> addresses = ni.getInetAddresses();
             while (addresses.hasMoreElements()) {
-                Optional<InetAddress> op = toValidAddress(addresses.nextElement());
+                Optional<InetAddress> op = toValidAddress(addresses.nextElement(), isPreferIPv6Address());
                 if (op.isPresent()) {
                     try {
                         if (op.get().isReachable(100)) {
@@ -48,7 +48,7 @@ public final class NetUtils {
         if (result == null) {
             try {
                 InetAddress address = InetAddress.getLocalHost();
-                Optional<InetAddress> op = toValidAddress(address);
+                Optional<InetAddress> op = toValidAddress(address, isPreferIPv6Address());
                 if (op.isPresent()) {
                     result = op.get();
                 }
@@ -81,7 +81,7 @@ public final class NetUtils {
             for (NetworkInterface ni : nis) {
                 Enumeration<InetAddress> addresses = ni.getInetAddresses();
                 while (addresses.hasMoreElements()) {
-                    Optional<InetAddress> op = toValidAddress(addresses.nextElement());
+                    Optional<InetAddress> op = toValidAddress(addresses.nextElement(), isPreferIPv6Address());
                     if (op.isPresent()) {
                         try {
                             if (op.get().isReachable(100)) {
@@ -115,13 +115,12 @@ public final class NetUtils {
 
     }
 
-    private static Optional<InetAddress> toValidAddress(InetAddress address) {
-        boolean ipv6 = isPreferIPv6Address();
+    private static Optional<InetAddress> toValidAddress(InetAddress address, boolean ipv6Prefer) {
         if (address instanceof Inet6Address) {
-            return ipv6 ? Optional.of(address) : Optional.empty();
+            return ipv6Prefer ? Optional.of(address) : Optional.empty();
         }
         if (address instanceof Inet4Address) {
-            return !ipv6 ? Optional.of(address) : Optional.empty();
+            return !ipv6Prefer ? Optional.of(address) : Optional.empty();
         }
         return Optional.empty();
     }
@@ -138,4 +137,32 @@ public final class NetUtils {
     static boolean isPreferIPv6Address() {
         return Boolean.getBoolean("java.net.preferIPv6Addresses");
     }
+
+
+    public static void joinMulticastGroup(MulticastSocket multicastSocket, InetAddress address) throws IOException {
+        boolean ipv6Prefer = address instanceof Inet6Address;
+        setInterface(multicastSocket, ipv6Prefer);
+        multicastSocket.setLoopbackMode(false);
+        multicastSocket.joinGroup(address);
+    }
+
+    public static void setInterface(MulticastSocket multicastSocket, boolean ipv6Prefer) throws IOException {
+        boolean interfaceBeSet = false;
+        List<NetworkInterface> nis = obtainNetworkInterfaces();
+        for (NetworkInterface ni : nis) {
+            Enumeration<InetAddress> addresses = ni.getInetAddresses();
+            while (addresses.hasMoreElements()) {
+                InetAddress n = addresses.nextElement();
+                if (!ipv6Prefer && n.isReachable(100) && n instanceof Inet4Address) {
+                    multicastSocket.setInterface(n);
+                    interfaceBeSet = true;
+                    break;
+                }
+            }
+            if (interfaceBeSet) {
+                break;
+            }
+        }
+    }
+
 }

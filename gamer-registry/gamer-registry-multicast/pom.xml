@@ -3,21 +3,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>gamer-parent</artifactId>
+        <artifactId>gamer-registry</artifactId>
         <groupId>com.thinkerwolf</groupId>
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>gamer-registry</artifactId>
-    <packaging>pom</packaging>
-    <name>Gamer/Registry</name>
+    <artifactId>gamer-registry-multicast</artifactId>
+    <packaging>jar</packaging>
+    <name>Gamer/RegistryMulticast</name>
 
-    <modules>
-        <module>gamer-registry-api</module>
-        <module>gamer-registry-zookeeper</module>
-        <module>gamer-registry-etcd3</module>
-        <module>gamer-registry-multicast</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>com.thinkerwolf</groupId>
+            <artifactId>gamer-registry-api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
