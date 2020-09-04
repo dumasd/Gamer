@@ -39,7 +39,7 @@ public class MulticastRegistry extends AbstractRegistry {
 
     private MulticastSocket multicastSocket;
 
-    private Set<URL> registered = new CopyOnWriteArraySet<>();
+    private final Set<URL> registered = new CopyOnWriteArraySet<>();
 
     private final ScheduledExecutorService resendExecutor;
 
@@ -63,7 +63,7 @@ public class MulticastRegistry extends AbstractRegistry {
             throw new RegistryException(e);
         }
 
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             byte[] buff = new byte[2048];
             final DatagramPacket packet = new DatagramPacket(buff, buff.length);
             while (!multicastSocket.isClosed()) {
@@ -81,9 +81,10 @@ public class MulticastRegistry extends AbstractRegistry {
                         LOG.error("Closed", e);
                     }
                 }
-
             }
-        }, "MulticastRegistry").start();
+        }, "MulticastRegistry");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private MulticastSocket prepareClient(URL url) {
@@ -159,10 +160,18 @@ public class MulticastRegistry extends AbstractRegistry {
         }
     }
 
+    private void clean() {
+        for (URL url : registered) {
+            unregister(url);
+        }
+    }
+
     @Override
     public void close() {
         if (multicastSocket.isClosed()) {
             return;
         }
+        clean();
+        resendExecutor.shutdown();
     }
 }
