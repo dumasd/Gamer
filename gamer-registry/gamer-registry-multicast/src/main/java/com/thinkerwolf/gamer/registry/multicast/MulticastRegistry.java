@@ -34,31 +34,26 @@ public class MulticastRegistry extends AbstractRegistry {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(MulticastRegistry.class);
 
+
+    private final MulticastSocket multicastSocket;
+    private final Set<URL> registered = new CopyOnWriteArraySet<>();
+    private final ScheduledExecutorService resendExecutor;
     private InetAddress multicastAddress;
     private int multicastPort;
-
-    private MulticastSocket multicastSocket;
-
-    private final Set<URL> registered = new CopyOnWriteArraySet<>();
-
-    private final ScheduledExecutorService resendExecutor;
 
     public MulticastRegistry(URL url) {
         super(url);
         this.multicastSocket = prepareClient(url);
         this.resendExecutor = Executors.newSingleThreadScheduledExecutor();
         try {
-            int ttl = multicastSocket.getTimeToLive();
-            resendExecutor.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    if (!multicastSocket.isClosed()) {
-                        for (URL u : registered) {
-                            doRegister(u);
-                        }
+            final int ttl = multicastSocket.getTimeToLive();
+            resendExecutor.scheduleAtFixedRate(() -> {
+                if (!multicastSocket.isClosed()) {
+                    for (URL u : registered) {
+                        multicast(REGISTER + " " + u.toString());
                     }
                 }
-            }, 1, ttl, TimeUnit.SECONDS);
+            }, ttl, ttl, TimeUnit.SECONDS);
         } catch (IOException e) {
             throw new RegistryException(e);
         }
@@ -107,16 +102,14 @@ public class MulticastRegistry extends AbstractRegistry {
     @Override
     protected void doRegister(URL url) {
         registered.add(url);
-        String msg = REGISTER + " " + url.toString();
-        multicast(msg);
+        multicast(REGISTER + " " + url.toString());
         fireDataChange(new DataEvent(toCacheKey(url), url));
     }
 
     @Override
     protected void doUnRegister(URL url) {
         registered.remove(url);
-        String msg = REGISTER + " " + url.toString();
-        multicast(msg);
+        multicast(UNREGISTER + " " + url.toString());
         fireDataChange(new DataEvent(toCacheKey(url), null));
     }
 
@@ -137,7 +130,9 @@ public class MulticastRegistry extends AbstractRegistry {
     }
 
     private void multicast(String msg) {
-        LOG.info("Send multicast message {} to {}:{}", msg, multicastAddress, multicastPort);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Send multicast message {} to {}:{}", msg, multicastAddress, multicastPort);
+        }
         byte[] buff = (msg + "\n").getBytes(UTF_8);
         DatagramPacket packet = new DatagramPacket(buff, buff.length, multicastAddress, multicastPort);
         try {
@@ -173,5 +168,6 @@ public class MulticastRegistry extends AbstractRegistry {
         }
         clean();
         resendExecutor.shutdown();
+        multicastSocket.close();
     }
 }
