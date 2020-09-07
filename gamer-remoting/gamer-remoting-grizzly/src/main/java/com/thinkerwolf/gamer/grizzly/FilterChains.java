@@ -8,7 +8,6 @@ import com.thinkerwolf.gamer.grizzly.websocket.WebSocketClientFilter;
 import com.thinkerwolf.gamer.grizzly.websocket.WebSocketServerFilter;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.Protocol;
-import com.thinkerwolf.gamer.remoting.ssl.SslConfig;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.grizzly.Processor;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
@@ -24,6 +23,11 @@ import org.glassfish.grizzly.utils.DelayedExecutor;
 import org.glassfish.grizzly.utils.IdleTimeoutFilter;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 
+import static com.thinkerwolf.gamer.common.URL.SSL_ENABLED;
+import static com.thinkerwolf.gamer.common.URL.SSL_KEYSTORE_FILE;
+import static com.thinkerwolf.gamer.common.URL.SSL_KEYSTORE_PASS;
+import static com.thinkerwolf.gamer.common.URL.SSL_TRUSTSTORE_FILE;
+import static com.thinkerwolf.gamer.common.URL.SSL_TRUSTSTORE_PASS;
 
 public final class FilterChains {
 
@@ -58,17 +62,21 @@ public final class FilterChains {
      */
     private static SSLEngineConfigurator initializeSSL(URL url) {
         SSLContextConfigurator sslContextConfig = new SSLContextConfigurator();
-        SslConfig cfg = url.getAttach(URL.SSL);
-        if (cfg == null || !cfg.isEnabled()) {
+        if (!url.getBoolean(SSL_ENABLED, false)) {
             return null;
         }
-        if (StringUtils.isNotBlank(cfg.getKeystoreFile())) {
-            sslContextConfig.setKeyStoreFile(cfg.getKeystoreFile());
-            sslContextConfig.setKeyStorePass(cfg.getKeystorePass());
+        String ksFile = url.getString(SSL_KEYSTORE_FILE);
+        String ksPass = url.getString(SSL_KEYSTORE_PASS);
+        if (StringUtils.isNotBlank(ksFile)) {
+            sslContextConfig.setKeyStoreFile(ksFile);
+            sslContextConfig.setKeyStorePass(ksPass);
         }
-        if (StringUtils.isNotBlank(cfg.getTruststoreFile())) {
-            sslContextConfig.setTrustStoreFile(cfg.getTruststoreFile());
-            sslContextConfig.setTrustStorePass(cfg.getTruststorePass());
+
+        String tsFile = url.getString(SSL_TRUSTSTORE_FILE);
+        String tsPass = url.getString(SSL_TRUSTSTORE_PASS);
+        if (StringUtils.isNotBlank(tsFile)) {
+            sslContextConfig.setTrustStoreFile(tsFile);
+            sslContextConfig.setTrustStorePass(tsPass);
         }
         return new SSLEngineConfigurator(sslContextConfig.createSSLContext(false), false, false, false);
     }

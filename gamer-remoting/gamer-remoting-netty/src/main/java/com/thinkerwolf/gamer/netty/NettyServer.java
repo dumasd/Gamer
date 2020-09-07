@@ -52,14 +52,16 @@ public class NettyServer implements Server {
         sb.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
         sb.option(ChannelOption.SO_KEEPALIVE, true);
         sb.option(ChannelOption.TCP_NODELAY, true);
-        Map<String, Object> options = url.getObject(URL.OPTIONS, Collections.emptyMap());
+        sb.childOption(ChannelOption.TCP_NODELAY, true);
+
+        Map<String, Object> options = url.getAttach(URL.OPTIONS, Collections.emptyMap());
         for (Map.Entry<String, Object> op : options.entrySet()) {
             if (ChannelOption.exists(op.getKey())) {
                 sb.option(ChannelOption.valueOf(op.getKey()), op.getValue());
             }
         }
 
-        Map<String, Object> childOptions = url.getObject(URL.CHILD_OPTIONS, Collections.emptyMap());
+        Map<String, Object> childOptions = url.getAttach(URL.CHILD_OPTIONS, Collections.emptyMap());
         for (Map.Entry<String, Object> op : childOptions.entrySet()) {
             if (ChannelOption.exists(op.getKey())) {
                 sb.childOption(ChannelOption.valueOf(op.getKey().toUpperCase()), op.getValue());

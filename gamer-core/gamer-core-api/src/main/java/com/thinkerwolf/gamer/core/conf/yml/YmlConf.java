@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.*;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("unchecked")
 public class YmlConf extends AbstractConf<YmlConf> {
@@ -154,9 +155,10 @@ public class YmlConf extends AbstractConf<YmlConf> {
             parameters.put(URL.CORE_THREADS, MapUtils.getInteger(netConf, URL.CORE_THREADS, 5));
             parameters.put(URL.MAX_THREADS, MapUtils.getInteger(netConf, URL.MAX_THREADS, 8));
             parameters.put(URL.COUNT_PER_CHANNEL, MapUtils.getInteger(netConf, URL.COUNT_PER_CHANNEL, 50));
-            parameters.put(URL.OPTIONS, MapUtils.getMap(netConf, URL.OPTIONS, Collections.EMPTY_MAP));
-            parameters.put(URL.CHILD_OPTIONS, MapUtils.getMap(netConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
             parameters.put(URL.CHANNEL_HANDLERS, MapUtils.getString(netConf, URL.CHANNEL_HANDLERS, ""));
+
+            url.setAttach(URL.OPTIONS, MapUtils.getMap(netConf, URL.OPTIONS, Collections.EMPTY_MAP));
+            url.setAttach(URL.CHILD_OPTIONS, MapUtils.getMap(netConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
 
             if (MapUtils.getBoolean(netConf, URL.RPC_USE_LOCAL, false)) {
                 parameters.put(URL.RPC_HOST, localAddress.getHostAddress());
@@ -175,16 +177,14 @@ public class YmlConf extends AbstractConf<YmlConf> {
     }
 
     private void initSslConfig(URL url, Map<String, Object> sslConf) {
-        boolean enabled = MapUtils.getBoolean(sslConf, Constants.SSL_ENABLED, Boolean.FALSE);
-        SslConfig sslConfig = SslConfig.builder()
-                .setEnabled(enabled)
-                .setKeystoreFile(MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_FILE))
-                .setKeystorePass(MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_PASS))
-                .setTruststoreFile(MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_FILE))
-                .setTruststorePass(MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_PASS))
-                .build();
-        url.setAttach(URL.SSL, sslConfig);
-        url.getParameters().put(URL.SSL, sslConf);
+        boolean enabled = MapUtils.getBoolean(sslConf, "enabled", Boolean.FALSE);
+        if (enabled) {
+            url.getParameters().put(URL.SSL_ENABLED, true);
+            url.getParameters().compute(URL.SSL_KEYSTORE_FILE, (s, o) -> MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_FILE));
+            url.getParameters().compute(URL.SSL_KEYSTORE_PASS, (s, o) -> MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_PASS));
+            url.getParameters().compute(URL.SSL_TRUSTSTORE_FILE, (s, o) -> MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_FILE));
+            url.getParameters().compute(URL.SSL_TRUSTSTORE_PASS, (s, o) -> MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_PASS));
+        }
     }
 
     private void loadServletConfig(Map<String, Object> servletConf, List<String> listenersConf) throws Exception {

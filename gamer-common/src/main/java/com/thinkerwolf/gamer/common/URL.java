@@ -27,7 +27,12 @@ public class URL implements Serializable {
     public static final String PASSWORD = "password";
 
     // ========================= parameter keys start =============================== //
-    public static final String SSL = "ssl";
+    public static final String SSL_ENABLED = "sslEnabled";
+    public static final String SSL_KEYSTORE_FILE = "sslKsFile";
+    public static final String SSL_KEYSTORE_PASS = "sslKsPass";
+    public static final String SSL_TRUSTSTORE_FILE = "sslTsFile";
+    public static final String SSL_TRUSTSTORE_PASS = "sslTsPass";
+
     public static final String BOSS_THREADS = "bossThreads";
     public static final String WORKER_THREADS = "workerThreads";
     public static final String CORE_THREADS = "coreThreads";

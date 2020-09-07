@@ -15,6 +15,12 @@ import io.netty.util.AsciiString;
 
 import javax.net.ssl.KeyManagerFactory;
 
+import static com.thinkerwolf.gamer.common.URL.SSL_ENABLED;
+import static com.thinkerwolf.gamer.common.URL.SSL_KEYSTORE_FILE;
+import static com.thinkerwolf.gamer.common.URL.SSL_KEYSTORE_PASS;
+import static com.thinkerwolf.gamer.common.URL.SSL_TRUSTSTORE_FILE;
+import static com.thinkerwolf.gamer.common.URL.SSL_TRUSTSTORE_PASS;
+
 /**
  * Http\Http2
  *
@@ -36,8 +42,12 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
     @Override
     public void init(URL url) throws Exception {
         this.url = url;
-        // Map<String, Object> sslConfig = url.getObject(URL.SSL);
-        SslConfig sslCfg = url.getAttach(URL.SSL);
+        SslConfig sslCfg = SslConfig.builder().setEnabled(url.getBoolean(SSL_ENABLED, false))
+                .setKeystoreFile(url.getString(SSL_KEYSTORE_FILE))
+                .setKeystorePass(url.getString(SSL_KEYSTORE_PASS))
+                .setTruststoreFile(url.getString(SSL_TRUSTSTORE_FILE))
+                .setTruststorePass(url.getString(SSL_TRUSTSTORE_PASS))
+                .build();
         if (sslCfg != null && sslCfg.isEnabled()) {
             SslProvider provider = SslProvider.isAlpnSupported(SslProvider.OPENSSL) ? SslProvider.OPENSSL : SslProvider.JDK;
             if (isServer()) {

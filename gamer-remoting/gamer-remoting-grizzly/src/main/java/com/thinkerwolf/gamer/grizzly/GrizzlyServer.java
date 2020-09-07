@@ -46,7 +46,7 @@ public class GrizzlyServer implements Server {
         }
         started.set(true);
         int workerThreads = url.getInteger(URL.WORKER_THREADS, DEFAULT_WORKER_THREADS);
-        Map<String, Object> options = url.getObject(URL.OPTIONS, Collections.emptyMap());
+        Map<String, Object> options = url.getAttach(URL.OPTIONS, Collections.emptyMap());
         TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
         for (Map.Entry<String, Object> op : options.entrySet()) {
             if (ChannelOptions.TCP_NODELAY.equalsIgnoreCase(op.getKey())) {
@@ -55,6 +55,7 @@ public class GrizzlyServer implements Server {
                 builder.setKeepAlive(Boolean.getBoolean(op.getValue().toString()));
             }
         }
+
         ThreadPoolConfig config = ThreadPoolConfig.defaultConfig();
         config.setCorePoolSize(workerThreads).setMaxPoolSize(workerThreads)
                 .setThreadFactory(new DefaultThreadFactory("GrizzlyWorker_" + url.getProtocol()));

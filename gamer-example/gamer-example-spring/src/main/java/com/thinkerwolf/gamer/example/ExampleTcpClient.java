@@ -56,9 +56,7 @@ public class ExampleTcpClient {
     private static void httpRequest() {
         URL url = URL.parse("http://127.0.0.1:8070");
         url.setParameters(new HashMap<>());
-        Map<String, Object> ssl = new HashMap<>();
-        ssl.put("enabled", true);
-        url.getParameters().put(URL.SSL, ssl);
+        url.getParameters().put(URL.SSL_ENABLED, true);
         NettyClient nettyClient = new NettyClient(url, new ChannelHandlerAdapter() {
             @Override
             public void received(Channel channel, Object message) throws RemotingException {
