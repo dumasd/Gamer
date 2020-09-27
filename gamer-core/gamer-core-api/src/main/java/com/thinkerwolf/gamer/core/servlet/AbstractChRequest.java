@@ -77,6 +77,14 @@ public abstract class AbstractChRequest implements Request {
         return getSession(false);
     }
 
+    protected ServletConfig servletConfig() {
+        return this.servletConfig;
+    }
+
+    protected ServletContext servletContext() {
+        return servletConfig().getServletContext();
+    }
+
     @Override
     public Session getSession(boolean create) {
         SessionManager sessionManager = servletConfig.getServletContext().getSessionManager();

@@ -1,41 +1,35 @@
 package com.thinkerwolf.gamer.netty.http;
 
-import com.thinkerwolf.gamer.core.servlet.Push;
+import com.thinkerwolf.gamer.core.servlet.AbstractChPush;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
+import com.thinkerwolf.gamer.remoting.Channel;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpChunkedInput;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-/**
- * http push
- */
-public class HttpPush implements Push {
 
-    private Channel channel;
-    private HttpRequest nettyRequest;
+public class HttpPush extends AbstractChPush {
 
+    private final io.netty.handler.codec.http.HttpRequest nettyRequest;
     private HttpChunkedInput chunkedInput;
-
     private PushChunkedInput pushChunkedInput;
 
-    public HttpPush(Channel channel, HttpRequest nettyRequest) {
-        this.channel = channel;
+    public HttpPush(Channel channel, io.netty.handler.codec.http.HttpRequest nettyRequest) {
+        super(channel);
         this.nettyRequest = nettyRequest;
     }
 
-
     @Override
     public void push(int opcode, String command, byte[] content) {
+        io.netty.channel.Channel nettyChannel = (io.netty.channel.Channel) getChannel().innerCh();
         if (chunkedInput == null) {
             pushChunkedInput = new PushChunkedInput();
             chunkedInput = new HttpChunkedInput(pushChunkedInput);
-            InternalHttpUtil.chunkResponse(channel, nettyRequest, chunkedInput);
+            InternalHttpUtil.chunkResponse((io.netty.channel.Channel) getChannel().innerCh(), nettyRequest, chunkedInput);
         }
-        ByteBuf buf = channel.config().getAllocator().buffer();
+        ByteBuf buf = nettyChannel.config().getAllocator().buffer();
         buf.writeInt(opcode);
         buf.writeInt(0);
 
@@ -47,12 +41,7 @@ public class HttpPush implements Push {
 
         pushChunkedInput.writeChunk(buf);
 
-        ChunkedWriteHandler chunkedWriteHandler = channel.pipeline().get(ChunkedWriteHandler.class);
+        ChunkedWriteHandler chunkedWriteHandler = nettyChannel.pipeline().get(ChunkedWriteHandler.class);
         chunkedWriteHandler.resumeTransfer();
-    }
-
-    @Override
-    public boolean isPushable() {
-        return channel.isOpen() && channel.isWritable();
     }
 }

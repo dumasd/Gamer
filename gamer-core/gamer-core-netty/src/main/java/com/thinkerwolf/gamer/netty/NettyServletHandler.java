@@ -40,9 +40,9 @@ public class NettyServletHandler extends AbstractServletHandler {
         } else if (message instanceof io.netty.handler.codec.http.HttpRequest) {
             io.netty.handler.codec.http.HttpRequest nettyRequest = (io.netty.handler.codec.http.HttpRequest) message;
             io.netty.channel.Channel nettyChannel = ((NettyChannel) channel).innerCh();
-            final Response response = new HttpResponse(nettyChannel, nettyRequest);
+            final Response response = new HttpResponse(channel, nettyRequest);
             boolean compress = ServletUtil.isCompress(getServletConfig());
-            final Request request = new HttpRequest(nettyChannel, getServletConfig().getServletContext(), nettyRequest, response, compress);
+            final Request request = new HttpRequest(channel, getServletConfig(), nettyRequest, response, compress);
             request.setAttribute(Request.DECORATOR_ATTRIBUTE, NettyConstants.HTTP_DECORATOR);
             // 长连接推送
             boolean longHttp = RequestUtil.isLongHttp(request.getCommand());

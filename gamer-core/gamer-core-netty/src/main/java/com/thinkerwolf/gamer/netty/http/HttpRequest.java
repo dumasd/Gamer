@@ -1,13 +1,11 @@
 package com.thinkerwolf.gamer.netty.http;
 
-import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
-import com.thinkerwolf.gamer.common.log.Logger;
-import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.common.util.CompressUtil;
+import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
-import com.thinkerwolf.gamer.netty.AbstractRequest;
 import com.thinkerwolf.gamer.netty.util.InternalHttpUtil;
-import io.netty.channel.Channel;
+import com.thinkerwolf.gamer.remoting.Channel;
+import com.thinkerwolf.gamer.remoting.Protocol;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -15,13 +13,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import java.util.List;
 import java.util.Map;
 
-public class HttpRequest extends AbstractRequest {
-
-    private static final Logger LOG = InternalLoggerFactory.getLogger(HttpRequest.class);
-
-    private final Channel channel;
-
-    private final ServletContext servletContext;
+public class HttpRequest extends AbstractChRequest {
 
     private final Map<String, Cookie> cookies;
 
@@ -33,12 +25,13 @@ public class HttpRequest extends AbstractRequest {
 
     private String encoding;
 
-    public HttpRequest(Channel channel, ServletContext servletContext,
-                       io.netty.handler.codec.http.HttpRequest nettyRequest, Response response, boolean compress) {
-        super(0, InternalHttpUtil.getCommand(nettyRequest), channel);
+    public HttpRequest(Channel ch,
+                       ServletConfig servletConfig,
+                       io.netty.handler.codec.http.HttpRequest nettyRequest,
+                       Response response,
+                       boolean compress) {
+        super(0, InternalHttpUtil.getCommand(nettyRequest), ch, servletConfig);
         this.nettyRequest = nettyRequest;
-        this.channel = channel;
-        this.servletContext = servletContext;
         this.cookies = InternalHttpUtil.getCookies(nettyRequest);
         this.contents = InternalHttpUtil.getRequestContent(nettyRequest);
         this.response = response;
@@ -51,8 +44,12 @@ public class HttpRequest extends AbstractRequest {
         if (RequestUtil.isLongHttp(getCommand())) {
             Session session = getSession(false);
             if (session != null) {
-                session.setPush(new HttpPush(channel, nettyRequest));
+                session.setPush(new HttpPush(getChannel(), nettyRequest));
             }
+        }
+        Object obj = getAttribute("requestId");
+        if (obj != null) {
+            setRequestId(Integer.parseInt(obj.toString()));
         }
     }
 
@@ -66,7 +63,7 @@ public class HttpRequest extends AbstractRequest {
 
     @Override
     public Session getSession() {
-        SessionManager sessionManager = servletContext.getSessionManager();
+        SessionManager sessionManager = servletContext().getSessionManager();
         if (sessionManager == null) {
             return null;
         }
@@ -79,7 +76,7 @@ public class HttpRequest extends AbstractRequest {
 
     @Override
     public Session getSession(boolean create) {
-        SessionManager sessionManager = servletContext.getSessionManager();
+        SessionManager sessionManager = servletContext().getSessionManager();
         if (sessionManager == null) {
             return null;
         }
@@ -107,13 +104,13 @@ public class HttpRequest extends AbstractRequest {
     }
 
     @Override
-    public com.thinkerwolf.gamer.remoting.Protocol getProtocol() {
-        return com.thinkerwolf.gamer.remoting.Protocol.HTTP;
+    public Protocol getProtocol() {
+        return Protocol.HTTP;
     }
 
     @Override
     public Push newPush() {
-        return new HttpPush(channel, nettyRequest);
+        return new HttpPush(getChannel(), nettyRequest);
     }
 
     public boolean isKeepAlive() {
