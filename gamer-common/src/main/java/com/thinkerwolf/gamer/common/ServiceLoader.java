@@ -61,7 +61,7 @@ public class ServiceLoader<T> {
                     }
                     Class<?> clazz = cachedClasses.get(name);
                     if (clazz == null) {
-                        throw new ServiceConfigurationError("No such service named : " + name);
+                        throw new ServiceConfigurationError("No such service named:" + name + ", baseClass:" + baseClass.getName());
                     }
                     try {
                         obj = objectFactory.buildObject(clazz);
