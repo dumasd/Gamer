@@ -16,15 +16,11 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         RpcResponse rpcResponse;
         if (!invocation.getRpcClient().async()) {
             promise = client.request(invocation, invocation.getRpcClient().timeout(), TimeUnit.MILLISECONDS);
-            if (!promise.isSuccess()) {
-                return new Result(promise.cause());
-            }
-            return new Result(promise.getNow().getResult());
+            return RpcUtils.processSync(promise);
         } else {
             promise = client.request(invocation);
             RpcContext.getContext().setCurrent(promise);
-            rpcResponse = promise.getNow();
-            return rpcResponse == null ? new Result(null) : new Result(rpcResponse.getResult());
+            return RpcUtils.processAsync(promise);
         }
     }
 

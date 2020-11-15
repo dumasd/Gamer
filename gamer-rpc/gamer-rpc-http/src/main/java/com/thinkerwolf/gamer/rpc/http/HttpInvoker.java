@@ -115,22 +115,14 @@ public class HttpInvoker<T> implements Invoker<T> {
             EntityUtils.consumeQuietly(entity);
             IOUtils.closeQuietly(httpResponse);
         }
-
         if (!msg.getRpcClient().async()) {
             if (!promise.isDone()) {
                 promise.setFailure(new TimeoutException());
             }
-            if (promise.isSuccess()) {
-                promise.getNow();
-                return new Result(promise.getNow().getResult());
-            } else {
-                return new Result(promise.cause());
-            }
+            return RpcUtils.processSync(promise);
         } else {
-            if (promise.isSuccess()) {
-                return new Result(promise.getNow().getResult());
-            }
-            return new Result((Object) null);
+            RpcContext.getContext().setCurrent(promise);
+            return RpcUtils.processAsync(promise);
         }
     }
 

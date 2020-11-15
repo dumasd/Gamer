@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.rpc;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.common.concurrent.Future;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 
 import java.lang.reflect.Method;
@@ -26,6 +27,31 @@ public final class RpcUtils {
             return newUrl;
         }
         return url;
+    }
+
+    public static Result processSync(Future<RpcResponse> future) {
+        if (!future.isSuccess()) {
+            return Result.builder().withThrown(future.cause()).build();
+        }
+        RpcResponse rpcResponse = future.getNow();
+        if (rpcResponse.getTx() != null) {
+            return Result.builder().withThrown(rpcResponse.getTx()).build();
+        } else {
+            return Result.builder().withResult(rpcResponse.getResult()).build();
+        }
+    }
+
+    public static Result processAsync(Future<RpcResponse> future) {
+        RpcResponse rpcResponse = future.getNow();
+        if (rpcResponse == null) {
+            return Result.builder().withResult(null).build();
+        } else {
+            if (rpcResponse.getTx() != null) {
+                return Result.builder().withThrown(rpcResponse.getTx()).build();
+            } else {
+                return Result.builder().withResult(rpcResponse.getResult()).build();
+            }
+        }
     }
 
 }

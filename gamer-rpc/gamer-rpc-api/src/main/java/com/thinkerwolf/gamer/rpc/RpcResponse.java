@@ -3,7 +3,7 @@ package com.thinkerwolf.gamer.rpc;
 import java.io.Serializable;
 
 /**
- * RPC响应
+ * RPC Response
  *
  * @author wukai
  * @date 2020/5/15 16:13
@@ -11,8 +11,14 @@ import java.io.Serializable;
 public class RpcResponse implements Serializable {
 
     private int requestId;
-
+    /**
+     * Rpc correct result
+     */
     private Object result;
+    /**
+     * Rpc exception
+     */
+    private Throwable tx;
 
     public int getRequestId() {
         return requestId;
@@ -28,5 +34,13 @@ public class RpcResponse implements Serializable {
 
     public void setResult(Object result) {
         this.result = result;
+    }
+
+    public Throwable getTx() {
+        return tx;
+    }
+
+    public void setTx(Throwable tx) {
+        this.tx = tx;
     }
 }
