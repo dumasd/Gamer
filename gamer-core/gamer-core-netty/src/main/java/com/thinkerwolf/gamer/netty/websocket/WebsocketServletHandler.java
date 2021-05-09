@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.netty.websocket;
 
-import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.buffer.ChannelBuffer;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.util.RequestUtil;
@@ -27,10 +26,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @since 2020-06-11
  */
 public class WebsocketServletHandler extends AbstractServletHandler {
-
-    public WebsocketServletHandler(URL url) {
-        super(url);
-    }
 
     @Override
     public void received(Channel channel, Object message) throws RemotingException {

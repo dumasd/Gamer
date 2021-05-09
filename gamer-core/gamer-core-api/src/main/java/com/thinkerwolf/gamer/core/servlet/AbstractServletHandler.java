@@ -17,16 +17,17 @@ import java.util.concurrent.ExecutorService;
  * @author wukai
  * @since 2020-06-11
  */
-public abstract class AbstractServletHandler extends ChannelHandlerAdapter {
+public abstract class AbstractServletHandler extends ChannelHandlerAdapter implements ServletChannelHandler {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractServletHandler.class);
 
     public ExecutorService executor;
-    private final URL url;
+    private URL url;
     private Servlet servlet;
-    private final ServletConfig servletConfig;
+    private ServletConfig servletConfig;
 
-    public AbstractServletHandler(URL url) {
+    @Override
+    public void init(URL url) {
         this.url = url;
         Object o = url.getAttach(URL.EXEC_GROUP_NAME);
         String name = o == null ? url.getProtocol() : o.toString();
@@ -37,10 +38,12 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter {
         }
     }
 
-    public URL getUrl() {
+    @Override
+    public URL getURL() {
         return url;
     }
 
+    @Override
     public ServletConfig getServletConfig() {
         return servletConfig;
     }

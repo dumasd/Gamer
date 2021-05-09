@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.core.grizzly;
 
-import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.buffer.ChannelBuffer;
 import com.thinkerwolf.gamer.common.buffer.ChannelBuffers;
 import com.thinkerwolf.gamer.core.grizzly.http.HttpRequest;
@@ -29,9 +28,6 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class GrizzlyServletHandler extends AbstractServletHandler {
-    public GrizzlyServletHandler(URL url) {
-        super(url);
-    }
 
     @Override
     public void received(Channel channel, Object message) throws RemotingException {

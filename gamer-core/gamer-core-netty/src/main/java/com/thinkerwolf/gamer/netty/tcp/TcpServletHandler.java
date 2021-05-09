@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.netty.tcp;
 
-import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.ServletContext;
 import com.thinkerwolf.gamer.core.servlet.Session;
@@ -16,10 +15,6 @@ import com.thinkerwolf.gamer.remoting.tcp.Packet;
  * @since 2020-05-05
  */
 public class TcpServletHandler extends AbstractServletHandler {
-
-    public TcpServletHandler(URL url) {
-        super(url);
-    }
 
     @Override
     public void registered(Channel channel) throws RemotingException {

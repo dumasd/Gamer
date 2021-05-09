@@ -7,13 +7,18 @@ import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.conf.yml.YmlConf;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
-import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.servlet.AbstractServletBootstrap;
+import com.thinkerwolf.gamer.core.servlet.Servlet;
+import com.thinkerwolf.gamer.core.servlet.ServletChannelHandler;
+import com.thinkerwolf.gamer.core.servlet.ServletConfig;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.Server;
 import org.apache.commons.lang.StringUtils;
 
-import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -108,30 +113,24 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
         List<ChannelHandler> handlers = new ArrayList<>();
         String handlerClasses = url.getObject(URL.CHANNEL_HANDLERS);
         if (StringUtils.isNotEmpty(handlerClasses)) {
-            String[] cls = Constants.SEMICOLON_SPLIT_PATTERN.split(handlerClasses);
-            for (String cl : cls) {
+            for (String cl : Constants.SEMICOLON_SPLIT_PATTERN.split(handlerClasses)) {
                 Class<?> clazz = ClassUtils.forName(cl);
-                if (!ChannelHandler.class.isAssignableFrom(clazz)) {
-                    throw new ConfigurationException(cl + " is not a ChannelHandler");
+                if (!ServletChannelHandler.class.isAssignableFrom(clazz)) {
+                    throw new ConfigurationException(cl + " is not a ServletChannelHandler");
                 }
-                Constructor<?> cont = clazz.getConstructors()[0];
-                ChannelHandler handler;
                 try {
-                    if (cont.getParameters().length <= 0) {
-                        handler = (ChannelHandler) cont.newInstance();
-                    } else {
-                        handler = (ChannelHandler) cont.newInstance(url);
-                    }
+                    ServletChannelHandler handler = (ServletChannelHandler) clazz.getDeclaredConstructors()[0].newInstance();
+                    handler.init(url);
                     handlers.add(handler);
                 } catch (Exception e) {
                     throw new ConfigurationException(e);
                 }
             }
-            return handlers.toArray(new ChannelHandler[0]);
+        } else {
+            NettyServletHandler handler = new NettyServletHandler();
+            handler.init(url);
+            handlers.add(handler);
         }
-        handlers.add(new NettyServletHandler(url));
-
-
         return handlers.toArray(new ChannelHandler[0]);
     }
 

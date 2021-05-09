@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.rpc.tcp;
 
 import com.thinkerwolf.gamer.common.URL;
+import com.thinkerwolf.gamer.netty.NettyClient;
 import com.thinkerwolf.gamer.remoting.ExchangeClient;
 import com.thinkerwolf.gamer.rpc.AbstractClientProtocol;
 import com.thinkerwolf.gamer.rpc.Invoker;

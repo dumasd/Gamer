@@ -15,7 +15,7 @@
     <!-- 控制台打印 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder charset="utf-8">
-            <pattern>%d{${DATETIME}} [%-5level] [%thread] %logger{36} - %m%n
+            <pattern>%red(%d{${DATETIME}}) %highlight([%-5level]) %red([%thread]) %boldMagenta(%logger{36}) - %cyan(%m%n)
             </pattern>
         </encoder>
     </appender>

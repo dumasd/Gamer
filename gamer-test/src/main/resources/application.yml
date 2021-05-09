@@ -1,6 +1,6 @@
 gamer:
   id: 1001
-  servlet-boot: grizzly
+  servlet-boot: netty
   conf:
     servlet:
       servletName: DispatcherServlet                                   # Servlet名称
@@ -30,7 +30,7 @@ gamer:
         maxThreads: 11       # Servlet业务最大线程
         countPerChannel: 100 # 每个Channel最大并发数量
         protocol: tcp        # 协议
-        port: 8090           # 端口
+        port: 9090           # 端口
         options:             # Options
           so_keepalive: true
         childOptions:        # ChildOptions
@@ -41,10 +41,10 @@ gamer:
         countPerChannel: 100 # 客户端最大并发数量
         protocol: http
         ssl:                 # ssl配置
-          enabled: true
+          enabled: false
           keystoreFile: C:/Users/wukai/keystore.jks
           keystorePass: Wk1234lc
-        port: 80
+        port: 8090
         options:
           so_keepalive: true
         childOptions:

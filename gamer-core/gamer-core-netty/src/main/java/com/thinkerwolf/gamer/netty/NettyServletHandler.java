@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.netty;
 
-import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.core.servlet.AbstractServletHandler;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
@@ -25,9 +24,7 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class NettyServletHandler extends AbstractServletHandler {
-    public NettyServletHandler(URL url) {
-        super(url);
-    }
+
 
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
