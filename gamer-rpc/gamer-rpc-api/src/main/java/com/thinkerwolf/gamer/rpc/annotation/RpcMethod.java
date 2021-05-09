@@ -32,5 +32,5 @@ public @interface RpcMethod {
      *
      * @return
      */
-    int retries() default 0;
+    int retry() default 0;
 }

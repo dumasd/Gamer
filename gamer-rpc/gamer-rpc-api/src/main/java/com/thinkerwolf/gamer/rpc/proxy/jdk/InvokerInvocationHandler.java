@@ -20,7 +20,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        RpcMessage invocation = new RpcMessage(interfaceClass, method.getName(), method.getParameterTypes(), args);
+        RpcMessage invocation = new RpcMessage(interfaceClass, method, method.getParameterTypes(), args);
         Result result = invoker.invoke(invocation);
         if (result.cause() != null) {
             throw result.cause();

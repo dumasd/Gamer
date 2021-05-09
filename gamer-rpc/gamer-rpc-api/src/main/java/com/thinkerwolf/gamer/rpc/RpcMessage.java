@@ -1,25 +1,28 @@
 package com.thinkerwolf.gamer.rpc;
 
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.rpc.annotation.RpcMethod;
 import com.thinkerwolf.gamer.rpc.annotation.RpcService;
+
+import java.lang.reflect.Method;
 
 public class RpcMessage implements Message {
 
     private Class<?> interfaceClass;
-    private String methodName;
+    private Method method;
     private Class<?>[] parameterTypes;
     private Object[] parameters;
-
     private int requestId;
-
     private RpcService rpcService;
+    private RpcMethod rpcMethod;
 
-    public RpcMessage(Class<?> interfaceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) {
+    public RpcMessage(Class<?> interfaceClass, Method method, Class<?>[] parameterTypes, Object[] parameters) {
         this.interfaceClass = interfaceClass;
-        this.methodName = methodName;
+        this.method = method;
         this.parameterTypes = parameterTypes;
         this.parameters = parameters;
         this.rpcService = ClassUtils.getAnnotation(interfaceClass, RpcService.class);
+        this.rpcMethod = ClassUtils.getAnnotation(method, RpcMethod.class);
     }
 
     public int getRequestId() {
@@ -35,7 +38,7 @@ public class RpcMessage implements Message {
     }
 
     public String getMethodName() {
-        return methodName;
+        return method.getName();
     }
 
     public Class<?>[] getParameterTypes() {
@@ -47,15 +50,19 @@ public class RpcMessage implements Message {
     }
 
     public String getSerial() {
-        return rpcService.serialize();
+        return rpcMethod.serialize();
     }
 
     public RpcService getRpcClient() {
         return rpcService;
     }
 
+    public RpcMethod getRpcMethod() {
+        return rpcMethod;
+    }
+
     public boolean isAsync() {
-        return rpcService.async();
+        return rpcMethod.async();
     }
 
 }

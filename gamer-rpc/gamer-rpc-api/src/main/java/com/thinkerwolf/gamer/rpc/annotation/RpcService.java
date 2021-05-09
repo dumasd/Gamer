@@ -7,20 +7,5 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 public @interface RpcService {
-    /**
-     * 序列化方式
-     */
-    String serialize() default "hessian2";
 
-    /**
-     * 是否异步
-     */
-    boolean async() default false;
-
-    /**
-     * 超时时间
-     *
-     * @return
-     */
-    long timeout() default 5000;
 }
