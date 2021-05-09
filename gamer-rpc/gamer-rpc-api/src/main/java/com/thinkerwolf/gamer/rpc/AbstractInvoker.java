@@ -3,41 +3,45 @@ package com.thinkerwolf.gamer.rpc;
 import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.remoting.ExchangeClient;
 
+import java.sql.Time;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractInvoker<T> implements Invoker<T> {
 
-    @Override
-    public Result invoke(Object args) throws Throwable {
-        RpcMessage invocation = (RpcMessage) args;
-        ExchangeClient<RpcResponse> client = nextClient();
-        Promise<RpcResponse> promise;
-        if (!invocation.isAsync()) {
-            promise = client.request(invocation, invocation.getRpcMethod().timeout(), TimeUnit.MILLISECONDS);
-            return RpcUtils.processSync(promise);
-        } else {
-            promise = client.request(invocation);
-            RpcContext.getContext().setCurrent(promise);
-            return RpcUtils.processAsync(promise);
-        }
+  @Override
+  public Result invoke(Object args) throws Throwable {
+    RpcMessage invocation = (RpcMessage) args;
+    ExchangeClient<RpcResponse> client = nextClient();
+    Promise<RpcResponse> promise;
+    if (invocation.isAsync()) {
+      // 异步调用
+      promise = client.request(invocation);
+      RpcContext.getContext().setCurrent(promise);
+      return RpcUtils.processAsync(promise);
+    } else {
+      // 同步调用
+      long timeout = TimeUnit.MILLISECONDS.toNanos(invocation.getRpcMethod().timeout());
+      promise = client.request(invocation, timeout, TimeUnit.NANOSECONDS);
+      return RpcUtils.processSync(promise);
     }
+  }
 
-    protected abstract ExchangeClient<RpcResponse> nextClient();
+  protected abstract ExchangeClient<RpcResponse> nextClient();
 
-    protected int nextIdx(AtomicInteger round, int length) {
-        if (length <= 1) {
-            return 0;
-        }
-        int except;
-        int update;
-        do {
-            except = round.get();
-            update = except + 1;
-            if (update < 0) {
-                update = 0;
-            }
-        } while (!round.compareAndSet(except, update));
-        return update % length;
+  protected int nextIdx(AtomicInteger round, int length) {
+    if (length <= 1) {
+      return 0;
     }
+    int except;
+    int update;
+    do {
+      except = round.get();
+      update = except + 1;
+      if (update < 0) {
+        update = 0;
+      }
+    } while (!round.compareAndSet(except, update));
+    return update % length;
+  }
 }
