@@ -1,7 +1,7 @@
 package com.thinkerwolf.gamer.rpc;
 
 import com.thinkerwolf.gamer.common.util.ClassUtils;
-import com.thinkerwolf.gamer.rpc.annotation.RpcClient;
+import com.thinkerwolf.gamer.rpc.annotation.RpcService;
 
 public class RpcMessage implements Message {
 
@@ -12,14 +12,14 @@ public class RpcMessage implements Message {
 
     private int requestId;
 
-    private RpcClient rpcClient;
+    private RpcService rpcService;
 
     public RpcMessage(Class<?> interfaceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) {
         this.interfaceClass = interfaceClass;
         this.methodName = methodName;
         this.parameterTypes = parameterTypes;
         this.parameters = parameters;
-        this.rpcClient = ClassUtils.getAnnotation(interfaceClass, RpcClient.class);
+        this.rpcService = ClassUtils.getAnnotation(interfaceClass, RpcService.class);
     }
 
     public int getRequestId() {
@@ -47,15 +47,15 @@ public class RpcMessage implements Message {
     }
 
     public String getSerial() {
-        return rpcClient.serialize();
+        return rpcService.serialize();
     }
 
-    public RpcClient getRpcClient() {
-        return rpcClient;
+    public RpcService getRpcClient() {
+        return rpcService;
     }
 
     public boolean isAsync() {
-        return rpcClient.async();
+        return rpcService.async();
     }
 
 }

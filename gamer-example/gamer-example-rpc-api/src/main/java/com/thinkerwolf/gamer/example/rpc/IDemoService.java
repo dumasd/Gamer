@@ -1,8 +1,8 @@
 package com.thinkerwolf.gamer.example.rpc;
 
-import com.thinkerwolf.gamer.rpc.annotation.RpcClient;
+import com.thinkerwolf.gamer.rpc.annotation.RpcService;
 
-@RpcClient
+@RpcService
 public interface IDemoService {
 
     String sayHello(String name);

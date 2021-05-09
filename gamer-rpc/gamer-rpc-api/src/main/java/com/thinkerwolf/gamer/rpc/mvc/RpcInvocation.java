@@ -16,11 +16,15 @@ import com.thinkerwolf.gamer.remoting.Content;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
-import com.thinkerwolf.gamer.rpc.annotation.RpcClient;
+import com.thinkerwolf.gamer.rpc.annotation.RpcMethod;
+import com.thinkerwolf.gamer.rpc.annotation.RpcService;
 import com.thinkerwolf.gamer.rpc.exception.BusinessException;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 public class RpcInvocation extends AbstractInvocation {
 
@@ -29,14 +33,16 @@ public class RpcInvocation extends AbstractInvocation {
     private final Class<?> interfaceClass;
     private final Method method;
     private final Object obj;
-    private final RpcClient rpcClient;
+    private final RpcService rpcService;
+    private final RpcMethod rpcMethod;
 
-    public RpcInvocation(Class interfaceClass, Method method, Object obj, RpcClient rpcClient) {
+    public RpcInvocation(Class interfaceClass, Method method, Object obj, RpcService rpcService, RpcMethod rpcMethod) {
         super(true);
         this.interfaceClass = interfaceClass;
         this.method = method;
         this.obj = obj;
-        this.rpcClient = rpcClient;
+        this.rpcService = rpcService;
+        this.rpcMethod = rpcMethod;
         this.command = RpcUtils.getRpcCommand(interfaceClass, method);
     }
 
@@ -54,7 +60,7 @@ public class RpcInvocation extends AbstractInvocation {
     protected void doHandle(Request request, Response response) throws Exception {
         Serializer serializer;
         try {
-            serializer = ServiceLoader.getService(rpcClient.serialize(), Serializer.class);
+            serializer = ServiceLoader.getService(rpcMethod.serialize(), Serializer.class);
         } catch (Exception e) {
             LOG.error("Rpc find serializer", e);
             throw e;
@@ -69,15 +75,31 @@ public class RpcInvocation extends AbstractInvocation {
             return;
         }
 
+        long timeRemain = TimeUnit.MILLISECONDS.toNanos(rpcMethod.timeout());
+        int retries = rpcMethod.retries();
         Object result;
-        try {
-            result = method.invoke(obj, args.getArgs());
-        } catch (Exception e) {
-            LOG.error("Rpc execution", e);
-            handleRpcResponse(request, response, serializer, exResponse(request, new BusinessException(e)));
-            return;
+        for (; ; ) {
+            long timeStart = System.nanoTime();
+            try {
+                FutureTask<Object> task = new FutureTask<>(() -> method.invoke(obj, args.getArgs()));
+                result = task.get(timeRemain, TimeUnit.NANOSECONDS);
+                break;
+            } catch (ExecutionException e) {
+                if (retries <= 0) {
+                    handleRpcResponse(request, response, serializer, exResponse(request, new BusinessException(e.getCause())));
+                    return;
+                }
+                retries--;
+                timeRemain -= (System.nanoTime() - timeStart);
+                if (timeRemain <= 0) {
+                    handleRpcResponse(request, response, serializer, exResponse(request, new BusinessException(e.getCause())));
+                    return;
+                }
+            } catch (Exception e) {
+                handleRpcResponse(request, response, serializer, exResponse(request, new RpcException(e)));
+                return;
+            }
         }
-
         try {
             handleRpcResponse(request, response, serializer, correctResponse(request, result));
         } catch (Exception e) {

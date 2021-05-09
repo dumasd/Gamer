@@ -8,7 +8,8 @@ import com.thinkerwolf.gamer.core.mvc.Invocation;
 import com.thinkerwolf.gamer.core.mvc.MvcServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.spring.SpringObjectFactory;
-import com.thinkerwolf.gamer.rpc.annotation.RpcClient;
+import com.thinkerwolf.gamer.rpc.annotation.RpcMethod;
+import com.thinkerwolf.gamer.rpc.annotation.RpcService;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
 import org.springframework.context.ApplicationContext;
 
@@ -66,25 +67,28 @@ public class RpcDispatchServlet implements MvcServlet {
             Object obj = null;
             Class<?>[] ifaces = clazz.getInterfaces();
             for (Class<?> iface : ifaces) {
-                RpcClient rpcClient = iface.getAnnotation(RpcClient.class);
-                if (rpcClient != null) {
+                RpcService rpcService = iface.getAnnotation(RpcService.class);
+                if (rpcService != null) {
                     for (Method method : iface.getDeclaredMethods()) {
                         if (obj == null) {
                             obj = objectFactory.buildObject(clazz);
                         }
-                        RpcInvocation invocation = createInvocation(obj, iface, method, rpcClient);
-                        if (rpcInvocationMap.containsKey(invocation.getCommand())) {
-                            throw new RpcException("Duplicate action command :" + invocation.getCommand());
+                        RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
+                        if (rpcMethod != null) {
+                            RpcInvocation invocation = createInvocation(obj, iface, method, rpcService, rpcMethod);
+                            if (rpcInvocationMap.containsKey(invocation.getCommand())) {
+                                throw new RpcException("Duplicate action command :" + invocation.getCommand());
+                            }
+                            rpcInvocationMap.put(invocation.getCommand(), invocation);
                         }
-                        rpcInvocationMap.put(invocation.getCommand(), invocation);
                     }
                 }
             }
         }
     }
 
-    private RpcInvocation createInvocation(Object obj, Class interfaceClass, Method method, RpcClient rpcClient) {
-        return new RpcInvocation(interfaceClass, method, obj, rpcClient);
+    private RpcInvocation createInvocation(Object obj, Class interfaceClass, Method method, RpcService rpcService, RpcMethod rpcMethod) {
+        return new RpcInvocation(interfaceClass, method, obj, rpcService, rpcMethod);
     }
 
     @Override

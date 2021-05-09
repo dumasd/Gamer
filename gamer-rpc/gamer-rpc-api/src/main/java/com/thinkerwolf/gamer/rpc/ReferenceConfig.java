@@ -139,7 +139,7 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
                     ServiceLoader.getService(cluster, Cluster.class);
             ref = rpcProxy.newProxy(interfaceClass, clu.combine(invokers));
         } else {
-            // TODO 2.注册中心获取
+            // 2.注册中心获取
             throw new UnsupportedOperationException("注册中心集群模式开发中...");
         }
     }
