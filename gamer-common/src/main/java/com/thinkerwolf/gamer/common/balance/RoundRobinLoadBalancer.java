@@ -13,7 +13,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer {
     public static final String ROBIN_INDEX = "round_robin_index";
 
     @Override
-    public <T> T select(Collection<T> collection, String key, Map<String, Object> props) {
+    public <T> T select(Collection<T> collection, String searchKey, Map<String, Object> props) {
         if (collection.isEmpty()) {
             return null;
         }

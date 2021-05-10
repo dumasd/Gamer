@@ -14,8 +14,17 @@ public final class RpcUtils {
         return getRpcCommand(interfaceClass, method.getName(), method.getParameterTypes());
     }
 
-    public static String getRpcCommand(Class interfaceClass, String methodName, Class<?>[] parameterTypes) {
-        return String.format(RPC_COMMAND_FORMAT, ClassUtils.getDesc(interfaceClass), methodName + ";", ClassUtils.getDesc(parameterTypes));
+    public static String getRpcCommand(
+            Class interfaceClass, String methodName, Class<?>[] parameterTypes) {
+        return String.format(
+                RPC_COMMAND_FORMAT,
+                ClassUtils.getDesc(interfaceClass),
+                methodName + ";",
+                ClassUtils.getDesc(parameterTypes));
+    }
+
+    public static String getRpcRegPath(Class interfaceClass, Method method) {
+        return getRpcCommand(interfaceClass, method).replace('/', '_');
     }
 
     public static URL getConnectUrl(URL url) {
@@ -53,5 +62,4 @@ public final class RpcUtils {
             }
         }
     }
-
 }

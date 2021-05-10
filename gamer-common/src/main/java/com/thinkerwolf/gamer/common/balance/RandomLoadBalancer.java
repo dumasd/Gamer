@@ -13,7 +13,7 @@ public class RandomLoadBalancer implements LoadBalancer {
     private static final Random r = new Random();
 
     @Override
-    public <T> T select(Collection<T> collection, String key, Map<String, Object> props) {
+    public <T> T select(Collection<T> collection, String searchKey, Map<String, Object> props) {
         if (collection == null) {
             throw new NullPointerException();
         }

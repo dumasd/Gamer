@@ -13,6 +13,10 @@ public interface ServletContext {
 
     public static final String ROOT_OBJECT_FACTORY = ServletContext.class.getName() + ".ROOT.OBJECT.FACTORY";
 
+    public static final String ROOT_REGISTRY = ServletContext.class.getName() + ".ROOT.REGISTRY";
+
+    public static final String SERVER_URLS = ServletContext.class.getName() + ".SERVER.URLS";
+
     Object getAttribute(String key);
 
     Map<String, Object> getAttributes();

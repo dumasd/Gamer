@@ -9,10 +9,10 @@ import java.util.Map;
 @Service
 public class ExampleService implements IExampleService {
 
+    @Override
     public Map<String, Object> helloApi(String name) {
         Map<String, Object> data = new HashMap<>();
         data.put("say", "Hello " + name);
         return data;
     }
-
 }

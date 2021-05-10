@@ -1,3 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.thinkerwolf.gamer.GamerServerConfiguration,\
-com.thinkerwolf.gamer.GamerRegistryConfiguration
+com.thinkerwolf.gamer.GamerAutoConfiguration

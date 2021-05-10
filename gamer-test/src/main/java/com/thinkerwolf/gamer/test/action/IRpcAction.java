@@ -5,7 +5,6 @@ import com.thinkerwolf.gamer.rpc.annotation.RpcService;
 
 import java.util.List;
 
-@RpcService
 public interface IRpcAction {
 
   @RpcMethod(serialize = "hessian2", async = false)

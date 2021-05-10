@@ -1,9 +1,12 @@
 package com.thinkerwolf.gamer.test.action;
 
+import com.thinkerwolf.gamer.rpc.annotation.RpcService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+@RpcService
 public class RpcTestAction implements IRpcAction {
     private static final Random r = new Random();
 
@@ -29,5 +32,4 @@ public class RpcTestAction implements IRpcAction {
         list.add(100);
         return list;
     }
-
 }

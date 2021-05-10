@@ -4,7 +4,12 @@ import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.registry.Registry;
+import com.thinkerwolf.gamer.registry.RegistryFactory;
 import com.thinkerwolf.gamer.rpc.cluster.Cluster;
+import com.thinkerwolf.gamer.rpc.cluster.Dictionary;
+import com.thinkerwolf.gamer.rpc.cluster.dictionary.ImmutableDictionary;
+import com.thinkerwolf.gamer.rpc.cluster.dictionary.RegistryDictionary;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
 import com.thinkerwolf.gamer.rpc.proxy.RpcProxy;
 import org.apache.commons.lang.StringUtils;
@@ -33,9 +38,7 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
     private String url;
 
     private List<URL> urls;
-    /**
-     * 注册中心
-     */
+    /** 注册中心 */
     private String registry;
 
     private volatile boolean initialized;
@@ -127,6 +130,7 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
             }
         }
 
+        Dictionary<T> dictionary;
         if (urls.size() > 0) {
             // 1.urls 直连
             final List<Invoker<T>> invokers = new ArrayList<>();
@@ -134,14 +138,24 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
                 Protocol protocol = ServiceLoader.getService(url.getProtocol(), Protocol.class);
                 invokers.add(protocol.invoker(interfaceClass, url));
             }
-            Cluster clu = cluster == null ?
-                    ServiceLoader.getDefaultService(Cluster.class) :
-                    ServiceLoader.getService(cluster, Cluster.class);
-            ref = rpcProxy.newProxy(interfaceClass, clu.combine(invokers));
+            dictionary = new ImmutableDictionary<>(interfaceClass, invokers);
         } else {
-            // 2.注册中心获取
-            throw new UnsupportedOperationException("注册中心集群模式开发中...");
+            // 注册中心获取
+            URL registryURL = URL.parse(registry);
+            RegistryFactory registryFactory =
+                    ServiceLoader.getService(registryURL.getProtocol(), RegistryFactory.class);
+            Registry reg;
+            try {
+                reg = registryFactory.create(registryURL);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            dictionary = new RegistryDictionary<T>(interfaceClass, reg);
         }
+        Cluster clu =
+                cluster == null
+                        ? ServiceLoader.getDefaultService(Cluster.class)
+                        : ServiceLoader.getService(cluster, Cluster.class);
+        ref = rpcProxy.newProxy(interfaceClass, clu.combine(dictionary));
     }
-
 }

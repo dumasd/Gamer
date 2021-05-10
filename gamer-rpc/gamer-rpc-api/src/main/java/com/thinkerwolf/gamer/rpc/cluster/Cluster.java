@@ -14,6 +14,6 @@ import java.util.List;
 @SPI("failfast")
 public interface Cluster {
 
-    <T> Invoker<T> combine(List<Invoker<T>> invokers);
+    <T> Invoker<T> combine(Dictionary<T> dictionary);
 
 }

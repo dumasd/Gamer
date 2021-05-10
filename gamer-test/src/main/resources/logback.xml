@@ -15,7 +15,7 @@
     <!-- 控制台打印 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder charset="utf-8">
-            <pattern>%red(%d{${DATETIME}}) [%highlight(%-5level)] [%thread] %boldMagenta(%logger{36}) - %cyan(%m%n)
+            <pattern>%red(%d{${DATETIME}}) %highlight(%-5level) [%thread] %boldMagenta(%logger{36}) - %cyan(%m%n)
             </pattern>
         </encoder>
     </appender>
@@ -156,7 +156,7 @@
     </logger>
 
     <!-- Logger 根目录 -->
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="DEBUG"/>
         <appender-ref ref="ERROR"/>

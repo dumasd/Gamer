@@ -11,6 +11,7 @@ public abstract class AbstractConf<C extends AbstractConf<C>> implements Conf<C>
     private ServletConfig servletConfig;
     private List<URL> urls;
     private String confFile;
+    private String name;
 
     @Override
     public C setConfFile(String confFile) {
@@ -20,6 +21,14 @@ public abstract class AbstractConf<C extends AbstractConf<C>> implements Conf<C>
 
     public String getConfFile() {
         return confFile;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

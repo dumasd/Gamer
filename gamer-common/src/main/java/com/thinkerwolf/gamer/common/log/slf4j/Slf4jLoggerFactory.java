@@ -5,6 +5,11 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Slf4j Logger
+ *
+ * @author wukai
+ */
 public class Slf4jLoggerFactory extends InternalLoggerFactory {
 
     static {
@@ -15,10 +20,12 @@ public class Slf4jLoggerFactory extends InternalLoggerFactory {
         }
     }
 
+    @Override
     public Logger createLogger(String name) {
         return new Slf4jLogger(LoggerFactory.getLogger(name));
     }
 
+    @Override
     public Logger createLogger(Class<?> clazz) {
         return new Slf4jLogger(LoggerFactory.getLogger(clazz));
     }

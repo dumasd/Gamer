@@ -1,41 +1,36 @@
 package com.thinkerwolf.gamer.properties;
 
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.Map;
 
 @ConfigurationProperties(prefix = "gamer")
 @Component
 public class GamerProperties {
-    /**
-     * Gamer Application id
-     */
-    private String id = "";
-    /**
-     * Gamer Application type
-     */
-    private String type;
-    /**
-     * Servlet config file position
-     */
+    /** Gamer Application name */
+    private String name;
+    /** Servlet config file position */
     private String configFile;
-
-    /**
-     * Remoting name
-     */
+    /** Remoting name */
     private String remoting = "netty";
-    /**
-     * Servlet bootstrap type
-     */
+    /** Servlet bootstrap type */
     private String servletBoot = "netty";
+    /** Gamer registry info */
+    private Registry registry;
     /**
-     * Conf. If <strong><i>configFile</i></strong> is not assigned, it will use this to initialize the <strong>ServletBootstrap</strong>
+     * Conf. If <strong><i>configFile</i></strong> is not assigned, it will use this to initialize
+     * the <strong>ServletBootstrap</strong>
      */
     private Map<String, Object> conf;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getConfigFile() {
         return configFile;
@@ -61,27 +56,40 @@ public class GamerProperties {
         this.servletBoot = servletBoot;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public Map<String, Object> getConf() {
         return conf;
     }
 
     public void setConf(Map<String, Object> conf) {
         this.conf = conf;
+    }
+
+    public Registry getRegistry() {
+        return registry;
+    }
+
+    public void setRegistry(Registry registry) {
+        this.registry = registry;
+    }
+
+    public static class Registry {
+        private boolean enabled;
+        private String address;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
     }
 }

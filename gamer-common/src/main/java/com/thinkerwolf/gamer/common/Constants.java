@@ -105,6 +105,10 @@ public final class Constants {
      * TrustStore 密码
      */
     public static final String SSL_TRUSTSTORE_PASS = "truststorePass";
+    /**
+     *
+     */
+    public static final String LOADBALANCE_KEY = "loadbalanceKey";
 
     /**
      * ;

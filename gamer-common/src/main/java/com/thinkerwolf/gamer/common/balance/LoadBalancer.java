@@ -17,11 +17,11 @@ public interface LoadBalancer {
      * select
      *
      * @param collection 待选择集合
-     * @param key        key
+     * @param searchKey        key
      * @param props      额外属性
      * @param <T>        选择类型
      * @return T
      */
-    <T> T select(Collection<T> collection, String key, Map<String, Object> props);
+    <T> T select(Collection<T> collection, String searchKey, Map<String, Object> props);
 
 }

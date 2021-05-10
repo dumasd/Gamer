@@ -41,6 +41,10 @@ public class RpcMessage implements Message {
         return method.getName();
     }
 
+    public Method getMethod() {
+        return method;
+    }
+
     public Class<?>[] getParameterTypes() {
         return parameterTypes;
     }

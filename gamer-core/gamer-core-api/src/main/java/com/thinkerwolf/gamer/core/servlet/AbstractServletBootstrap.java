@@ -11,6 +11,7 @@ public abstract class AbstractServletBootstrap implements ServletBootstrap {
                 throw new IllegalStateException("Closed");
             }
         }
+        getServletConfig().getServletContext().setAttribute(ServletContext.SERVER_URLS, getUrls());
         doStartup();
     }
 
@@ -44,5 +45,4 @@ public abstract class AbstractServletBootstrap implements ServletBootstrap {
             }
         }
     }
-
 }

@@ -1,12 +1,12 @@
-
 gamer:
   id: 1001
   type: game
+  name: game
   conf:
     servlet:
       servletName: DispatcherServlet                                   # Servlet名称
       servletClass: com.thinkerwolf.gamer.core.mvc.DispatcherServlet   # Servlet类名
-      initParams:                                                      # 参数列表
+      initParams: # 参数列表
         componentScanPackage: com.thinkerwolf                          # 组件扫描包名
         compress: true                                                 # 传输压缩(仅http生效)
         sessionTimeout: 120                                            # Session超时时间(s)
@@ -26,16 +26,16 @@ gamer:
         countPerChannel: 100 # 每个Channel最大并发数量
         protocol: tcp        # 协议
         port: 9080           # 端口
-        options:             # Options
+        options: # Options
           so_keepalive: true
-        childOptions:        # ChildOptions
+        childOptions: # ChildOptions
           tcp_nodelay: true
       - workerThreads: 5
         coreThreads: 10
         maxThreads: 11
         countPerChannel: 100 # 客户端最大并发数量
         protocol: http
-        ssl:                 # ssl配置
+        ssl: # ssl配置
           enabled: true
         port: 8070
         options:

@@ -1,1 +1,1 @@
-failfast=com.thinkerwolf.gamer.rpc.cluster.FailfastCluster
+failfast=com.thinkerwolf.gamer.rpc.cluster.support.FailfastCluster

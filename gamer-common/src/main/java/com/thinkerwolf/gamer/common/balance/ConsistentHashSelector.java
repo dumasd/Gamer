@@ -10,7 +10,7 @@ import java.util.TreeMap;
  *
  * @param <T> Value type
  */
-public class ConsistentHashMap<T> {
+public class ConsistentHashSelector<T> {
 
     private final int virtualNum;
 
@@ -18,9 +18,15 @@ public class ConsistentHashMap<T> {
 
     private final HashAlgorithm hashAlgorithm;
 
-    public ConsistentHashMap(HashAlgorithm hashAlgorithm, int virtualNum, Collection<T> nodes) {
+    private Collection<T> nodes;
+
+    private int identityHashCode;
+
+    public ConsistentHashSelector(HashAlgorithm hashAlgorithm, int virtualNum, Collection<T> nodes, int identityHashCode) {
         this.hashAlgorithm = hashAlgorithm;
         this.virtualNum = virtualNum;
+        this.nodes = nodes;
+        this.identityHashCode = identityHashCode;
         for (T t : nodes) {
             String s = t.toString();
             for (int i = 0; i < virtualNum; i++) {
@@ -28,10 +34,6 @@ public class ConsistentHashMap<T> {
                 nodeMap.put(nodeKey, t);
             }
         }
-    }
-
-    public ConsistentHashMap(Collection<T> nodes) {
-        this(HashAlgorithm.MURMUR, 100, nodes);
     }
 
     public void add(T t) {
@@ -48,6 +50,10 @@ public class ConsistentHashMap<T> {
             long nodeKey = this.hashAlgorithm.hash(s + "-" + i);
             nodeMap.remove(nodeKey);
         }
+    }
+
+    public int getIdentityHashCode() {
+        return identityHashCode;
     }
 
     public T find(String key) {

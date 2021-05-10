@@ -36,6 +36,7 @@ public class NettyServer implements Server {
         this.handler = handler;
     }
 
+    @Override
     public synchronized void startup() throws Exception {
         if (started) {
             return;
@@ -48,7 +49,8 @@ public class NettyServer implements Server {
         this.serverBootstrap = new ServerBootstrap();
         ServerBootstrap sb = this.serverBootstrap;
         this.bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory(bossName));
-        this.workerGroup = new NioEventLoopGroup(workerThreads, new DefaultThreadFactory(workerName));
+        this.workerGroup =
+                new NioEventLoopGroup(workerThreads, new DefaultThreadFactory(workerName));
         sb.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
         sb.option(ChannelOption.SO_KEEPALIVE, true);
         sb.option(ChannelOption.TCP_NODELAY, true);
@@ -72,13 +74,20 @@ public class NettyServer implements Server {
                 .childHandler(ChannelHandlers.createChannelInitializer(true, url, handler));
         ChannelFuture future = sb.bind(new InetSocketAddress(url.getPort()));
         this.channel = future.channel();
-        future.addListener((ChannelFutureListener) f -> {
-            if (f.isSuccess()) {
-                LOG.info("Listen @" + url.getProtocol() + " on @" + url.getPort() + " success");
-            } else {
-                LOG.error("Can't start server", f.cause());
-            }
-        });
+        future.addListener(
+                (ChannelFutureListener)
+                        f -> {
+                            if (f.isSuccess()) {
+                                LOG.info(
+                                        "Listen @"
+                                                + url.getProtocol()
+                                                + " on @"
+                                                + url.getPort()
+                                                + " success");
+                            } else {
+                                LOG.error("Can't start server", f.cause());
+                            }
+                        });
     }
 
     @Override

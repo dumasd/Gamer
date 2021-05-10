@@ -31,8 +31,7 @@ public class YmlConf extends AbstractConf<YmlConf> {
 
     @Override
     public YmlConf load(Map<String, Object> confMap) throws Exception {
-        if (getServletConfig() != null
-                && getUrls() != null) {
+        if (getServletConfig() != null && getUrls() != null) {
             return this;
         }
         Map<String, Object> servletConf = (Map<String, Object>) confMap.get("servlet");
@@ -85,14 +84,16 @@ public class YmlConf extends AbstractConf<YmlConf> {
 
     @Override
     public YmlConf load() {
-        if (getServletConfig() != null
-                && getUrls() != null) {
+        if (getServletConfig() != null && getUrls() != null) {
             return self();
         }
         InputStream is = null;
         try {
             Yaml yaml = new Yaml();
-            String file = StringUtils.isBlank(getConfFile()) ? Constants.DEFAULT_CONFIG_FILE_YML : getConfFile();
+            String file =
+                    StringUtils.isBlank(getConfFile())
+                            ? Constants.DEFAULT_CONFIG_FILE_YML
+                            : getConfFile();
             is = ResourceUtils.findInputStream("", file);
             if (is == null) {
                 LOG.info("Can't load config from [" + file + "]");
@@ -114,7 +115,6 @@ public class YmlConf extends AbstractConf<YmlConf> {
             IOUtils.closeQuietly(is);
         }
     }
-
 
     private void loadUrlConfig(List<Map<String, Object>> netConfs) {
         if (netConfs == null || netConfs.size() == 0) {
@@ -154,11 +154,16 @@ public class YmlConf extends AbstractConf<YmlConf> {
             parameters.put(URL.WORKER_THREADS, MapUtils.getInteger(netConf, URL.WORKER_THREADS, 3));
             parameters.put(URL.CORE_THREADS, MapUtils.getInteger(netConf, URL.CORE_THREADS, 5));
             parameters.put(URL.MAX_THREADS, MapUtils.getInteger(netConf, URL.MAX_THREADS, 8));
-            parameters.put(URL.COUNT_PER_CHANNEL, MapUtils.getInteger(netConf, URL.COUNT_PER_CHANNEL, 50));
-            parameters.put(URL.CHANNEL_HANDLERS, MapUtils.getString(netConf, URL.CHANNEL_HANDLERS, ""));
+            parameters.put(
+                    URL.COUNT_PER_CHANNEL, MapUtils.getInteger(netConf, URL.COUNT_PER_CHANNEL, 50));
+            parameters.put(
+                    URL.CHANNEL_HANDLERS, MapUtils.getString(netConf, URL.CHANNEL_HANDLERS, ""));
 
-            url.setAttach(URL.OPTIONS, MapUtils.getMap(netConf, URL.OPTIONS, Collections.EMPTY_MAP));
-            url.setAttach(URL.CHILD_OPTIONS, MapUtils.getMap(netConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
+            url.setAttach(
+                    URL.OPTIONS, MapUtils.getMap(netConf, URL.OPTIONS, Collections.EMPTY_MAP));
+            url.setAttach(
+                    URL.CHILD_OPTIONS,
+                    MapUtils.getMap(netConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
 
             if (MapUtils.getBoolean(netConf, URL.RPC_USE_LOCAL, false)) {
                 parameters.put(URL.RPC_HOST, localAddress.getHostAddress());
@@ -180,14 +185,27 @@ public class YmlConf extends AbstractConf<YmlConf> {
         boolean enabled = MapUtils.getBoolean(sslConf, "enabled", Boolean.FALSE);
         if (enabled) {
             url.getParameters().put(URL.SSL_ENABLED, true);
-            url.getParameters().compute(URL.SSL_KEYSTORE_FILE, (s, o) -> MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_FILE));
-            url.getParameters().compute(URL.SSL_KEYSTORE_PASS, (s, o) -> MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_PASS));
-            url.getParameters().compute(URL.SSL_TRUSTSTORE_FILE, (s, o) -> MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_FILE));
-            url.getParameters().compute(URL.SSL_TRUSTSTORE_PASS, (s, o) -> MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_PASS));
+            url.getParameters()
+                    .compute(
+                            URL.SSL_KEYSTORE_FILE,
+                            (s, o) -> MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_FILE));
+            url.getParameters()
+                    .compute(
+                            URL.SSL_KEYSTORE_PASS,
+                            (s, o) -> MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_PASS));
+            url.getParameters()
+                    .compute(
+                            URL.SSL_TRUSTSTORE_FILE,
+                            (s, o) -> MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_FILE));
+            url.getParameters()
+                    .compute(
+                            URL.SSL_TRUSTSTORE_PASS,
+                            (s, o) -> MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_PASS));
         }
     }
 
-    private void loadServletConfig(Map<String, Object> servletConf, List<String> listenersConf) throws Exception {
+    private void loadServletConfig(Map<String, Object> servletConf, List<String> listenersConf)
+            throws Exception {
         Class<?> servletClass;
         if (servletConf.get("servletClass") == null) {
             servletClass = DispatcherServlet.class;
@@ -207,38 +225,42 @@ public class YmlConf extends AbstractConf<YmlConf> {
 
         ServletContext servletContext = new DefaultServletContext();
 
-        ServletConfig servletConfig = new ServletConfig() {
-            @Override
-            public String getServletName() {
-                Object name = servletConf.get("servletName");
-                return name == null ? null : String.valueOf(name).trim();
-            }
+        ServletConfig servletConfig =
+                new ServletConfig() {
+                    @Override
+                    public String getServletName() {
+                        Object name = servletConf.get("servletName");
+                        return name == null ? null : String.valueOf(name).trim();
+                    }
 
-            @Override
-            public Class<? extends Servlet> servletClass() {
-                return (Class<? extends Servlet>) servletClass;
-            }
+                    @Override
+                    public Class<? extends Servlet> servletClass() {
+                        return (Class<? extends Servlet>) servletClass;
+                    }
 
-            @Override
-            public String getInitParam(String key) {
-                return initParams.containsKey(key) ? String.valueOf(initParams.get(key)).trim() : null;
-            }
+                    @Override
+                    public String getInitParam(String key) {
+                        return initParams.containsKey(key)
+                                ? String.valueOf(initParams.get(key)).trim()
+                                : null;
+                    }
 
-            @Override
-            public Collection<String> getInitParamNames() {
-                return initParams.keySet();
-            }
+                    @Override
+                    public Collection<String> getInitParamNames() {
+                        return initParams.keySet();
+                    }
 
-            @Override
-            public ServletContext getServletContext() {
-                return servletContext;
-            }
-        };
+                    @Override
+                    public ServletContext getServletContext() {
+                        return servletContext;
+                    }
+                };
         loadListeners(servletConfig, listenersConf);
         setServletConfig(servletConfig);
     }
 
-    private void loadListeners(ServletConfig servletConfig, List<String> listenersConf) throws Exception {
+    private void loadListeners(ServletConfig servletConfig, List<String> listenersConf)
+            throws Exception {
         List<Object> listeners = new ArrayList<>();
 
         if (listenersConf != null && listenersConf.size() > 0) {
@@ -249,5 +271,4 @@ public class YmlConf extends AbstractConf<YmlConf> {
         }
         servletConfig.getServletContext().setListeners(listeners);
     }
-
 }
