@@ -24,7 +24,7 @@ public final class ZkClientUtils {
     /**
      * Create parent persistent path
      *
-     * @param zkc  ZkClint
+     * @param zkc ZkClint
      * @param path path
      * @throws RuntimeException If any other exception occurs
      */
@@ -65,7 +65,7 @@ public final class ZkClientUtils {
      * @return A zookeeper path
      */
     public static String toPath(URL url) {
-        if (StringUtils.isBlank(url.getPath())) {
+        if (StringUtils.isBlank(url.getPath()) || "/".equals(url.getPath())) {
             return "/";
         } else {
             String path = URL.decode(url.getPath());
@@ -86,7 +86,7 @@ public final class ZkClientUtils {
     /**
      * Start with the given path. Obtain all children path.
      *
-     * @param zkc       ZkClient
+     * @param zkc ZkClient
      * @param startPath Start path
      * @return All children path
      */
@@ -105,11 +105,9 @@ public final class ZkClientUtils {
             return;
         }
         for (String child : children) {
-            String childPath = startPath + "/" + child;
+            String childPath = "/".equals(startPath) ? "/" + child : startPath + "/" + child;
             paths.add(childPath);
             addChildrenPath(zkc, childPath, paths);
         }
     }
-
-
 }

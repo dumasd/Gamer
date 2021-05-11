@@ -19,6 +19,7 @@ import org.apache.zookeeper.data.ACL;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.thinkerwolf.gamer.common.URL.RETRY;
@@ -29,18 +30,17 @@ import static com.thinkerwolf.gamer.common.URL.SESSION_TIMEOUT;
 import static com.thinkerwolf.gamer.common.URL.BACKUP;
 
 /**
- * Zookeeper Registry Center
- * <lu>
- * <li>/gamer/rpc</li>
- * <li>/eliminate/game/game_1001</li>
- * <li>/eliminate/login/login_1001</li>
- * <li>/eliminate/match/match_1001</li>
- * </lu>
+ * Zookeeper Registry Center <lu>
+ * <li>/gamer/rpc
+ * <li>/eliminate/game/game_1001
+ * <li>/eliminate/login/login_1001
+ * <li>/eliminate/match/match_1001 </lu>
  *
  * @author wukai
  * @since 2020-05-21
  */
-public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateListener, IZkDataListener, IZkChildListener {
+public class ZookeeperRegistry extends AbstractZkRegistry
+        implements IZkStateListener, IZkDataListener, IZkChildListener {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(ZookeeperRegistry.class);
 
@@ -50,11 +50,11 @@ public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateLis
         super(url);
         this.zkClient = prepareClient();
         this.zkClient.subscribeStateChanges(this);
-        fetchAllChildren();
     }
 
     private ZkClient prepareClient() {
-        final int connectionTimeout = url.getInteger(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
+        final int connectionTimeout =
+                url.getInteger(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
         final int sessionTimeout = url.getInteger(SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT);
 
         String backup = url.getString(BACKUP);
@@ -67,28 +67,11 @@ public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateLis
         final ZkSerializer serializer = new AdaptiveZkSerializer();
         int retry = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
         try {
-            return RetryLoops.invokeWithRetry(() -> new ZkClient(zkServers, sessionTimeout, connectionTimeout, serializer), new RetryNTimes(retry, connectionTimeout + 100, TimeUnit.MILLISECONDS));
+            return RetryLoops.invokeWithRetry(
+                    () -> new ZkClient(zkServers, sessionTimeout, connectionTimeout, serializer),
+                    new RetryNTimes(retry, connectionTimeout + 100, TimeUnit.MILLISECONDS));
         } catch (Exception e) {
             throw new RegistryException(e);
-        }
-    }
-
-
-    private void fetchAllChildren() {
-        List<String> childs = ZkClientUtils.getAllChildren(zkClient, ZkClientUtils.toPath(url));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Zk all children : " + childs);
-        }
-        for (String child : childs) {
-            URL url = zkClient.readData(child, true);
-            if (url != null) {
-                saveToCache(url);
-                doSubscribe(url);
-            } else {
-                URL parent = new URL();
-                parent.setPath(child);
-                doSubscribe(parent);
-            }
         }
     }
 
@@ -100,27 +83,29 @@ public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateLis
         final boolean ephemeral = url.getBoolean(NODE_EPHEMERAL, true);
         final List<ACL> acl = ZkClientUtils.createACLs(url);
         try {
-            RetryLoops.invokeWithRetry(() -> {
-                try {
-                    ZkClientUtils.createParent(zkClient, path);
-                } catch (ZkNodeExistsException ignored) {
-                }
-                if (ephemeral) {
-                    try {
-                        zkClient.createEphemeral(path, url, acl);
-                    } catch (ZkNodeExistsException e) {
-                        zkClient.delete(path);
-                        zkClient.createEphemeral(path, url, acl);
-                    }
-                } else {
-                    try {
-                        zkClient.createPersistent(path, url, acl);
-                    } catch (ZkNodeExistsException e) {
-                        zkClient.writeData(path, url);
-                    }
-                }
-                return Boolean.TRUE;
-            }, new RetryNTimes(retry, retryMillis, TimeUnit.MILLISECONDS));
+            RetryLoops.invokeWithRetry(
+                    () -> {
+                        try {
+                            ZkClientUtils.createParent(zkClient, path);
+                        } catch (ZkNodeExistsException ignored) {
+                        }
+                        if (ephemeral) {
+                            try {
+                                zkClient.createEphemeral(path, url, acl);
+                            } catch (ZkNodeExistsException e) {
+                                zkClient.delete(path);
+                                zkClient.createEphemeral(path, url, acl);
+                            }
+                        } else {
+                            try {
+                                zkClient.createPersistent(path, url, acl);
+                            } catch (ZkNodeExistsException e) {
+                                zkClient.writeData(path, url);
+                            }
+                        }
+                        return Boolean.TRUE;
+                    },
+                    new RetryNTimes(retry, retryMillis, TimeUnit.MILLISECONDS));
         } catch (Exception e) {
             throw new RegistryException("Zk register [" + url + "]", e);
         }
@@ -145,7 +130,6 @@ public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateLis
         zkClient.unsubscribeChildChanges(path, this);
         zkClient.unsubscribeDataChanges(path, this);
     }
-
 
     @Override
     protected List<URL> doLookup(URL url) {
@@ -180,8 +164,14 @@ public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateLis
             case Disconnected:
                 rs = RegistryState.DISCONNECTED;
                 break;
+            default:
+                break;
         }
         if (rs != null) {
+            if (RegistryState.CONNECTED.equals(rs)) {
+                Set<URL> urls = getCaches(null);
+                urls.forEach(this::register);
+            }
             fireStateChange(rs);
         }
     }
@@ -189,7 +179,6 @@ public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateLis
     @Override
     public void handleNewSession() throws Exception {
         fireNewSession();
-        fetchAllChildren();
     }
 
     @Override
@@ -208,19 +197,19 @@ public class ZookeeperRegistry extends AbstractZkRegistry implements IZkStateLis
                 }
             }
         }
-        ChildEvent event = new ChildEvent(internalToKey(parentPath), childs);
+        ChildEvent event = new ChildEvent(parentPath, childs);
         fireChildChange(event);
     }
 
     @Override
     public void handleDataChange(String dataPath, Object data) throws Exception {
-        DataEvent event = new DataEvent(internalToKey(dataPath), (URL) data);
+        DataEvent event = new DataEvent(dataPath, (URL) data);
         fireDataChange(event);
     }
 
     @Override
     public void handleDataDeleted(String dataPath) throws Exception {
-        DataEvent event = new DataEvent(internalToKey(dataPath), null);
+        DataEvent event = new DataEvent(dataPath, null);
         fireDataChange(event);
     }
 }

@@ -8,7 +8,7 @@ import com.thinkerwolf.gamer.registry.Registry;
 import com.thinkerwolf.gamer.registry.RegistryFactory;
 import com.thinkerwolf.gamer.rpc.cluster.Cluster;
 import com.thinkerwolf.gamer.rpc.cluster.Dictionary;
-import com.thinkerwolf.gamer.rpc.cluster.dictionary.ImmutableDictionary;
+import com.thinkerwolf.gamer.rpc.cluster.dictionary.StaticDictionary;
 import com.thinkerwolf.gamer.rpc.cluster.dictionary.RegistryDictionary;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
 import com.thinkerwolf.gamer.rpc.proxy.RpcProxy;
@@ -86,6 +86,14 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
         this.cluster = cluster;
     }
 
+    public String getRegistry() {
+        return registry;
+    }
+
+    public void setRegistry(String registry) {
+        this.registry = registry;
+    }
+
     public synchronized T get() {
         if (ref == null) {
             init();
@@ -138,7 +146,7 @@ public class ReferenceConfig<T> extends InterfaceConfig<T> {
                 Protocol protocol = ServiceLoader.getService(url.getProtocol(), Protocol.class);
                 invokers.add(protocol.invoker(interfaceClass, url));
             }
-            dictionary = new ImmutableDictionary<>(interfaceClass, invokers);
+            dictionary = new StaticDictionary<>(interfaceClass, invokers);
         } else {
             // 注册中心获取
             URL registryURL = URL.parse(registry);

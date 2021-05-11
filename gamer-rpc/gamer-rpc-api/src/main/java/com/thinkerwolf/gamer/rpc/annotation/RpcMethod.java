@@ -30,7 +30,7 @@ public @interface RpcMethod {
      *
      * @return
      */
-    int retry() default 0;
+    int retries() default 0;
 
     /**
      * 负载均衡
@@ -38,4 +38,11 @@ public @interface RpcMethod {
      * @return
      */
     String loadbalance() default "random";
+
+    /**
+     * 分组
+     *
+     * @return
+     */
+    String group() default "default";
 }

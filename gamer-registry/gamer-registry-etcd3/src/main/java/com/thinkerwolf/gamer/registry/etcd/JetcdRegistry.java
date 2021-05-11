@@ -95,7 +95,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
         for (KeyValue v : kvs) {
             URL u = byteSeqToUrl(v.getValue());
             if (u != null) {
-                saveToCache(u);
+                saveCache(u);
             }
         }
     }
@@ -130,7 +130,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
                 }
                 CompletableFuture<PutResponse> cf = client.getKVClient().put(pathSeq, urlToByteSeq(url), builder.build());
                 cf.get();
-                saveToCache(url);
+                saveCache(url);
                 registryUrls.add(url);
                 return leaseId;
             }, retryPolicy);
@@ -140,6 +140,7 @@ public class JetcdRegistry extends AbstractRegistry implements Watch.Listener {
         }
     }
 
+    @Override
     protected String toPathString(URL url) {
         String nodeName = url.getString(URL.NODE_NAME);
         String append = nodeName == null ? "" : ("/" + nodeName);

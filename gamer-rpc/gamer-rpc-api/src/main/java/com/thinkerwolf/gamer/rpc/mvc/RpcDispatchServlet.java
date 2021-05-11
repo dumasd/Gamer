@@ -130,8 +130,8 @@ public class RpcDispatchServlet implements MvcServlet {
             RpcMethod rpcMethod) {
         if (registry != null) {
             String regPath = RpcUtils.getRpcRegPath(interfaceClass, method);
-            String baseUrl = registry.url().getPath() + "/" + RpcConstants.SERVICE_PATH + regPath;
-            // /gamer/rpc/com.thinkerwolf.gamer.Test#getName/http/host:port  url
+            String baseUrl = "/" + rpcMethod.group() + "/" + RpcConstants.SERVICE_PATH + regPath;
+            // /gamer/rpc/com_thinkerwolf_gamer_Test#getName/http/host:port  url
             List<URL> serverURLs =
                     (List<URL>)
                             getServletConfig()
@@ -143,17 +143,9 @@ public class RpcDispatchServlet implements MvcServlet {
                     host = serverURL.getHost();
                 }
                 String hostPort = host + ":" + serverURL.getPort();
-                URL regURL =
-                        URL.parse(
-                                serverURL.getProtocol()
-                                        + "://"
-                                        + hostPort
-                                        + "/"
-                                        + baseUrl
-                                        + "/"
-                                        + serverURL.getProtocol());
+                URL regURL = URL.parse(serverURL.getProtocol() + "://" + hostPort + baseUrl);
                 regURL.setParameters(new HashMap<>());
-                regURL.getParameters().put(URL.NODE_NAME, hostPort);
+                regURL.getParameters().put(URL.NODE_NAME, UUID.randomUUID().toString());
                 registry.register(regURL);
             }
         }

@@ -9,47 +9,27 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeUnit;
 
-/**
- * @author wukai
- */
+/** @author wukai */
 public abstract class AbstractRegistry implements Registry {
-    /**
-     * default retry times
-     */
-    protected static final int DEFAULT_RETRY_TIMES = 1;
-    /**
-     * default retry interval millis
-     */
-    protected static final long DEFAULT_RETRY_MILLIS = 1000;
-    /**
-     * default connection timeout
-     */
-    protected static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
-    /**
-     * default session timeout
-     */
-    protected static final int DEFAULT_SESSION_TIMEOUT = 30000;
-
-    private static final int DEFAULT_REGISTRY_TIMEOUT = 2000;
-
+    /** logger */
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractRegistry.class);
-    /**
-     * URL listener map
-     */
-    private final ConcurrentMap<String, Set<INotifyListener>> listenerMap = new ConcurrentHashMap<>();
-    /**
-     * Registry state listener
-     */
+    /** default retry times */
+    protected static final int DEFAULT_RETRY_TIMES = 0;
+    /** default retry interval millis */
+    protected static final long DEFAULT_RETRY_MILLIS = 1000;
+    /** default connection timeout */
+    protected static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
+    /** default session timeout */
+    protected static final int DEFAULT_SESSION_TIMEOUT = 30000;
+    /** URL listener map */
+    private final ConcurrentMap<String, Set<INotifyListener>> listenerMap =
+            new ConcurrentHashMap<>();
+    /** Registry state listener */
     private final Set<IStateListener> stateListeners = new CopyOnWriteArraySet<>();
-    /**
-     * The local cache
-     */
+    /** The local cache */
     private final Properties properties = new Properties();
-    /**
-     * Link url
-     */
+    /** Link url */
     protected URL url;
 
     public AbstractRegistry(URL url) {
@@ -70,20 +50,12 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public void register(URL url) {
         checkRegisterUrl(url);
-        String key = toCacheKey(url);
-        properties.remove(key);
-        DefaultPromise<DataEvent> promise = new DefaultPromise<>();
-        final INotifyListener listener = new DataChangeListener(promise);
-        subscribe(url, listener);
-        long timeout = url.getInteger(URL.REQUEST_TIMEOUT, DEFAULT_REGISTRY_TIMEOUT);
         try {
             doRegister(url);
-            try {
-                promise.await(timeout, TimeUnit.MILLISECONDS);
-            } catch (Exception ignored) {
-            }
+        } catch (Exception e) {
+
         } finally {
-            unsubscribe(url, listener);
+            saveCache(url);
         }
     }
 
@@ -92,18 +64,10 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public void unregister(URL url) {
         checkRegisterUrl(url);
-        DefaultPromise<DataEvent> promise = new DefaultPromise<>();
-        final INotifyListener listener = new DataChangeListener(promise);
-        subscribe(url, listener);
-        long timeout = url.getInteger(URL.REQUEST_TIMEOUT, DEFAULT_REGISTRY_TIMEOUT);
         try {
             doUnRegister(url);
-            try {
-                promise.await(timeout, TimeUnit.MILLISECONDS);
-            } catch (Exception ignored) {
-            }
         } finally {
-            unsubscribe(url, listener);
+            delCache(url);
         }
     }
 
@@ -112,14 +76,16 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public void subscribe(final URL url, final INotifyListener listener) {
         String key = toCacheKey(url);
-        listenerMap.compute(key, (s, listeners) -> {
-            if (listeners == null) {
-                listeners = new CopyOnWriteArraySet<>();
-                doSubscribe(url);
-            }
-            listeners.add(listener);
-            return listeners;
-        });
+        listenerMap.compute(
+                key,
+                (s, listeners) -> {
+                    if (listeners == null) {
+                        listeners = new CopyOnWriteArraySet<>();
+                        doSubscribe(url);
+                    }
+                    listeners.add(listener);
+                    return listeners;
+                });
     }
 
     protected abstract void doSubscribe(URL url);
@@ -127,28 +93,31 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public void unsubscribe(final URL url, final INotifyListener listener) {
         String key = toCacheKey(url);
-        listenerMap.computeIfPresent(key, (s, listeners) -> {
-            listeners.remove(listener);
-            doUnSubscribe(url);
-            return listeners;
-        });
+        listenerMap.computeIfPresent(
+                key,
+                (s, listeners) -> {
+                    listeners.remove(listener);
+                    doUnSubscribe(url);
+                    return listeners;
+                });
     }
 
     protected abstract void doUnSubscribe(URL url);
 
-    public List<URL> getCacheUrls(URL url) {
-        String lk = toCacheKey(url);
-        List<URL> urls = null;
+    public Set<URL> getCaches(URL url) {
+        String lk = url == null ? null : toCacheKey(url);
+        Set<URL> urls = new HashSet<>();
         // 1.Find from cache
         synchronized (properties) {
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
                 String k = entry.getKey().toString();
                 String v = entry.getValue().toString();
-                int idx = k.indexOf(lk);
-                if (idx == 0 && k.indexOf('.', lk.length() + 1) < 0) {
-                    if (urls == null) {
-                        urls = new ArrayList<>();
+                if (lk != null) {
+                    int idx = k.indexOf(lk);
+                    if (idx == 0 && k.indexOf('.', lk.length() + 1) < 0) {
+                        urls.add(URL.parse(v));
                     }
+                } else {
                     urls.add(URL.parse(v));
                 }
             }
@@ -156,7 +125,7 @@ public abstract class AbstractRegistry implements Registry {
         return urls;
     }
 
-    public void saveToCache(URL url) {
+    public void saveCache(URL url) {
         properties.setProperty(toCacheKey(url), url.toString());
     }
 
@@ -164,13 +133,13 @@ public abstract class AbstractRegistry implements Registry {
         return properties.containsKey(toCacheKey(url));
     }
 
+    public URL delCache(URL url) {
+        return (URL) properties.remove(toCacheKey(url));
+    }
+
     @Override
     public List<URL> lookup(URL url) {
-        List<URL> urls = getCacheUrls(url);
-        if (urls == null) {
-            return doLookup(url);
-        }
-        return urls;
+        return doLookup(url);
     }
 
     protected abstract List<URL> doLookup(URL url);
@@ -182,7 +151,7 @@ public abstract class AbstractRegistry implements Registry {
      * @return
      */
     protected String toCacheKey(URL url) {
-        return toPathString(url).replace('/', '.');
+        return toPathString(url);
     }
 
     protected String toPathString(URL url) {
@@ -223,22 +192,6 @@ public abstract class AbstractRegistry implements Registry {
     protected void fireChildChange(final ChildEvent event) {
         // 子节点变化
         LOG.info("Fire child change " + event);
-        synchronized (properties) {
-            Set<String> rks = new HashSet<>();
-            for (Object k : properties.keySet()) {
-                int idx = k.toString().indexOf(event.getSource());
-                if (idx == 0 && k.toString().length() > event.getSource().length()) {
-                    rks.add(k.toString());
-                }
-            }
-            for (String rk : rks) {
-                properties.remove(rk);
-            }
-            for (URL url : event.getChildUrls()) {
-                saveToCache(url);
-            }
-        }
-
         Set<INotifyListener> listeners = listenerMap.get(event.getSource());
         if (listeners != null) {
             for (INotifyListener listener : listeners) {
@@ -294,8 +247,7 @@ public abstract class AbstractRegistry implements Registry {
     protected class DataChangeListener extends NotifyListenerAdapter {
         private DefaultPromise<DataEvent> promise;
 
-        public DataChangeListener() {
-        }
+        public DataChangeListener() {}
 
         public DataChangeListener(DefaultPromise<DataEvent> promise) {
             this.promise = promise;
@@ -308,5 +260,4 @@ public abstract class AbstractRegistry implements Registry {
             }
         }
     }
-
 }

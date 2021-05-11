@@ -53,12 +53,6 @@
             <artifactId>gamer-spring-boot-starter</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-logging</artifactId>-->
-        <!--            <version>2.0.5.RELEASE</version>-->
-        <!--            <scope>compile</scope>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
