@@ -4,6 +4,7 @@ import com.thinkerwolf.gamer.rpc.ReferenceConfig;
 import com.thinkerwolf.gamer.test.action.IRpcAction;
 import org.apache.commons.lang.RandomStringUtils;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** @author wukai */
@@ -24,20 +25,19 @@ public class ReferenceConfigTests {
     }
 
     public static void main(String[] args) {
-        String localURL = "tcp://localhost:9090?clientNum=20";
-        String remoteURL = "tcp://192.168.1.3:9090?clientNum=5";
-        IRpcAction rpcAction = testDirect(remoteURL);
+        String url = "tcp://localhost:9090?clientNum=20";
+        //        String url = "tcp://192.168.1.3:9090?clientNum=5";
+        IRpcAction rpcAction = testDirect(url);
         System.err.println(rpcAction.sayHello("wukai"));
         System.err.println(rpcAction.getList());
 
         testSequence(rpcAction, 100);
-        //        testConcurrency(rpcAction, 30, new AtomicInteger());
-        //        try {
-        //            TimeUnit.MILLISECONDS.sleep(5000);
-        //        } catch (InterruptedException ignored) {
-        //        }
-        //        testConcurrency(rpcAction, 100, new AtomicInteger());
-
+        testConcurrency(rpcAction, 30, new AtomicInteger());
+        try {
+            TimeUnit.MILLISECONDS.sleep(5000);
+        } catch (InterruptedException ignored) {
+        }
+        testConcurrency(rpcAction, 100, new AtomicInteger());
     }
 
     private static void testSequence(IRpcAction rpcAction, int times) {

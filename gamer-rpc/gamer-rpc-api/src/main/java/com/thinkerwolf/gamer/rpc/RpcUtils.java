@@ -2,9 +2,11 @@ package com.thinkerwolf.gamer.rpc;
 
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.concurrent.Future;
+import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 
 public final class RpcUtils {
 
@@ -38,22 +40,32 @@ public final class RpcUtils {
         return url;
     }
 
-    public static Result processSync(Future<RpcResponse> future) {
-        if (!future.isSuccess()) {
-            return Result.builder().withThrown(future.cause()).build();
-        }
-        RpcResponse rpcResponse = future.getNow();
-        if (rpcResponse.getTx() != null) {
-            return Result.builder().withThrown(rpcResponse.getTx()).build();
-        } else {
-            return Result.builder().withResult(rpcResponse.getResult()).build();
+    public static Result processSync(Promise<RpcResponse> promise, RpcMessage rpcMessage) {
+        long timeout = rpcMessage.getRpcMethod().timeout();
+        try {
+            RpcResponse rpcResponse;
+            if (timeout > 0) {
+                rpcResponse = promise.get(timeout, TimeUnit.MILLISECONDS);
+            } else {
+                rpcResponse = promise.get();
+            }
+            if (rpcResponse.getTx() != null) {
+                return Result.builder().withThrown(rpcResponse.getTx()).build();
+            } else {
+                return Result.builder().withResult(rpcResponse.getResult()).build();
+            }
+        } catch (Exception e) {
+            promise.setFailure(e);
+            return Result.builder().withThrown(e).build();
         }
     }
 
-    public static Result processAsync(Future<RpcResponse> future) {
+    public static Result processAsync(Future<RpcResponse> future, RpcMessage rpcMessage) {
         RpcResponse rpcResponse = future.getNow();
         if (rpcResponse == null) {
-            return Result.builder().withResult(null).build();
+            return Result.builder()
+                    .withResult(ClassUtils.getDefaultValue(rpcMessage.getMethod().getReturnType()))
+                    .build();
         } else {
             if (rpcResponse.getTx() != null) {
                 return Result.builder().withThrown(rpcResponse.getTx()).build();

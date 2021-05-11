@@ -8,15 +8,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author wukai
- * @date 2020/5/14 10:01
+ * @since 2020/5/14 10:01
  */
 public class TcpInvoker<T> extends AbstractInvoker<T> {
 
     private final AtomicInteger round = new AtomicInteger();
 
-    private ExchangeClient[] clients;
+    private ExchangeClient<RpcResponse>[] clients;
 
-    public TcpInvoker(ExchangeClient[] clients) {
+    public TcpInvoker(ExchangeClient<RpcResponse>[] clients) {
         this.clients = clients;
     }
 

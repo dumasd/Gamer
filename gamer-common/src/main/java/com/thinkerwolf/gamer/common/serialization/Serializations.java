@@ -1,8 +1,5 @@
 package com.thinkerwolf.gamer.common.serialization;
 
-import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
-import com.thinkerwolf.gamer.common.log.Logger;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -16,10 +13,8 @@ import java.io.IOException;
  */
 public final class Serializations {
 
-    private static final Logger LOG = InternalLoggerFactory.getLogger(Serializations.class);
-
     public static byte[] getBytes(Serializer serializer, Object obj) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
         ObjectOutput oo = null;
         try {
             oo = serializer.serialize(baos);

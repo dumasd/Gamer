@@ -20,7 +20,7 @@ public class SerializationTests {
         sw.start();
         byte[] data = Serializations.getBytes(serializer, obj);
         sw.stop();
-        System.out.println("getBytes:" + sw.getMillis());
+        System.out.println("getBytes:" + sw.getMillis() + ", len: " + data.length);
 
         sw.start();
         Serializations.getObject(serializer, data, SerializedObj.class);
