@@ -9,9 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 import static com.thinkerwolf.gamer.common.URL.RPC_CLIENT_NUM;
 
 public abstract class AbstractClientProtocol extends AbstractProtocol {
-    /**
-     * 共享的client
-     */
+    /** 共享的client */
     private final ConcurrentMap<URL, ExchangeClient> sharedClients = new ConcurrentHashMap<>();
 
     public ExchangeClient getSharedClient(URL url) {
@@ -21,11 +19,12 @@ public abstract class AbstractClientProtocol extends AbstractProtocol {
     protected ExchangeClient[] getClients(URL url) {
         Integer num = url.getInteger(RPC_CLIENT_NUM);
         if (num == null) {
-            num = url.getAttach(RPC_CLIENT_NUM, 1);
+            num = url.getAttach(RPC_CLIENT_NUM, 5);
         }
         ExchangeClient[] clients = new ExchangeClient[num];
         if (num == 1) {
-            ExchangeClient client = getSharedClient(url); // not thread safe
+            // not thread safe
+            ExchangeClient client = getSharedClient(url);
             if (client == null) {
                 client = doCreateClient(url);
                 sharedClients.putIfAbsent(url, client);

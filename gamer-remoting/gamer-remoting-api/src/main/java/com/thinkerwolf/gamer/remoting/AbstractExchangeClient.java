@@ -13,7 +13,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter implements ExchangeClient<T> {
+public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter
+        implements ExchangeClient<T> {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractExchangeClient.class);
 
@@ -42,6 +43,7 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
 
     @Override
     public Promise<T> request(Object message, long timeout, TimeUnit unit) {
+        LOG.debug("Request timeout: " + unit.toMillis(timeout) + "ms, msg: " + message);
         DefaultPromise<T> promise = new DefaultPromise<>();
         try {
             checkConnection();
@@ -73,6 +75,7 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
                 promise.await(timeout, unit);
             } catch (InterruptedException ignored) {
             }
+            LOG.debug("Temp result : " + promise.getNow());
             if (!promise.isDone()) {
                 waitResultMap.remove(requestId);
                 promise.setFailure(new TimeoutException());
@@ -84,7 +87,7 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
     /**
      * Encode request
      *
-     * @param message   request message
+     * @param message request message
      * @param requestId requestId
      * @return encoded message
      * @throws Exception encode error
@@ -113,9 +116,7 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
      * @param channel channel
      * @param message message
      */
-    protected void handleNullIdResponse(Channel channel, Object message) {
-
-    }
+    protected void handleNullIdResponse(Channel channel, Object message) {}
 
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
@@ -160,5 +161,4 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter im
             client.reconnect();
         }
     }
-
 }

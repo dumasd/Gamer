@@ -1,9 +1,13 @@
 package com.thinkerwolf.gamer.common.serialization;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 序列化集合工具
@@ -12,6 +16,8 @@ import java.io.IOException;
  * @date 2020/5/13 17:31
  */
 public final class Serializations {
+
+    private static final Logger LOG = InternalLoggerFactory.getLogger(Serializations.class);
 
     public static byte[] getBytes(Serializer serializer, Object obj) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -29,7 +35,8 @@ public final class Serializations {
         }
     }
 
-    public static <T> T getObject(Serializer serializer, byte[] data, Class<T> clazz) throws IOException, ClassNotFoundException {
+    public static <T> T getObject(Serializer serializer, byte[] data, Class<T> clazz)
+            throws IOException, ClassNotFoundException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         ObjectInput oi = null;
         try {
@@ -45,24 +52,21 @@ public final class Serializations {
 
     private static void closeQuietly(Closeable closeable) {
         try {
-            if (closeable != null)
-                closeable.close();
+            if (closeable != null) closeable.close();
         } catch (IOException ignored) {
         }
     }
 
     public static void closeQuietly(ObjectInput oi) {
         try {
-            if (oi != null)
-                oi.close();
+            if (oi != null) oi.close();
         } catch (IOException ignored) {
         }
     }
 
     public static void closeQuietly(ObjectOutput oo) {
         try {
-            if (oo != null)
-                oo.close();
+            if (oo != null) oo.close();
         } catch (IOException ignored) {
         }
     }

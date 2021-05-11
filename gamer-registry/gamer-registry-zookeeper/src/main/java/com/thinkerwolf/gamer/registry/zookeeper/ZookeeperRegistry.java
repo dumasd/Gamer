@@ -34,11 +34,7 @@ import static com.thinkerwolf.gamer.common.URL.SESSION_TIMEOUT;
 import static com.thinkerwolf.gamer.common.URL.BACKUP;
 
 /**
- * Zookeeper Registry Center <lu>
- * <li>/gamer/rpc
- * <li>/eliminate/game/game_1001
- * <li>/eliminate/login/login_1001
- * <li>/eliminate/match/match_1001 </lu>
+ * Zookeeper Registry Center
  *
  * @author wukai
  * @since 2020-05-21
@@ -49,9 +45,6 @@ public class ZookeeperRegistry extends AbstractZkRegistry
     private static final Logger LOG = InternalLoggerFactory.getLogger(ZookeeperRegistry.class);
 
     private ZkClient zkClient;
-
-    private static ScheduledExecutorService scheduled =
-            new ScheduledThreadPoolExecutor(5, new ThreadPoolExecutor.CallerRunsPolicy());
 
     public ZookeeperRegistry(URL url) {
         super(url);
@@ -180,7 +173,7 @@ public class ZookeeperRegistry extends AbstractZkRegistry
                 // Put it to another thread
                 urls.forEach(
                         url -> {
-                            scheduled.schedule(
+                            scheduler.schedule(
                                     () -> {
                                         ZookeeperRegistry.this.register(url);
                                     },

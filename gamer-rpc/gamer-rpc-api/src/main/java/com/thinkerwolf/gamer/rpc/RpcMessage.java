@@ -3,6 +3,7 @@ package com.thinkerwolf.gamer.rpc;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.rpc.annotation.RpcMethod;
 import com.thinkerwolf.gamer.rpc.annotation.RpcService;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.lang.reflect.Method;
 
@@ -13,7 +14,6 @@ public class RpcMessage implements Message {
     private Class<?>[] parameterTypes;
     private Object[] parameters;
     private int requestId;
-    private RpcService rpcService;
     private RpcMethod rpcMethod;
 
     public RpcMessage(
@@ -66,5 +66,17 @@ public class RpcMessage implements Message {
 
     public boolean isAsync() {
         return rpcMethod.async();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("interfaceClass", interfaceClass)
+                .append("method", method)
+                .append("parameterTypes", parameterTypes)
+                .append("parameters", parameters)
+                .append("requestId", requestId)
+                .append("rpcMethod", rpcMethod)
+                .toString();
     }
 }

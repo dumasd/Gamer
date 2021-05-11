@@ -6,12 +6,14 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.*;
 
 /** @author wukai */
 public abstract class AbstractRegistry implements Registry {
+    /** 公用scheduler */
+    public static ScheduledExecutorService scheduler =
+            new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
+
     /** logger */
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractRegistry.class);
     /** default retry times */
@@ -27,7 +29,7 @@ public abstract class AbstractRegistry implements Registry {
             new ConcurrentHashMap<>();
     /** Registry state listener */
     private final Set<IStateListener> stateListeners = new CopyOnWriteArraySet<>();
-    /** The local cache */
+    /** The local register cache */
     private final Properties properties = new Properties();
     /** Link url */
     protected URL url;

@@ -1,12 +1,13 @@
 package com.thinkerwolf.gamer.test;
 
-import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.rpc.ReferenceConfig;
 import com.thinkerwolf.gamer.test.action.IRpcAction;
 import org.apache.commons.lang.RandomStringUtils;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/** @author wukai */
 public class ReferenceConfigTests {
 
     private static IRpcAction testRegistry() {
@@ -16,13 +17,8 @@ public class ReferenceConfigTests {
         return ref.get();
     }
 
-    private static IRpcAction testURL() {
-        String url = "ws://101.200.177.204:80?clientNum=5";
-        //        String url = "http://127.0.0.1:8080";
-        //        String url = "ws://127.0.0.1:8080?clientNum=5";
-        //        String url = "tcp://127.0.0.1:8090?clientNum=5";
-        URL u = URL.parse(url);
-        //        String url = "tcp://127.0.0.1:8090";
+    private static IRpcAction testDirect() {
+        String url = "tcp://localhost:9090?clientNum=20";
         ReferenceConfig<IRpcAction> ref = new ReferenceConfig<>();
         ref.setInterfaceClass(IRpcAction.class);
         ref.setUrl(url);
@@ -30,20 +26,15 @@ public class ReferenceConfigTests {
     }
 
     public static void main(String[] args) {
-
-        IRpcAction rpcAction = testRegistry();
-
+        IRpcAction rpcAction = testDirect();
         System.err.println(rpcAction.sayHello("wukai"));
         System.err.println(rpcAction.getList());
-
-        testConcurrency(rpcAction, 40, new AtomicInteger());
-
+        testConcurrency(rpcAction, 30, new AtomicInteger());
         try {
-            Thread.sleep(2000);
+            TimeUnit.MILLISECONDS.sleep(5000);
         } catch (InterruptedException ignored) {
         }
-
-        // testConcurrency(rpcAction, 80, counter);
+        testConcurrency(rpcAction, 60, new AtomicInteger());
     }
 
     private static void testConcurrency(
@@ -53,14 +44,36 @@ public class ReferenceConfigTests {
                     new Thread(
                             () -> {
                                 int count = counter.incrementAndGet();
+                                long startTime = System.nanoTime();
                                 try {
                                     String r =
                                             rpcAction.sayHello(
-                                                    "wukai-" + RandomStringUtils.random(5));
-                                    System.err.println("Count::: " + count + ", Result::: " + r);
+                                                    "wukai-"
+                                                            + RandomStringUtils.randomAlphanumeric(
+                                                                    5));
+                                    long endTime = System.nanoTime();
+                                    double spend = (double) (endTime - startTime) / 1000000;
+
+                                    System.err.println(
+                                            "Count::: "
+                                                    + count
+                                                    + ", Time:::"
+                                                    + spend
+                                                    + ", Result::: "
+                                                    + r);
+
                                 } catch (Exception e) {
-                                    System.err.println("Count::: " + count + ", Exception:::");
+                                    long endTime = System.nanoTime();
+                                    double spend = (double) (endTime - startTime) / 1000000;
+                                    System.err.println(
+                                            "Count::: "
+                                                    + count
+                                                    + ", Time::: "
+                                                    + spend
+                                                    + ", Exception:::");
                                     e.printStackTrace();
+                                } finally {
+
                                 }
                             });
             t.start();
