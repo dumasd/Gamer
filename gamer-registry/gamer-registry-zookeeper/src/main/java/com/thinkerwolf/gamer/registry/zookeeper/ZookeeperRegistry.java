@@ -14,12 +14,16 @@ import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.exception.ZkNodeExistsException;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.ACL;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.thinkerwolf.gamer.common.URL.RETRY;
@@ -45,6 +49,9 @@ public class ZookeeperRegistry extends AbstractZkRegistry
     private static final Logger LOG = InternalLoggerFactory.getLogger(ZookeeperRegistry.class);
 
     private ZkClient zkClient;
+
+    private static ScheduledExecutorService scheduled =
+            new ScheduledThreadPoolExecutor(5, new ThreadPoolExecutor.CallerRunsPolicy());
 
     public ZookeeperRegistry(URL url) {
         super(url);
@@ -170,7 +177,16 @@ public class ZookeeperRegistry extends AbstractZkRegistry
         if (rs != null) {
             if (RegistryState.CONNECTED.equals(rs)) {
                 Set<URL> urls = getCaches(null);
-                urls.forEach(this::register);
+                // Put it to another thread
+                urls.forEach(
+                        url -> {
+                            scheduled.schedule(
+                                    () -> {
+                                        ZookeeperRegistry.this.register(url);
+                                    },
+                                    10 + RandomUtils.nextInt(50),
+                                    TimeUnit.MILLISECONDS);
+                        });
             }
             fireStateChange(rs);
         }
