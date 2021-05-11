@@ -13,18 +13,8 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
   public Result invoke(Object args) throws Throwable {
     RpcMessage invocation = (RpcMessage) args;
     ExchangeClient<RpcResponse> client = nextClient();
-    Promise<RpcResponse> promise;
-    if (invocation.isAsync()) {
-      // 异步调用
-      promise = client.request(invocation);
-      RpcContext.getContext().setCurrent(promise);
-      return RpcUtils.processAsync(promise);
-    } else {
-      // 同步调用
-      long timeout = TimeUnit.MILLISECONDS.toNanos(invocation.getRpcMethod().timeout());
-      promise = client.request(invocation, timeout, TimeUnit.NANOSECONDS);
-      return RpcUtils.processSync(promise);
-    }
+    Promise<RpcResponse> promise = client.request(invocation);
+    return Result.builder().withPromise(promise).build();
   }
 
   protected abstract ExchangeClient<RpcResponse> nextClient();

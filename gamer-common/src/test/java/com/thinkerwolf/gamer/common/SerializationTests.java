@@ -2,27 +2,30 @@ package com.thinkerwolf.gamer.common;
 
 import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
+import com.thinkerwolf.gamer.common.util.Stopwatch;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SerizlizerTests {
+public class SerializationTests {
 
     @Test
     public void test() throws IOException, ClassNotFoundException {
         Serializer serializer = ServiceLoader.getService("hessian2", Serializer.class);
-        SerializetionObj obj = new SerializetionObj(3, "1");
 
+        SerializedObj obj = new SerializedObj(3, "1");
+        Stopwatch sw = new Stopwatch();
+        sw.start();
         byte[] data = Serializations.getBytes(serializer, obj);
+        sw.stop();
+        System.out.println("getBytes:" + sw.getMillis());
 
-
-        System.out.println(Arrays.toString(data));
-
-        Serializations.getObject(serializer, data, SerializetionObj.class);
-
+        sw.start();
+        Serializations.getObject(serializer, data, SerializedObj.class);
+        sw.stop();
+        System.out.println("getObject:" + sw.getMillis());
     }
 
     @Test
@@ -33,10 +36,9 @@ public class SerizlizerTests {
         map.put("k1", 1);
         map.put("k2", "kv2");
         map.put("k3", 1.0D);
-        SerializetionObj sobj = new SerializetionObj(50, map);
+        SerializedObj sobj = new SerializedObj(50, map);
         byte[] data = Serializations.getBytes(s, sobj);
-        SerializetionObj dobj = Serializations.getObject(s, data, SerializetionObj.class);
+        SerializedObj dobj = Serializations.getObject(s, data, SerializedObj.class);
         System.out.println(dobj);
     }
-
 }

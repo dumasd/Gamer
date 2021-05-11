@@ -4,7 +4,6 @@ import com.thinkerwolf.gamer.rpc.ReferenceConfig;
 import com.thinkerwolf.gamer.test.action.IRpcAction;
 import org.apache.commons.lang.RandomStringUtils;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** @author wukai */
@@ -17,8 +16,7 @@ public class ReferenceConfigTests {
         return ref.get();
     }
 
-    private static IRpcAction testDirect() {
-        String url = "tcp://localhost:9090?clientNum=20";
+    private static IRpcAction testDirect(String url) {
         ReferenceConfig<IRpcAction> ref = new ReferenceConfig<>();
         ref.setInterfaceClass(IRpcAction.class);
         ref.setUrl(url);
@@ -26,15 +24,41 @@ public class ReferenceConfigTests {
     }
 
     public static void main(String[] args) {
-        IRpcAction rpcAction = testDirect();
+        String localURL = "tcp://localhost:9090?clientNum=20";
+        String remoteURL = "tcp://192.168.1.3:9090?clientNum=5";
+        IRpcAction rpcAction = testDirect(remoteURL);
         System.err.println(rpcAction.sayHello("wukai"));
         System.err.println(rpcAction.getList());
-        testConcurrency(rpcAction, 30, new AtomicInteger());
-        try {
-            TimeUnit.MILLISECONDS.sleep(5000);
-        } catch (InterruptedException ignored) {
+
+        testSequence(rpcAction, 100);
+        //        testConcurrency(rpcAction, 30, new AtomicInteger());
+        //        try {
+        //            TimeUnit.MILLISECONDS.sleep(5000);
+        //        } catch (InterruptedException ignored) {
+        //        }
+        //        testConcurrency(rpcAction, 100, new AtomicInteger());
+
+    }
+
+    private static void testSequence(IRpcAction rpcAction, int times) {
+        for (int i = 0; i < times; i++) {
+            int count = i + 1;
+            long startTime = System.nanoTime();
+            try {
+                String r = rpcAction.sayHello("wukai-" + RandomStringUtils.randomAlphanumeric(5));
+                long endTime = System.nanoTime();
+                double spend = (double) (endTime - startTime) / 1000000;
+
+                System.err.println("Count::: " + count + ", Time:::" + spend + ", Result::: " + r);
+            } catch (Exception e) {
+                long endTime = System.nanoTime();
+                double spend = (double) (endTime - startTime) / 1000000;
+                System.err.println("Count::: " + count + ", Time::: " + spend + ", Exception:::");
+                e.printStackTrace();
+            } finally {
+
+            }
         }
-        testConcurrency(rpcAction, 60, new AtomicInteger());
     }
 
     private static void testConcurrency(

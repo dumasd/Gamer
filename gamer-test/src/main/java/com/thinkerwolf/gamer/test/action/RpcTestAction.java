@@ -21,8 +21,12 @@ public class RpcTestAction implements IRpcAction {
 
     @Override
     public String sayHello(String hello) {
-        sleepRnd(1000);
-        return "Hello " + hello;
+        return "Hello sync " + hello;
+    }
+
+    @Override
+    public String sayHelloAsync(String hello) {
+        return "Hello async " + hello;
     }
 
     @Override

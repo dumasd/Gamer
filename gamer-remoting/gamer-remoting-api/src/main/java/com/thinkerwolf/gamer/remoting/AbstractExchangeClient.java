@@ -36,6 +36,10 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter
         this.client = client;
     }
 
+    public URL getUrl() {
+        return url;
+    }
+
     @Override
     public Promise<T> request(Object message) {
         return request(message, 0, null);
@@ -43,7 +47,6 @@ public abstract class AbstractExchangeClient<T> extends ChannelHandlerAdapter
 
     @Override
     public Promise<T> request(Object message, long timeout, TimeUnit unit) {
-        LOG.debug("Request timeout: " + unit.toMillis(timeout) + "ms, msg: " + message);
         DefaultPromise<T> promise = new DefaultPromise<>();
         try {
             checkConnection();

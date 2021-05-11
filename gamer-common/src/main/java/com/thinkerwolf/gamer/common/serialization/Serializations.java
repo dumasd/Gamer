@@ -7,7 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 序列化集合工具
@@ -20,15 +19,14 @@ public final class Serializations {
     private static final Logger LOG = InternalLoggerFactory.getLogger(Serializations.class);
 
     public static byte[] getBytes(Serializer serializer, Object obj) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
         ObjectOutput oo = null;
         try {
             oo = serializer.serialize(baos);
             oo.writeObject(obj);
+            oo.flush();
             oo.close();
             return baos.toByteArray();
-        } catch (IOException e) {
-            throw e;
         } finally {
             closeQuietly(baos);
             closeQuietly(oo);
@@ -42,8 +40,6 @@ public final class Serializations {
         try {
             oi = serializer.deserialize(bais);
             return oi.readObject(clazz);
-        } catch (IOException e) {
-            throw e;
         } finally {
             closeQuietly(bais);
             closeQuietly(oi);

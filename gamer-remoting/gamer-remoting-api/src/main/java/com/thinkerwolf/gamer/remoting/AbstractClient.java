@@ -51,6 +51,7 @@ public abstract class AbstractClient implements Client {
 
     @Override
     public void reconnect() throws RemotingException {
+        LOG.debug("");
         disconnect();
         connect();
     }

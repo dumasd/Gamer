@@ -2,15 +2,20 @@ package com.thinkerwolf.gamer.common;
 
 import java.io.Serializable;
 
-public class SerializetionObj implements Serializable {
+/**
+ * 被序列化对象
+ *
+ * @author wukai
+ */
+public class SerializedObj implements Serializable {
 
     private int num;
     private Object json;
+    //    private Object[] args;
 
-    public SerializetionObj() {
-    }
+    public SerializedObj() {}
 
-    public SerializetionObj(int num, Object json) {
+    public SerializedObj(int num, Object json) {
         this.num = num;
         this.json = json;
     }
@@ -30,4 +35,12 @@ public class SerializetionObj implements Serializable {
     public void setJson(Object json) {
         this.json = json;
     }
+
+    //    public Object[] getArgs() {
+    //        return args;
+    //    }
+    //
+    //    public void setArgs(Object[] args) {
+    //        this.args = args;
+    //    }
 }
