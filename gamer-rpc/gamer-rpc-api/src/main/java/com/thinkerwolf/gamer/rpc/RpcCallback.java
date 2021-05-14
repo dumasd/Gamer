@@ -38,6 +38,8 @@ public abstract class RpcCallback<V> implements FutureListener<Future<RpcRespons
     }
 
     /**
+     * 服务处理成功
+     *
      * @param result
      * @throws Exception
      */

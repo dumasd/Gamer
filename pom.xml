@@ -71,6 +71,7 @@
         <commons-lang_version>2.5</commons-lang_version>
         <commons-io_version>2.5</commons-io_version>
         <commons-collections_version>3.2.2</commons-collections_version>
+        <commons-logging_version>1.2</commons-logging_version>
         <snakeyaml_version>1.25</snakeyaml_version>
         <grpc_version>1.28.1</grpc_version>
         <grizzly_version>2.4.4</grizzly_version>
@@ -148,6 +149,11 @@
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging_version}</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>

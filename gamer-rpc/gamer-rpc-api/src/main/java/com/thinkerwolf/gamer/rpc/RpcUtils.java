@@ -4,6 +4,7 @@ import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.concurrent.Future;
 import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
+import com.thinkerwolf.gamer.rpc.exception.RpcException;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
@@ -48,6 +49,11 @@ public final class RpcUtils {
                 rpcResponse = promise.get(timeout, TimeUnit.MILLISECONDS);
             } else {
                 rpcResponse = promise.get();
+            }
+
+            if (rpcResponse == null) {
+                // fix bug
+                throw new RpcException("Rpc response is null, the service may have errors");
             }
             if (rpcResponse.getTx() != null) {
                 return Result.builder().withThrown(rpcResponse.getTx()).build();

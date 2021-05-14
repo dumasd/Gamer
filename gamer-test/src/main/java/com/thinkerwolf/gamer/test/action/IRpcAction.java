@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface IRpcAction {
 
-    @RpcMethod(serialize = "hessian2", async = false)
+    @RpcMethod(serialize = "kryo", async = false)
     String sayHello(String hello);
 
     @RpcMethod(serialize = "hessian2", async = true)
