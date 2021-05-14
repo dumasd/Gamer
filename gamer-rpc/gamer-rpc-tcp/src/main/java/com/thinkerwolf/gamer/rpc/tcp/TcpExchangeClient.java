@@ -8,7 +8,7 @@ import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.netty.NettyClient;
 import com.thinkerwolf.gamer.remoting.tcp.Packet;
 import com.thinkerwolf.gamer.remoting.AbstractExchangeClient;
-import com.thinkerwolf.gamer.rpc.RpcMessage;
+import com.thinkerwolf.gamer.rpc.Invocation;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
@@ -30,7 +30,7 @@ public class TcpExchangeClient extends AbstractExchangeClient<RpcResponse> {
     @Override
     protected Object encodeRequest(Object message, int requestId) throws Exception {
         Packet packet = new Packet();
-        RpcMessage msg = (RpcMessage) message;
+        Invocation msg = (Invocation) message;
         String command = RpcUtils.getRpcCommand(msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());
         packet.setCommand(command);
         packet.setRequestId(requestId);
@@ -51,7 +51,7 @@ public class TcpExchangeClient extends AbstractExchangeClient<RpcResponse> {
     protected RpcResponse decodeResponse(Object message, DefaultPromise<RpcResponse> promise) throws Exception {
         Packet packet = (Packet) message;
         byte[] data = ArrayUtils.subarray(packet.getContent(), 4, packet.getContent().length);
-        RpcMessage rpcMsg = (RpcMessage) promise.getAttachment();
+        Invocation rpcMsg = (Invocation) promise.getAttachment();
         Serializer serializer = ServiceLoader.getService(rpcMsg.getSerial(), Serializer.class);
         return Serializations.getObject(serializer, data, RpcResponse.class);
     }

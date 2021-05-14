@@ -9,7 +9,7 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
 
     @Override
     public Result invoke(Object args) throws Throwable {
-        RpcMessage invocation = (RpcMessage) args;
+        Invocation invocation = (Invocation) args;
         ExchangeClient<RpcResponse> client = nextClient();
         Promise<RpcResponse> promise = client.request(invocation);
 

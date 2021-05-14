@@ -41,8 +41,8 @@ public final class RpcUtils {
         return url;
     }
 
-    public static Result processSync(Promise<RpcResponse> promise, RpcMessage rpcMessage) {
-        long timeout = rpcMessage.getRpcMethod().timeout();
+    public static Result processSync(Promise<RpcResponse> promise, Invocation invocation) {
+        long timeout = invocation.getRpcMethod().timeout();
         try {
             RpcResponse rpcResponse;
             if (timeout > 0) {
@@ -66,11 +66,11 @@ public final class RpcUtils {
         }
     }
 
-    public static Result processAsync(Future<RpcResponse> future, RpcMessage rpcMessage) {
+    public static Result processAsync(Future<RpcResponse> future, Invocation invocation) {
         RpcResponse rpcResponse = future.getNow();
         if (rpcResponse == null) {
             return Result.builder()
-                    .withResult(ClassUtils.getDefaultValue(rpcMessage.getMethod().getReturnType()))
+                    .withResult(ClassUtils.getDefaultValue(invocation.getMethod().getReturnType()))
                     .build();
         } else {
             if (rpcResponse.getTx() != null) {

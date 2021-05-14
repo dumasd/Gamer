@@ -2,21 +2,34 @@ package com.thinkerwolf.gamer.rpc;
 
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.rpc.annotation.RpcMethod;
-import com.thinkerwolf.gamer.rpc.annotation.RpcService;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.lang.reflect.Method;
 
-public class RpcMessage implements Message {
-
-    private Class<?> interfaceClass;
-    private Method method;
-    private Class<?>[] parameterTypes;
-    private Object[] parameters;
+/**
+ * Rpc invocation
+ *
+ * @author wukai
+ */
+public class Invocation implements Message {
+    /** Invoke interface class */
+    private final Class<?> interfaceClass;
+    /** Invoke method */
+    private final Method method;
+    /** Method parameter types */
+    private final Class<?>[] parameterTypes;
+    /** Method parameters */
+    private final Object[] parameters;
+    /** Invocation requestId */
     private int requestId;
-    private RpcMethod rpcMethod;
+    /**
+     * Method RpcMethod annotation
+     *
+     * @see com.thinkerwolf.gamer.rpc.annotation.RpcMethod
+     */
+    private final RpcMethod rpcMethod;
 
-    public RpcMessage(
+    public Invocation(
             Class<?> interfaceClass,
             Method method,
             Class<?>[] parameterTypes,

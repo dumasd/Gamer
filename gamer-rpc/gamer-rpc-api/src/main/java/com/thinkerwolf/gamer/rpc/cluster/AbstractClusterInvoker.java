@@ -5,7 +5,7 @@ import com.thinkerwolf.gamer.common.ServiceLoader;
 import com.thinkerwolf.gamer.common.balance.LoadBalancer;
 import com.thinkerwolf.gamer.rpc.Invoker;
 import com.thinkerwolf.gamer.rpc.Result;
-import com.thinkerwolf.gamer.rpc.RpcMessage;
+import com.thinkerwolf.gamer.rpc.Invocation;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
 import org.apache.commons.collections.CollectionUtils;
@@ -41,7 +41,7 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
     private Invoker<T> doSelect(
             Object invocation, LoadBalancer loadBalancer, List<Invoker<T>> invokers) {
         Map<String, Object> props = new HashMap<>(5, 1.0F);
-        RpcMessage rpcMsg = (RpcMessage) invocation;
+        Invocation rpcMsg = (Invocation) invocation;
         props.put(
                 Constants.LOADBALANCE_KEY,
                 RpcUtils.getRpcCommand(rpcMsg.getInterfaceClass(), rpcMsg.getMethod()));
@@ -51,7 +51,7 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
 
     @Override
     public Result invoke(Object args) throws Throwable {
-        RpcMessage rpcMsg = (RpcMessage) args;
+        Invocation rpcMsg = (Invocation) args;
         List<Invoker<T>> invokers = dictionary.find(rpcMsg);
         LoadBalancer loadBalancer =
                 ServiceLoader.getService(rpcMsg.getRpcMethod().loadbalance(), LoadBalancer.class);

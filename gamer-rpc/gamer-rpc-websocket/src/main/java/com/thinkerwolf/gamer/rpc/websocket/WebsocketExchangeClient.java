@@ -12,7 +12,7 @@ import com.thinkerwolf.gamer.netty.NettyClient;
 import com.thinkerwolf.gamer.remoting.AbstractExchangeClient;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.RemotingException;
-import com.thinkerwolf.gamer.rpc.RpcMessage;
+import com.thinkerwolf.gamer.rpc.Invocation;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
@@ -50,7 +50,7 @@ public class WebsocketExchangeClient extends AbstractExchangeClient<RpcResponse>
 
     @Override
     protected Object encodeRequest(Object message, int requestId) throws Exception {
-        RpcMessage msg = (RpcMessage) message;
+        Invocation msg = (Invocation) message;
         String command = RpcUtils.getRpcCommand(msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer(20);
         buf.writeInt(0);
@@ -84,7 +84,7 @@ public class WebsocketExchangeClient extends AbstractExchangeClient<RpcResponse>
         BinaryWebSocketFrame frame = (BinaryWebSocketFrame) message;
         ByteBuf buf = frame.content();
         byte[] data = new byte[buf.readableBytes()];
-        RpcMessage rpcMsg = (RpcMessage) promise.getAttachment();
+        Invocation rpcMsg = (Invocation) promise.getAttachment();
         Serializer serializer = ServiceLoader.getService(rpcMsg.getSerial(), Serializer.class);
         return Serializations.getObject(serializer, data, RpcResponse.class);
     }

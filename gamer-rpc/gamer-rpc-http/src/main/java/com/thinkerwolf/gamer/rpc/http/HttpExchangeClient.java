@@ -7,7 +7,7 @@ import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.remoting.ExchangeClient;
-import com.thinkerwolf.gamer.rpc.RpcMessage;
+import com.thinkerwolf.gamer.rpc.Invocation;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
@@ -116,7 +116,7 @@ public class HttpExchangeClient implements ExchangeClient<RpcResponse> {
     public Promise<RpcResponse> request(Object message, long timeout, TimeUnit unit) {
         DefaultPromise<RpcResponse> promise = new DefaultPromise<>();
 
-        RpcMessage msg = (RpcMessage) message;
+        Invocation msg = (Invocation) message;
         String command =
                 RpcUtils.getRpcCommand(
                         msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());

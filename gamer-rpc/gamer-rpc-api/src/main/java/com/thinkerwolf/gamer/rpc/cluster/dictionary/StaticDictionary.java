@@ -1,7 +1,7 @@
 package com.thinkerwolf.gamer.rpc.cluster.dictionary;
 
 import com.thinkerwolf.gamer.rpc.Invoker;
-import com.thinkerwolf.gamer.rpc.RpcMessage;
+import com.thinkerwolf.gamer.rpc.Invocation;
 import com.thinkerwolf.gamer.rpc.cluster.AbstractDictionary;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class StaticDictionary<T> extends AbstractDictionary<T> {
     }
 
     @Override
-    public List<Invoker<T>> find(RpcMessage rpcMessage) {
+    public List<Invoker<T>> find(Invocation invocation) {
         return invokers;
     }
 }
