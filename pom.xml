@@ -69,7 +69,7 @@
         <zkclient_version>0.11</zkclient_version>
         <classmate_version>1.5.1</classmate_version>
         <commons-lang_version>2.5</commons-lang_version>
-        <commons-io_version>2.5</commons-io_version>
+        <commons-io_version>2.7</commons-io_version>
         <commons-collections_version>3.2.2</commons-collections_version>
         <commons-logging_version>1.2</commons-logging_version>
         <snakeyaml_version>1.25</snakeyaml_version>
