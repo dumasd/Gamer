@@ -13,6 +13,7 @@ import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
 import com.thinkerwolf.gamer.remoting.Content;
+import com.thinkerwolf.gamer.rpc.RpcContext;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
@@ -33,7 +34,12 @@ public class RpcInvocation extends AbstractInvocation {
     private final RpcService rpcService;
     private final RpcMethod rpcMethod;
 
-    public RpcInvocation(Class interfaceClass, Method method, Object obj, RpcService rpcService, RpcMethod rpcMethod) {
+    public RpcInvocation(
+            Class interfaceClass,
+            Method method,
+            Object obj,
+            RpcService rpcService,
+            RpcMethod rpcMethod) {
         super(true);
         this.interfaceClass = interfaceClass;
         this.method = method;
@@ -65,18 +71,27 @@ public class RpcInvocation extends AbstractInvocation {
 
         RpcRequest rpcRequest;
         try {
-            rpcRequest = Serializations.getObject(serializer, request.getContent(), RpcRequest.class);
+            rpcRequest =
+                    Serializations.getObject(serializer, request.getContent(), RpcRequest.class);
         } catch (Exception e) {
             LOG.error("Rpc internal error", e);
-            handleRpcResponse(request, response, serializer, exResponse(request, new RpcException(e)));
+            handleRpcResponse(
+                    request, response, serializer, exResponse(request, new RpcException(e)));
             return;
+        }
+        if (rpcRequest.getAttachments() != null) {
+            RpcContext.getContext().clearAttachments();
+            rpcRequest
+                    .getAttachments()
+                    .forEach((k, v) -> RpcContext.getContext().setAttachment(k, v));
         }
         Object result;
         try {
             result = method.invoke(obj, rpcRequest.getArgs());
         } catch (Exception e) {
             LOG.error("Rpc execution", e);
-            handleRpcResponse(request, response, serializer, exResponse(request, new BusinessException(e)));
+            handleRpcResponse(
+                    request, response, serializer, exResponse(request, new BusinessException(e)));
             return;
         }
 
@@ -84,17 +99,26 @@ public class RpcInvocation extends AbstractInvocation {
             handleRpcResponse(request, response, serializer, correctResponse(request, result));
         } catch (Exception e) {
             LOG.error("Rpc internal error", e);
-            handleRpcResponse(request, response, serializer, exResponse(request, new RpcException(e)));
+            handleRpcResponse(
+                    request, response, serializer, exResponse(request, new RpcException(e)));
         }
     }
 
-    private void handleRpcResponse(Request request, Response response, Serializer serializer, RpcResponse rpcResponse) throws Exception {
+    private void handleRpcResponse(
+            Request request, Response response, Serializer serializer, RpcResponse rpcResponse)
+            throws Exception {
         byte[] bytes = Serializations.getBytes(serializer, rpcResponse);
         ChannelBuffer buf = ChannelBuffers.buffer(4 + bytes.length);
         buf.writeInt(rpcResponse.getRequestId());
         buf.writeBytes(bytes);
         response.setContentType(Content.CONTENT_BYTES);
-        Decorator decorator = ServiceLoader.getService(request.getAttribute(com.thinkerwolf.gamer.core.servlet.Request.DECORATOR_ATTRIBUTE).toString(), Decorator.class);
+        Decorator decorator =
+                ServiceLoader.getService(
+                        request.getAttribute(
+                                        com.thinkerwolf.gamer.core.servlet.Request
+                                                .DECORATOR_ATTRIBUTE)
+                                .toString(),
+                        Decorator.class);
         response.write(decorator.decorate(new ByteModel(buf.array()), request, response));
     }
 
@@ -102,6 +126,7 @@ public class RpcInvocation extends AbstractInvocation {
         RpcResponse rpcResponse = new RpcResponse();
         rpcResponse.setRequestId(request.getRequestId());
         rpcResponse.setTx(e);
+        rpcResponse.setAttachments(RpcContext.getContext().getAttachments());
         return rpcResponse;
     }
 
@@ -109,6 +134,7 @@ public class RpcInvocation extends AbstractInvocation {
         RpcResponse rpcResponse = new RpcResponse();
         rpcResponse.setRequestId(request.getRequestId());
         rpcResponse.setResult(result);
+        rpcResponse.setAttachments(RpcContext.getContext().getAttachments());
         return rpcResponse;
     }
 }

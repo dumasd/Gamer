@@ -1,40 +1,43 @@
 package com.thinkerwolf.gamer.rpc.proxy.jdk;
 
-import com.thinkerwolf.gamer.rpc.Invoker;
-import com.thinkerwolf.gamer.rpc.Result;
-import com.thinkerwolf.gamer.rpc.Invocation;
+import com.thinkerwolf.gamer.rpc.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
 
-public class InvokerInvocationHandler implements InvocationHandler {
+public class InvokerInvocationHandler<T> implements InvocationHandler {
 
-    private Class interfaceClass;
+    private Class<T> interfaceClass;
 
-    private Invoker invoker;
+    private Invoker<T> invoker;
 
-    public InvokerInvocationHandler(Class interfaceClass, Invoker invoker) {
+    public InvokerInvocationHandler(Class<T> interfaceClass, Invoker<T> invoker) {
         this.interfaceClass = interfaceClass;
         this.invoker = invoker;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // 调用前需要清除RpcContext
+        RpcContext.getContext().clearAttachments();
         Invocation invocation =
                 new Invocation(interfaceClass, method, method.getParameterTypes(), args);
-        Result result = invoker.invoke(invocation);
-        //        Promise<RpcResponse> promise = result.promise();
-        //        if (invocation.isAsync()) {
-        //            // 异步调用
-        //            RpcContext.getContext().setCurrent(promise);
-        //            return ClassUtils.getDefaultValue(method.getReturnType());
-        //        } else {
-        //            // 同步调用
-        //            long timeout =
-        // TimeUnit.MILLISECONDS.toNanos(invocation.getRpcMethod().timeout());
-        //            RpcResponse rpcResponse = promise.get(timeout, TimeUnit.NANOSECONDS);
-        //            return rpcResponse.getResult();
-        //        }
+
+        String group = invocation.getRpcMethod().group();
+        if (StringUtils.isBlank(group)) {
+            group = "default";
+        }
+        List<RpcFilter> filters = RpcApplication.getFilters(group);
+        Result result = null;
+        if (filters == null || filters.size() == 0) {
+            result = invoker.invoke(invocation);
+        } else {
+            for (RpcFilter filter : filters) {
+                result = filter.invoke(invocation, invoker);
+            }
+        }
         if (result.cause() != null) {
             throw result.cause();
         }

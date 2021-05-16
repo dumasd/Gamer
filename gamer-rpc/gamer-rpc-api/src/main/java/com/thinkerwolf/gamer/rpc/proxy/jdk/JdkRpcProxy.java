@@ -10,6 +10,10 @@ public class JdkRpcProxy implements RpcProxy {
 
     @Override
     public <T> T newProxy(Class<T> clazz, Invoker<T> invoker) {
-        return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz}, new InvokerInvocationHandler(clazz, invoker));
+        return (T)
+                Proxy.newProxyInstance(
+                        clazz.getClassLoader(),
+                        new Class[] {clazz},
+                        new InvokerInvocationHandler<>(clazz, invoker));
     }
 }

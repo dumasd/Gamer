@@ -1,6 +1,9 @@
 package com.thinkerwolf.gamer.test;
 
 import com.thinkerwolf.gamer.rpc.ReferenceConfig;
+import com.thinkerwolf.gamer.rpc.RpcCallback;
+import com.thinkerwolf.gamer.rpc.RpcContext;
+import com.thinkerwolf.gamer.rpc.exception.RpcException;
 import com.thinkerwolf.gamer.test.action.IRpcAction;
 import org.apache.commons.lang.RandomStringUtils;
 
@@ -25,7 +28,7 @@ public class ReferenceConfigTests {
     }
 
     public static void main(String[] args) {
-        String url = "tcp://localhost:9090?clientNum=20";
+        String url = "tcp://localhost:9090?clientNum=30";
         //        String url = "tcp://192.168.1.3:9090?clientNum=5";
         IRpcAction rpcAction = testDirect(url);
         System.err.println(rpcAction.sayHello("wukai"));
@@ -48,7 +51,6 @@ public class ReferenceConfigTests {
                 String r = rpcAction.sayHello("wukai-" + RandomStringUtils.randomAlphanumeric(5));
                 long endTime = System.nanoTime();
                 double spend = (double) (endTime - startTime) / 1000000;
-
                 System.err.println("Count::: " + count + ", Time:::" + spend + ", Result::: " + r);
             } catch (Exception e) {
                 long endTime = System.nanoTime();
@@ -71,10 +73,28 @@ public class ReferenceConfigTests {
                                 long startTime = System.nanoTime();
                                 try {
                                     String r =
-                                            rpcAction.sayHello(
+                                            rpcAction.sayHelloAsync(
                                                     "wukai-"
                                                             + RandomStringUtils.randomAlphanumeric(
                                                                     5));
+                                    RpcContext.getContext()
+                                            .addListener(
+                                                    new RpcCallback<String>() {
+                                                        @Override
+                                                        protected void onSuccess(String result)
+                                                                throws Exception {
+                                                            System.out.println(result);
+                                                        }
+
+                                                        @Override
+                                                        protected void onBusinessError(Throwable t)
+                                                                throws Exception {}
+
+                                                        @Override
+                                                        protected void onRpcError(RpcException ex)
+                                                                throws Exception {}
+                                                    });
+
                                     long endTime = System.nanoTime();
                                     double spend = (double) (endTime - startTime) / 1000000;
 

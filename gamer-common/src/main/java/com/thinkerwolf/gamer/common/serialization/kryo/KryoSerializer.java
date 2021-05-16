@@ -6,7 +6,6 @@ import com.esotericsoftware.kryo.io.Output;
 import com.thinkerwolf.gamer.common.serialization.ObjectInput;
 import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
-import org.objenesis.strategy.StdInstantiatorStrategy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,9 +17,6 @@ public class KryoSerializer implements Serializer {
             ThreadLocal.withInitial(
                     () -> {
                         final Kryo kryo = new Kryo();
-                        kryo.setInstantiatorStrategy(
-                                new Kryo.DefaultInstantiatorStrategy(
-                                        new StdInstantiatorStrategy()));
                         return kryo;
                     });
 

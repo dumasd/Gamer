@@ -12,10 +12,7 @@ import com.thinkerwolf.gamer.netty.NettyClient;
 import com.thinkerwolf.gamer.remoting.AbstractExchangeClient;
 import com.thinkerwolf.gamer.remoting.Channel;
 import com.thinkerwolf.gamer.remoting.RemotingException;
-import com.thinkerwolf.gamer.rpc.Invocation;
-import com.thinkerwolf.gamer.rpc.RpcRequest;
-import com.thinkerwolf.gamer.rpc.RpcResponse;
-import com.thinkerwolf.gamer.rpc.RpcUtils;
+import com.thinkerwolf.gamer.rpc.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
@@ -51,7 +48,9 @@ public class WebsocketExchangeClient extends AbstractExchangeClient<RpcResponse>
     @Override
     protected Object encodeRequest(Object message, int requestId) throws Exception {
         Invocation msg = (Invocation) message;
-        String command = RpcUtils.getRpcCommand(msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());
+        String command =
+                RpcUtils.getRpcCommand(
+                        msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer(20);
         buf.writeInt(0);
         buf.writeInt(requestId);
@@ -61,6 +60,7 @@ public class WebsocketExchangeClient extends AbstractExchangeClient<RpcResponse>
 
         RpcRequest rpcRequest = new RpcRequest();
         rpcRequest.setArgs(msg.getParameters());
+        rpcRequest.setAttachments(RpcContext.getContext().getAttachments());
         Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
         byte[] content = Serializations.getBytes(serializer, rpcRequest);
         buf.writeInt(content.length);
@@ -80,7 +80,8 @@ public class WebsocketExchangeClient extends AbstractExchangeClient<RpcResponse>
     }
 
     @Override
-    protected RpcResponse decodeResponse(Object message, DefaultPromise<RpcResponse> promise) throws Exception {
+    protected RpcResponse decodeResponse(Object message, DefaultPromise<RpcResponse> promise)
+            throws Exception {
         BinaryWebSocketFrame frame = (BinaryWebSocketFrame) message;
         ByteBuf buf = frame.content();
         byte[] data = new byte[buf.readableBytes()];
@@ -98,6 +99,4 @@ public class WebsocketExchangeClient extends AbstractExchangeClient<RpcResponse>
             handshakePromise.setSuccess(DEFAULT_HANDSHAKE_RESULT);
         }
     }
-
-
 }

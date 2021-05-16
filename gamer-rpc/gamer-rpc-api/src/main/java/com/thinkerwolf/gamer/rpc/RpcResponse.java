@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.rpc;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * RPC Response
@@ -11,13 +12,11 @@ import java.io.Serializable;
 public class RpcResponse implements Serializable {
 
     private int requestId;
-    /**
-     * Rpc correct result
-     */
+    /** Rpc correct result */
     private Object result;
-    /**
-     * Rpc exception
-     */
+
+    private Map<String, String> attachments;
+    /** Rpc exception */
     private Throwable tx;
 
     public int getRequestId() {
@@ -42,5 +41,13 @@ public class RpcResponse implements Serializable {
 
     public void setTx(Throwable tx) {
         this.tx = tx;
+    }
+
+    public Map<String, String> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(Map<String, String> attachments) {
+        this.attachments = attachments;
     }
 }

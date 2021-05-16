@@ -7,10 +7,7 @@ import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.remoting.ExchangeClient;
-import com.thinkerwolf.gamer.rpc.Invocation;
-import com.thinkerwolf.gamer.rpc.RpcRequest;
-import com.thinkerwolf.gamer.rpc.RpcResponse;
-import com.thinkerwolf.gamer.rpc.RpcUtils;
+import com.thinkerwolf.gamer.rpc.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpEntity;
@@ -122,11 +119,12 @@ public class HttpExchangeClient implements ExchangeClient<RpcResponse> {
                         msg.getInterfaceClass(), msg.getMethodName(), msg.getParameterTypes());
 
         Serializer serializer = ServiceLoader.getService(msg.getSerial(), Serializer.class);
-        RpcRequest rpcArgs = new RpcRequest();
-        rpcArgs.setArgs(msg.getParameters());
+        RpcRequest rpcRequest = new RpcRequest();
+        rpcRequest.setArgs(msg.getParameters());
+        rpcRequest.setAttachments(RpcContext.getContext().getAttachments());
         byte[] entityBytes;
         try {
-            entityBytes = Serializations.getBytes(serializer, rpcArgs);
+            entityBytes = Serializations.getBytes(serializer, rpcRequest);
         } catch (IOException e) {
             promise.setFailure(e);
             return promise;

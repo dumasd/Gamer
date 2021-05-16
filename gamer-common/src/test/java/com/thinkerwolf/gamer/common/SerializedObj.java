@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.common;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 被序列化对象
@@ -11,13 +12,19 @@ public class SerializedObj implements Serializable {
 
     private int num;
     private Object json;
-    //    private Object[] args;
+    private Map<String, Object> map;
 
     public SerializedObj() {}
 
     public SerializedObj(int num, Object json) {
         this.num = num;
         this.json = json;
+    }
+
+    public SerializedObj(int num, Object json, Map<String, Object> map) {
+        this.num = num;
+        this.json = json;
+        this.map = map;
     }
 
     public int getNum() {
@@ -36,11 +43,16 @@ public class SerializedObj implements Serializable {
         this.json = json;
     }
 
-    //    public Object[] getArgs() {
-    //        return args;
-    //    }
-    //
-    //    public void setArgs(Object[] args) {
-    //        this.args = args;
-    //    }
+    public Map<String, Object> getMap() {
+        return map;
+    }
+
+    public void setMap(Map<String, Object> map) {
+        this.map = map;
+    }
+
+    @Override
+    public String toString() {
+        return "SerializedObj{" + "num=" + num + ", json=" + json + ", map=" + map + '}';
+    }
 }

@@ -21,7 +21,6 @@ public class SerializationTests {
         byte[] data = Serializations.getBytes(serializer, obj);
         sw.stop();
         System.out.println("getBytes:" + sw.getMillis() + ", len: " + data.length);
-
         sw.start();
         Serializations.getObject(serializer, data, SerializedObj.class);
         sw.stop();
@@ -36,9 +35,12 @@ public class SerializationTests {
         map.put("k1", 1);
         map.put("k2", "kv2");
         map.put("k3", 1.0D);
-        SerializedObj sobj = new SerializedObj(50, map);
+        SerializedObj sobj = new SerializedObj(50, "", map);
         byte[] data = Serializations.getBytes(s, sobj);
         SerializedObj dobj = Serializations.getObject(s, data, SerializedObj.class);
         System.out.println(dobj);
     }
+
+    @Test
+    public void testOther() throws Exception {}
 }
