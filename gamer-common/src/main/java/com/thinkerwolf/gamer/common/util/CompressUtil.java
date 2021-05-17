@@ -46,7 +46,6 @@ public final class CompressUtil {
         return bytes;
     }
 
-
     public static byte[] compressGzip(byte[] bytes) throws IOException {
         ByteArrayOutputStream out = null;
         GZIPOutputStream gzip = null;
@@ -54,7 +53,6 @@ public final class CompressUtil {
             out = new ByteArrayOutputStream();
             gzip = new GZIPOutputStream(out);
             gzip.write(bytes);
-            gzip.close();
             return out.toByteArray();
         } finally {
             IOUtils.closeQuietly(out);

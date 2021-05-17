@@ -9,10 +9,7 @@ import com.thinkerwolf.gamer.core.mvc.Invocation;
 import com.thinkerwolf.gamer.core.mvc.MvcServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.core.spring.SpringObjectFactory;
-import com.thinkerwolf.gamer.registry.IStateListener;
 import com.thinkerwolf.gamer.registry.Registry;
-import com.thinkerwolf.gamer.registry.RegistryState;
-import com.thinkerwolf.gamer.registry.StateListenerAdapter;
 import com.thinkerwolf.gamer.rpc.RpcConstants;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
 import com.thinkerwolf.gamer.rpc.annotation.RpcMethod;
@@ -23,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -143,9 +141,14 @@ public class RpcDispatchServlet implements MvcServlet {
                     host = serverURL.getHost();
                 }
                 String hostPort = host + ":" + serverURL.getPort();
-                URL regURL = URL.parse(serverURL.getProtocol() + "://" + hostPort + baseUrl);
+                String urlStr = serverURL.getProtocol() + "://" + hostPort + baseUrl;
+                URL regURL = URL.parse(urlStr);
                 regURL.setParameters(new HashMap<>());
-                regURL.getParameters().put(URL.NODE_NAME, UUID.randomUUID().toString());
+                regURL.getParameters()
+                        .put(
+                                URL.NODE_NAME,
+                                UUID.nameUUIDFromBytes(urlStr.getBytes(StandardCharsets.UTF_8))
+                                        .toString());
                 registry.register(regURL);
             }
         }

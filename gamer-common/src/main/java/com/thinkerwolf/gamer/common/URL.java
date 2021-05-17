@@ -50,10 +50,9 @@ public class URL implements Serializable {
     public static final String RETRY = "retry";
     public static final String RETRY_MILLIS = "retryMillis";
 
-    /**
-     * RPC通信时是否使用本地地址
-     */
+    /** RPC通信时是否使用本地地址 */
     public static final String RPC_USE_LOCAL = "rpcUseLocal";
+
     public static final String RPC_HOST = "rpcHost";
     public static final String CHANNEL_HANDLERS = "channelHandlers";
     // ========================= parameter keys end  =============================== //
@@ -76,20 +75,22 @@ public class URL implements Serializable {
     private String host;
     private int port;
     private String path;
-    /**
-     * 传输参数。Value值必须为String
-     */
+    /** 传输参数。Value值必须为String */
     private volatile Map<String, Object> parameters;
 
-    /**
-     * 附加对象，不参与序列化
-     */
+    /** 附加对象，不参与序列化 */
     private transient Map<String, Object> attachs;
 
-    public URL() {
-    }
+    public URL() {}
 
-    public URL(String protocol, String username, String password, String host, int port, String path, Map<String, Object> parameters) {
+    public URL(
+            String protocol,
+            String username,
+            String password,
+            String host,
+            int port,
+            String path,
+            Map<String, Object> parameters) {
         this.protocol = protocol;
         this.username = username;
         this.password = password;
@@ -141,14 +142,17 @@ public class URL implements Serializable {
         }
         i = url.indexOf("://");
         if (i >= 0) {
-            if (i == 0) throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+            if (i == 0) {
+                throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+            }
             protocol = url.substring(0, i);
             url = url.substring(i + 3);
         } else {
             // case: file:/path/to/file.txt
             i = url.indexOf(":/");
             if (i >= 0) {
-                if (i == 0) throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+                if (i == 0)
+                    throw new IllegalStateException("url missing protocol: \"" + url + "\"");
                 protocol = url.substring(0, i);
                 url = url.substring(i + 1);
             }
@@ -174,7 +178,9 @@ public class URL implements Serializable {
             port = Integer.parseInt(url.substring(i + 1));
             url = url.substring(0, i);
         }
-        if (url.length() > 0) host = url;
+        if (url.length() > 0) {
+            host = url;
+        }
         return new URL(protocol, username, password, host, port, path, parameters);
     }
 
@@ -242,7 +248,6 @@ public class URL implements Serializable {
         return String.format("%s:%d", host, port);
     }
 
-
     public String getString(String key, String defaultValue) {
         return MapUtils.getString(parameters, key, defaultValue);
     }
@@ -281,7 +286,6 @@ public class URL implements Serializable {
     public <T> T getObject(String key, T defaultValue) {
         return (T) MapUtils.getObject(parameters, key, defaultValue);
     }
-
 
     @SuppressWarnings("unchecked")
     public <T> T getAttach(String key) {
@@ -332,16 +336,20 @@ public class URL implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         URL url = (URL) o;
-        return port == url.port &&
-                Objects.equals(protocol, url.protocol) &&
-                Objects.equals(username, url.username) &&
-                Objects.equals(password, url.password) &&
-                Objects.equals(host, url.host) &&
-                Objects.equals(path, url.path) &&
-                Objects.equals(parameters, url.parameters);
+        return port == url.port
+                && Objects.equals(protocol, url.protocol)
+                && Objects.equals(username, url.username)
+                && Objects.equals(password, url.password)
+                && Objects.equals(host, url.host)
+                && Objects.equals(path, url.path)
+                && Objects.equals(parameters, url.parameters);
     }
 
     @Override
