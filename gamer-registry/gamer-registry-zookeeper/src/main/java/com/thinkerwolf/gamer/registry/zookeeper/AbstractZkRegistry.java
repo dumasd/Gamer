@@ -22,17 +22,4 @@ public abstract class AbstractZkRegistry extends AbstractRegistry {
         String append = nodeName == null ? "" : ("/" + nodeName);
         return p + append;
     }
-
-    @Override
-    protected String toCacheKey(URL url) {
-        return internalToKey(toDataPath(url));
-    }
-
-    protected String internalToKey(String path) {
-        String k = path.replace('/', '.');
-        if (k.charAt(0) == '.') {
-            return k.substring(1);
-        }
-        return k;
-    }
 }

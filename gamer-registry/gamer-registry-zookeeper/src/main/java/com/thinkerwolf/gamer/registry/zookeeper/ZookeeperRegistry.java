@@ -21,9 +21,6 @@ import org.apache.zookeeper.data.ACL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.thinkerwolf.gamer.common.URL.RETRY;
@@ -50,6 +47,7 @@ public class ZookeeperRegistry extends AbstractZkRegistry
         super(url);
         this.zkClient = prepareClient();
         this.zkClient.subscribeStateChanges(this);
+        startLookupTask();
     }
 
     private ZkClient prepareClient() {

@@ -34,7 +34,6 @@ public class MulticastRegistry extends AbstractRegistry {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(MulticastRegistry.class);
 
-
     private final MulticastSocket multicastSocket;
     private final Set<URL> registered = new CopyOnWriteArraySet<>();
     private final ScheduledExecutorService resendExecutor;
@@ -47,53 +46,63 @@ public class MulticastRegistry extends AbstractRegistry {
         this.resendExecutor = Executors.newSingleThreadScheduledExecutor();
         try {
             final int ttl = multicastSocket.getTimeToLive();
-            resendExecutor.scheduleAtFixedRate(() -> {
-                if (!multicastSocket.isClosed()) {
-                    for (URL u : registered) {
-                        multicast(REGISTER + " " + u.toString());
-                    }
-                }
-            }, ttl, ttl, TimeUnit.SECONDS);
+            resendExecutor.scheduleAtFixedRate(
+                    () -> {
+                        if (!multicastSocket.isClosed()) {
+                            for (URL u : registered) {
+                                multicast(REGISTER + " " + u.toString());
+                            }
+                        }
+                    },
+                    ttl,
+                    ttl,
+                    TimeUnit.SECONDS);
         } catch (IOException e) {
             throw new RegistryException(e);
         }
 
-        Thread thread = new Thread(() -> {
-            byte[] buff = new byte[2048];
-            final DatagramPacket packet = new DatagramPacket(buff, buff.length);
-            while (!multicastSocket.isClosed()) {
-                try {
-                    multicastSocket.receive(packet);
-                    String msg = new String(packet.getData());
-                    int idx = msg.indexOf('\n');
-                    if (idx > 0) {
-                        msg = msg.substring(0, idx);
-                    }
-                    MulticastRegistry.this.received(msg, packet.getSocketAddress());
-                    Arrays.fill(buff, (byte) 0);
-                } catch (Throwable e) {
-                    if (multicastSocket.isClosed()) {
-                        LOG.error("Closed", e);
-                    }
-                }
-            }
-        }, "MulticastRegistry");
+        Thread thread =
+                new Thread(
+                        () -> {
+                            byte[] buff = new byte[2048];
+                            final DatagramPacket packet = new DatagramPacket(buff, buff.length);
+                            while (!multicastSocket.isClosed()) {
+                                try {
+                                    multicastSocket.receive(packet);
+                                    String msg = new String(packet.getData());
+                                    int idx = msg.indexOf('\n');
+                                    if (idx > 0) {
+                                        msg = msg.substring(0, idx);
+                                    }
+                                    MulticastRegistry.this.received(msg, packet.getSocketAddress());
+                                    Arrays.fill(buff, (byte) 0);
+                                } catch (Throwable e) {
+                                    if (multicastSocket.isClosed()) {
+                                        LOG.error("Closed", e);
+                                    }
+                                }
+                            }
+                        },
+                        "MulticastRegistry");
         thread.setDaemon(true);
         thread.start();
     }
 
     private MulticastSocket prepareClient(URL url) {
-        final int connectionTimeout = url.getInteger(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
+        final int connectionTimeout =
+                url.getInteger(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
         int retry = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
         try {
             this.multicastAddress = InetAddress.getByName(url.getHost());
             this.multicastPort = url.getPort() <= 0 ? DEFAULT_PORT : url.getPort();
-            return RetryLoops.invokeWithRetry(() -> {
-                MulticastSocket socket = new MulticastSocket(multicastPort);
-                socket.setTimeToLive(30);
-                NetUtils.joinMulticastGroup(socket, multicastAddress);
-                return socket;
-            }, new RetryNTimes(retry, connectionTimeout + 50, TimeUnit.MILLISECONDS));
+            return RetryLoops.invokeWithRetry(
+                    () -> {
+                        MulticastSocket socket = new MulticastSocket(multicastPort);
+                        socket.setTimeToLive(30);
+                        NetUtils.joinMulticastGroup(socket, multicastAddress);
+                        return socket;
+                    },
+                    new RetryNTimes(retry, connectionTimeout + 50, TimeUnit.MILLISECONDS));
         } catch (Exception e) {
             throw new RegistryException(e);
         }
@@ -103,16 +112,15 @@ public class MulticastRegistry extends AbstractRegistry {
     protected void doRegister(URL url) {
         registered.add(url);
         multicast(REGISTER + " " + url.toString());
-        fireDataChange(new DataEvent(toCacheKey(url), url));
+        fireDataChange(new DataEvent(toPathString(url), url));
     }
 
     @Override
     protected void doUnRegister(URL url) {
         registered.remove(url);
         multicast(UNREGISTER + " " + url.toString());
-        fireDataChange(new DataEvent(toCacheKey(url), null));
+        fireDataChange(new DataEvent(toPathString(url), null));
     }
-
 
     @Override
     protected void doSubscribe(URL url) {
@@ -134,7 +142,8 @@ public class MulticastRegistry extends AbstractRegistry {
             LOG.info("Send multicast message {} to {}:{}", msg, multicastAddress, multicastPort);
         }
         byte[] buff = (msg + "\n").getBytes(UTF_8);
-        DatagramPacket packet = new DatagramPacket(buff, buff.length, multicastAddress, multicastPort);
+        DatagramPacket packet =
+                new DatagramPacket(buff, buff.length, multicastAddress, multicastPort);
         try {
             multicastSocket.send(packet);
         } catch (Exception e) {
@@ -146,11 +155,11 @@ public class MulticastRegistry extends AbstractRegistry {
         LOG.info("Multicast received {}", msg);
         if (msg.startsWith(REGISTER)) {
             URL url = URL.parse(msg.substring(REGISTER.length() + 1));
-            DataEvent dataEvent = new DataEvent(toCacheKey(url), url);
+            DataEvent dataEvent = new DataEvent(toPathString(url), url);
             fireDataChange(dataEvent);
         } else if (msg.startsWith(UNREGISTER)) {
             URL url = URL.parse(msg.substring(UNREGISTER.length() + 1));
-            DataEvent dataEvent = new DataEvent(toCacheKey(url), null);
+            DataEvent dataEvent = new DataEvent(toPathString(url), null);
             fireDataChange(dataEvent);
         }
     }

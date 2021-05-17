@@ -41,12 +41,9 @@ public class RegistryDictionary<T> extends AbstractDictionary {
 
     @Override
     public List<Invoker<T>> find(Invocation invocation) {
-        URL lookUrl = new URL();
-        lookUrl.setParameters(Collections.emptyMap());
-        String regPath = RpcUtils.getRpcRegPath(interfaceClass, invocation.getMethod());
-        String baseUrl =
-                "/" + invocation.getRpcMethod().group() + "/" + RpcConstants.SERVICE_PATH + regPath;
-        lookUrl.setPath(baseUrl);
+        URL lookUrl =
+                RpcUtils.getLookupURL(
+                        invocation.getRpcMethod().group(), interfaceClass, invocation.getMethod());
         long start = System.nanoTime();
         List<URL> urls = registry.lookup(lookUrl);
         if (LOG.isDebugEnabled()) {

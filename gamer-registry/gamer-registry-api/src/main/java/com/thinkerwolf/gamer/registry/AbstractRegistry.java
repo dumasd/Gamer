@@ -1,21 +1,35 @@
 package com.thinkerwolf.gamer.registry;
 
 import com.thinkerwolf.gamer.common.URL;
-import com.thinkerwolf.gamer.common.concurrent.DefaultPromise;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
+import com.thinkerwolf.gamer.common.util.NetUtils;
+import org.apache.commons.io.FileUtils;
 
+import java.io.*;
+import java.nio.channels.FileLock;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /** @author wukai */
 public abstract class AbstractRegistry implements Registry {
-    /** 公用scheduler */
-    public static ScheduledExecutorService scheduler =
-            new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
-
     /** logger */
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractRegistry.class);
+    /** 公用scheduler */
+    private static final AtomicInteger counter = new AtomicInteger();
+
+    public static ScheduledExecutorService scheduler =
+            new ScheduledThreadPoolExecutor(
+                    Runtime.getRuntime().availableProcessors(),
+                    r -> {
+                        Thread t = new Thread(r, "Registry-scheduler-" + counter.incrementAndGet());
+                        t.setPriority(Thread.NORM_PRIORITY);
+                        t.setDaemon(false);
+                        return t;
+                    });
     /** default retry times */
     protected static final int DEFAULT_RETRY_TIMES = 0;
     /** default retry interval millis */
@@ -31,11 +45,61 @@ public abstract class AbstractRegistry implements Registry {
     private final Set<IStateListener> stateListeners = new CopyOnWriteArraySet<>();
     /** The local register cache */
     private final Properties properties = new Properties();
+    /** 本地属性文件 */
+    private String propertiesFile;
+    /** 是否同步properties */
+    private boolean syncProperties = false;
     /** Link url */
     protected URL url;
+    /** 查询缓存 lookupURL -> List(URL) */
+    private final Map<URL, List<URL>> notified = new ConcurrentHashMap<>();
 
     public AbstractRegistry(URL url) {
         this.url = url;
+        loadProperties();
+    }
+
+    private void loadProperties() {
+        String host = NetUtils.getLocalAddress().getHostAddress();
+        this.propertiesFile =
+                System.getProperty("user.home") + "/.gamer" + "/gamer-registry-" + host + ".cache";
+        FileInputStream fis = null;
+        try {
+            FileUtils.forceMkdirParent(new File(propertiesFile));
+            fis = new FileInputStream(propertiesFile);
+            properties.load(fis);
+        } catch (FileNotFoundException e) {
+            // 文件未找到，ignore
+            LOG.warn("Registry file not found", e);
+        } catch (IOException e) {
+            throw new RegistryException(e);
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    /** 定时从注册中心拉取信息 */
+    protected void startLookupTask() {
+        scheduler.scheduleWithFixedDelay(
+                () -> {
+                    Set<URL> set = new HashSet<>(notified.keySet());
+                    set.forEach(
+                            url -> {
+                                try {
+                                    notified.put(url, doLookup(url));
+                                } catch (Exception e) {
+                                    LOG.warn("Lookup " + url, e);
+                                }
+                            });
+                },
+                1000,
+                20000,
+                TimeUnit.MILLISECONDS);
     }
 
     private static void checkRegisterUrl(URL url) {
@@ -52,15 +116,11 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public void register(URL url) {
         checkRegisterUrl(url);
-        try {
-            doRegister(url);
-        } catch (Exception e) {
-
-        } finally {
-            saveCache(url);
-        }
+        doRegister(url);
+        saveCache(url);
     }
 
+    /** @param url */
     protected abstract void doRegister(URL url);
 
     @Override
@@ -73,11 +133,12 @@ public abstract class AbstractRegistry implements Registry {
         }
     }
 
+    /** @param url */
     protected abstract void doUnRegister(URL url);
 
     @Override
     public void subscribe(final URL url, final INotifyListener listener) {
-        String key = toCacheKey(url);
+        String key = toPathString(url);
         listenerMap.compute(
                 key,
                 (s, listeners) -> {
@@ -94,7 +155,7 @@ public abstract class AbstractRegistry implements Registry {
 
     @Override
     public void unsubscribe(final URL url, final INotifyListener listener) {
-        String key = toCacheKey(url);
+        String key = toPathString(url);
         listenerMap.computeIfPresent(
                 key,
                 (s, listeners) -> {
@@ -114,34 +175,102 @@ public abstract class AbstractRegistry implements Registry {
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
                 String k = entry.getKey().toString();
                 String v = entry.getValue().toString();
-                if (lk != null) {
-                    int idx = k.indexOf(lk);
-                    if (idx == 0 && k.indexOf('.', lk.length() + 1) < 0) {
-                        urls.add(URL.parse(v));
-                    }
-                } else {
-                    urls.add(URL.parse(v));
-                }
+                Set<String> set = new LinkedHashSet<>(Arrays.asList(v.split(" ")));
+                set.forEach(
+                        e -> {
+                            if (lk != null) {
+                                int idx = k.indexOf(lk);
+                                if (idx == 0 && k.indexOf('.', lk.length() + 1) < 0) {
+                                    urls.add(URL.parse(e));
+                                }
+                            } else {
+                                urls.add(URL.parse(e));
+                            }
+                        });
             }
         }
         return urls;
     }
 
     public void saveCache(URL url) {
-        properties.setProperty(toCacheKey(url), url.toString());
+        // 同一个path存储在相同的key下
+        String cacheKey = toCacheKey(url);
+        Set<String> set = getCacheSet(cacheKey);
+        set.add(url.toString());
+        properties.setProperty(
+                cacheKey, set.stream().filter(s -> !s.isEmpty()).collect(Collectors.joining(" ")));
+        if (syncProperties) {
+            saveProperties();
+        } else {
+            scheduler.schedule(this::saveProperties, 100, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void saveProperties() {
+        FileLock fileLock = null;
+        try {
+            FileOutputStream fos = new FileOutputStream(propertiesFile);
+            fileLock = fos.getChannel().lock();
+            properties.store(fos, "Gamer register cache");
+        } catch (IOException e) {
+            LOG.error("Registered cache save error", e);
+        } finally {
+            if (fileLock != null) {
+                try {
+                    fileLock.release();
+                } catch (IOException ignored) {
+                }
+            }
+        }
     }
 
     public boolean existsCache(URL url) {
         return properties.containsKey(toCacheKey(url));
     }
 
-    public URL delCache(URL url) {
-        return (URL) properties.remove(toCacheKey(url));
+    public void delCache(URL url) {
+        String cacheKey = toCacheKey(url);
+        String cache = properties.getProperty(cacheKey);
+        if (cache == null) {
+            return;
+        }
+        Set<String> set = getCacheSet(cacheKey);
+        set.remove(url.toString());
+        properties.setProperty(cacheKey, String.join(" ", set));
+        if (syncProperties) {
+            saveProperties();
+        } else {
+            scheduler.schedule(this::saveProperties, 100, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private Set<String> getCacheSet(String cacheKey) {
+        String cache = properties.getProperty(cacheKey);
+        if (cache == null) {
+            return new LinkedHashSet<>();
+        }
+        return Arrays.stream(cache.split(" "))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toCollection((Supplier<Set<String>>) LinkedHashSet::new));
     }
 
     @Override
-    public List<URL> lookup(URL url) {
-        return doLookup(url);
+    public List<URL> lookup(final URL url) {
+        List<URL> findURLs =
+                notified.computeIfAbsent(
+                        url,
+                        s -> {
+                            List<URL> urls = doLookup(url);
+                            return urls == null ? new ArrayList<>() : urls;
+                        });
+        String nodeName = url.getString(URL.NODE_NAME);
+        if (nodeName == null) {
+            return new ArrayList<>(findURLs);
+        } else {
+            return findURLs.stream()
+                    .filter(f -> nodeName.equals(f.getString(URL.NODE_NAME)))
+                    .collect(Collectors.toList());
+        }
     }
 
     protected abstract List<URL> doLookup(URL url);
@@ -153,7 +282,7 @@ public abstract class AbstractRegistry implements Registry {
      * @return
      */
     protected String toCacheKey(URL url) {
-        return toPathString(url);
+        return URL.decode(url.getPath());
     }
 
     protected String toPathString(URL url) {
@@ -168,11 +297,6 @@ public abstract class AbstractRegistry implements Registry {
      * @param event
      */
     protected void fireDataChange(final DataEvent event) {
-        if (event.getUrl() == null) {
-            properties.remove(event.getSource());
-        } else {
-            properties.setProperty(event.getSource(), event.getUrl().toString());
-        }
         LOG.info("Fire data change " + event);
         Set<INotifyListener> listeners = listenerMap.get(event.getSource());
         if (listeners != null) {
@@ -242,23 +366,6 @@ public abstract class AbstractRegistry implements Registry {
                 listener.notifyEstablishmentError(error);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    protected class DataChangeListener extends NotifyListenerAdapter {
-        private DefaultPromise<DataEvent> promise;
-
-        public DataChangeListener() {}
-
-        public DataChangeListener(DefaultPromise<DataEvent> promise) {
-            this.promise = promise;
-        }
-
-        @Override
-        public void notifyDataChange(DataEvent event) throws Exception {
-            if (promise != null && !promise.isDone()) {
-                promise.setSuccess(event);
             }
         }
     }

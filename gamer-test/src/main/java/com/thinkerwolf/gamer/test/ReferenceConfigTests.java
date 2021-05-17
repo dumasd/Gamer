@@ -30,7 +30,7 @@ public class ReferenceConfigTests {
     public static void main(String[] args) {
         String url = "tcp://localhost:9090?clientNum=30";
         //        String url = "tcp://192.168.1.3:9090?clientNum=5";
-        IRpcAction rpcAction = testDirect(url);
+        IRpcAction rpcAction = testRegistry();
         System.err.println(rpcAction.sayHello("wukai"));
         System.err.println(rpcAction.getList());
 

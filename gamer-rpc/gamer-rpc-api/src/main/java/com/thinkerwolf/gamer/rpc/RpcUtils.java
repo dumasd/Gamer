@@ -7,8 +7,15 @@ import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * RPC工具集合
+ *
+ * @author wukai
+ */
 public final class RpcUtils {
 
     public static final String RPC_COMMAND_FORMAT = "rpc@%s%s%s";
@@ -28,6 +35,15 @@ public final class RpcUtils {
 
     public static String getRpcRegPath(Class interfaceClass, Method method) {
         return getRpcCommand(interfaceClass, method).replace('/', '_');
+    }
+
+    public static URL getLookupURL(String group, Class interfaceClass, Method method) {
+        URL lookUrl = new URL();
+        lookUrl.setParameters(new HashMap<>());
+        String regPath = RpcUtils.getRpcRegPath(interfaceClass, method);
+        String baseUrl = "/" + group + "/" + RpcConstants.SERVICE_PATH + regPath;
+        lookUrl.setPath(baseUrl);
+        return lookUrl;
     }
 
     public static URL getConnectUrl(URL url) {

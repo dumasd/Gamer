@@ -43,7 +43,7 @@ public class RpcContext {
     }
 
     public Map<String, String> getAttachments() {
-        return Collections.unmodifiableMap(attachments);
+        return attachments;
     }
 
     /**
