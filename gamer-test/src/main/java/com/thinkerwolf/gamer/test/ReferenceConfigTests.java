@@ -31,13 +31,13 @@ public class ReferenceConfigTests {
         String url = "tcp://localhost:9090?clientNum=30";
         //        String url = "tcp://192.168.1.3:9090?clientNum=5";
         IRpcAction rpcAction = testRegistry();
-        System.err.println(rpcAction.sayHello("wukai"));
-        System.err.println(rpcAction.getList());
+//        System.err.println(rpcAction.sayHello("wukai"));
+//        System.err.println(rpcAction.getList());
 
         testSequence(rpcAction, 100);
         testConcurrency(rpcAction, 30, new AtomicInteger());
         try {
-            TimeUnit.MILLISECONDS.sleep(5000);
+            TimeUnit.MILLISECONDS.sleep(10000);
         } catch (InterruptedException ignored) {
         }
         testConcurrency(rpcAction, 100, new AtomicInteger());

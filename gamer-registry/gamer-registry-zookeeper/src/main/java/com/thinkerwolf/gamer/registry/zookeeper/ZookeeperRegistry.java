@@ -75,7 +75,7 @@ public class ZookeeperRegistry extends AbstractZkRegistry
 
     @Override
     protected void doRegister(URL url) {
-        String path = toDataPath(url);
+        String path = toZkPathName(url);
         int retry = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
         long retryMillis = url.getLong(RETRY_MILLIS, DEFAULT_RETRY_MILLIS);
         final boolean ephemeral = url.getBoolean(NODE_EPHEMERAL, true);
@@ -111,27 +111,27 @@ public class ZookeeperRegistry extends AbstractZkRegistry
 
     @Override
     public void doUnRegister(URL url) {
-        String path = toDataPath(url);
+        String path = toZkPathName(url);
         zkClient.delete(path);
     }
 
     @Override
     protected void doSubscribe(URL url) {
-        String path = toDataPath(url);
+        String path = toZkPath(url);
         zkClient.subscribeDataChanges(path, this);
         zkClient.subscribeChildChanges(path, this);
     }
 
     @Override
     protected void doUnSubscribe(URL url) {
-        String path = toDataPath(url);
+        String path = toZkPath(url);
         zkClient.unsubscribeChildChanges(path, this);
         zkClient.unsubscribeDataChanges(path, this);
     }
 
     @Override
     protected List<URL> doLookup(URL url) {
-        String path = toDataPath(url);
+        String path = toZkPath(url);
         List<String> childrenPaths = ZkClientUtils.getAllChildren(zkClient, path);
         childrenPaths.add(path);
         List<URL> urls = new LinkedList<>();

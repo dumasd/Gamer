@@ -5,6 +5,7 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.util.NetUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.nio.channels.FileLock;
@@ -15,7 +16,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /** @author wukai */
-public abstract class AbstractRegistry implements Registry {
+public abstract class AbstractRegistry implements Registry, INotifyListener {
     /** logger */
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractRegistry.class);
     /** 公用scheduler */
@@ -52,7 +53,7 @@ public abstract class AbstractRegistry implements Registry {
     /** Link url */
     protected URL url;
     /** 查询缓存 lookupURL -> List(URL) */
-    private final Map<URL, List<URL>> notified = new ConcurrentHashMap<>();
+    private final Map<String, List<URL>> notified = new ConcurrentHashMap<>();
 
     public AbstractRegistry(URL url) {
         this.url = url;
@@ -87,19 +88,28 @@ public abstract class AbstractRegistry implements Registry {
     protected void startLookupTask() {
         scheduler.scheduleWithFixedDelay(
                 () -> {
-                    Set<URL> set = new HashSet<>(notified.keySet());
+                    Set<String> set = new HashSet<>(notified.keySet());
                     set.forEach(
-                            url -> {
-                                try {
-                                    notified.put(url, doLookup(url));
-                                } catch (Exception e) {
-                                    LOG.warn("Lookup " + url, e);
-                                }
+                            p -> {
+                                URL lookUpUrl = new URL();
+                                lookUpUrl.setParameters(new HashMap<>());
+                                lookUpUrl.setPath(p);
+                                reLookup(lookUpUrl);
                             });
                 },
                 1000,
                 20000,
                 TimeUnit.MILLISECONDS);
+    }
+
+    private void reLookup(URL lookupUrl) {
+        if (lookupUrl != null) {
+            try {
+                notified.put(toCacheKey(lookupUrl), doLookup(lookupUrl));
+            } catch (Exception e) {
+                LOG.warn("ReLookup " + lookupUrl, e);
+            }
+        }
     }
 
     private static void checkRegisterUrl(URL url) {
@@ -139,16 +149,7 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public void subscribe(final URL url, final INotifyListener listener) {
         String key = toPathString(url);
-        listenerMap.compute(
-                key,
-                (s, listeners) -> {
-                    if (listeners == null) {
-                        listeners = new CopyOnWriteArraySet<>();
-                        doSubscribe(url);
-                    }
-                    listeners.add(listener);
-                    return listeners;
-                });
+        addNotifyListener(key, url, listener);
     }
 
     protected abstract void doSubscribe(URL url);
@@ -256,11 +257,13 @@ public abstract class AbstractRegistry implements Registry {
 
     @Override
     public List<URL> lookup(final URL url) {
+        String key = toCacheKey(url);
         List<URL> findURLs =
                 notified.computeIfAbsent(
-                        url,
+                        key,
                         s -> {
                             List<URL> urls = doLookup(url);
+                            addNotifyListener(key, url, AbstractRegistry.this);
                             return urls == null ? new ArrayList<>() : urls;
                         });
         String nodeName = url.getString(URL.NODE_NAME);
@@ -273,7 +276,28 @@ public abstract class AbstractRegistry implements Registry {
         }
     }
 
+    private void addNotifyListener(String key, URL url, INotifyListener notifyListener) {
+        listenerMap.compute(
+                key,
+                (k, listeners) -> {
+                    if (listeners == null) {
+                        listeners = new CopyOnWriteArraySet<>();
+                        doSubscribe(url);
+                    }
+                    listeners.add(notifyListener);
+                    return listeners;
+                });
+    }
+
     protected abstract List<URL> doLookup(URL url);
+
+    @Override
+    public void notifyDataChange(DataEvent event) throws Exception {}
+
+    @Override
+    public void notifyChildChange(ChildEvent event) throws Exception {
+        notified.put(event.getSource(), event.getChildUrls());
+    }
 
     /**
      * Convert url to cache key
@@ -287,7 +311,7 @@ public abstract class AbstractRegistry implements Registry {
 
     protected String toPathString(URL url) {
         String nodeName = url.getString(URL.NODE_NAME);
-        String append = nodeName == null ? "" : ("/" + nodeName);
+        String append = StringUtils.isBlank(nodeName) ? "" : ("/" + nodeName);
         return URL.decode(url.getPath()) + append;
     }
 

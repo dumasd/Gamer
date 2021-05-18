@@ -16,10 +16,14 @@ public abstract class AbstractZkRegistry extends AbstractRegistry {
      * @param url url
      * @return url's zk path
      */
-    protected String toDataPath(URL url) {
+    protected String toZkPathName(URL url) {
         String p = ZkClientUtils.toPath(url);
         String nodeName = url.getString(NODE_NAME);
         String append = nodeName == null ? "" : ("/" + nodeName);
         return p + append;
+    }
+
+    protected String toZkPath(URL url) {
+        return ZkClientUtils.toPath(url);
     }
 }
