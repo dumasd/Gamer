@@ -74,11 +74,11 @@ public class ReferenceConfigTests {
                                 long startTime = System.nanoTime();
                                 try {
                                     String r =
-                                            rpcAction.sayHelloAsync(
+                                            rpcAction.sayHello(
                                                     "wukai-"
                                                             + RandomStringUtils.randomAlphanumeric(
                                                                     5));
-                                    RpcContext.getContext()
+                                   /* RpcContext.getContext()
                                             .addListener(
                                                     new RpcCallback<String>() {
                                                         @Override
@@ -94,7 +94,7 @@ public class ReferenceConfigTests {
                                                         @Override
                                                         protected void onRpcError(RpcException ex)
                                                                 throws Exception {}
-                                                    });
+                                                    });*/
 
                                     long endTime = System.nanoTime();
                                     double spend = (double) (endTime - startTime) / 1000000;
