@@ -13,10 +13,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 /** @author wukai */
 public class ReferenceConfigTests {
 
-    private static IRpcAction testRegistry() {
+    private static IRpcAction testRegistry(String url) {
         ReferenceConfig<IRpcAction> ref = new ReferenceConfig<>();
         ref.setInterfaceClass(IRpcAction.class);
-        ref.setRegistry("zookeeper://localhost:2181/test");
+        ref.setRegistry(url);
         return ref.get();
     }
 
@@ -28,11 +28,12 @@ public class ReferenceConfigTests {
     }
 
     public static void main(String[] args) {
-        String url = "tcp://localhost:9090?clientNum=30";
+        //        String url = "tcp://localhost:9090?clientNum=30";
         //        String url = "tcp://192.168.1.3:9090?clientNum=5";
-        IRpcAction rpcAction = testRegistry();
-//        System.err.println(rpcAction.sayHello("wukai"));
-//        System.err.println(rpcAction.getList());
+        //        IRpcAction rpcAction = testRegistry("zookeeper://localhost:2181/test");
+        IRpcAction rpcAction = testRegistry("etcd://localhost:2379/test");
+        //        System.err.println(rpcAction.sayHello("wukai"));
+        //        System.err.println(rpcAction.getList());
 
         testSequence(rpcAction, 100);
         testConcurrency(rpcAction, 30, new AtomicInteger());

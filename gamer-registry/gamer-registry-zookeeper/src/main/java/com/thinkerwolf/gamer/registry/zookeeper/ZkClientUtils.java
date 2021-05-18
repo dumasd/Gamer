@@ -3,7 +3,6 @@ package com.thinkerwolf.gamer.registry.zookeeper;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.registry.RegistryException;
 import org.I0Itec.zkclient.ZkClient;
-import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
@@ -55,31 +54,6 @@ public final class ZkClientUtils {
             return Collections.singletonList(acl);
         } catch (NoSuchAlgorithmException e) {
             throw new RegistryException(e);
-        }
-    }
-
-    /**
-     * Convert a url to a zookeeper path.
-     *
-     * @param url url
-     * @return A zookeeper path
-     */
-    public static String toPath(URL url) {
-        if (StringUtils.isBlank(url.getPath()) || "/".equals(url.getPath())) {
-            return "/";
-        } else {
-            String path = URL.decode(url.getPath());
-            StringBuilder sb = new StringBuilder();
-            if (path.charAt(0) != '/') {
-                sb.append('/');
-            }
-            int len = path.length();
-            if (path.lastIndexOf('/') == len - 1) {
-                sb.append(path, 0, len - 1);
-            } else {
-                sb.append(path);
-            }
-            return sb.toString();
         }
     }
 

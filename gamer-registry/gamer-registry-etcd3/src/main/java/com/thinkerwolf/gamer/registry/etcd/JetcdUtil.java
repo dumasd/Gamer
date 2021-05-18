@@ -5,8 +5,19 @@ import io.etcd.jetcd.ByteSequence;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+/**
+ * Jetcd工具
+ *
+ * @author wukai
+ */
 public final class JetcdUtil {
 
+    private JetcdUtil() {}
+
+    /**
+     * @param s
+     * @return
+     */
     public static ByteSequence toByteSeq(String s) {
         return ByteSequence.from(s, UTF_8);
     }
@@ -26,5 +37,4 @@ public final class JetcdUtil {
     public static String byteSeqToString(ByteSequence byteSequence) {
         return byteSequence.toString(UTF_8);
     }
-
 }

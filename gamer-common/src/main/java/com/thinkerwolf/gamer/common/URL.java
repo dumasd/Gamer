@@ -1,8 +1,6 @@
 package com.thinkerwolf.gamer.common;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -126,7 +124,7 @@ public class URL implements Serializable {
         int i = url.indexOf("?");
         if (i >= 0) {
             String[] parts = url.substring(i + 1).split("\\&");
-            parameters = new HashMap<>();
+            parameters = new HashMap<>(16);
             for (String part : parts) {
                 part = part.trim();
                 if (part.length() > 0) {
@@ -151,8 +149,9 @@ public class URL implements Serializable {
             // case: file:/path/to/file.txt
             i = url.indexOf(":/");
             if (i >= 0) {
-                if (i == 0)
+                if (i == 0) {
                     throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+                }
                 protocol = url.substring(0, i);
                 url = url.substring(i + 1);
             }

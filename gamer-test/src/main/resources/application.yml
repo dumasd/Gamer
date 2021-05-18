@@ -5,7 +5,8 @@ gamer:
   name: gamer_test
   registry:
     enabled: true
-    address: zookeeper://localhost:2181
+    #address: zookeeper://localhost:2181
+    address: etcd://localhost:2379
   conf:
     servlet:
       servletName: DispatcherServlet                                   # Servlet名称

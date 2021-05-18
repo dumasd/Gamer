@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.registry;
 
+import com.thinkerwolf.gamer.common.DefaultThreadFactory;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
@@ -11,7 +12,6 @@ import java.io.*;
 import java.nio.channels.FileLock;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -20,17 +20,10 @@ public abstract class AbstractRegistry implements Registry, INotifyListener {
     /** logger */
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractRegistry.class);
     /** 公用scheduler */
-    private static final AtomicInteger counter = new AtomicInteger();
-
     public static ScheduledExecutorService scheduler =
             new ScheduledThreadPoolExecutor(
                     Runtime.getRuntime().availableProcessors(),
-                    r -> {
-                        Thread t = new Thread(r, "Registry-scheduler-" + counter.incrementAndGet());
-                        t.setPriority(Thread.NORM_PRIORITY);
-                        t.setDaemon(false);
-                        return t;
-                    });
+                    new DefaultThreadFactory("Registry-scheduler"));
     /** default retry times */
     protected static final int DEFAULT_RETRY_TIMES = 0;
     /** default retry interval millis */
@@ -148,7 +141,7 @@ public abstract class AbstractRegistry implements Registry, INotifyListener {
 
     @Override
     public void subscribe(final URL url, final INotifyListener listener) {
-        String key = toPathString(url);
+        String key = toPathName(url);
         addNotifyListener(key, url, listener);
     }
 
@@ -156,7 +149,7 @@ public abstract class AbstractRegistry implements Registry, INotifyListener {
 
     @Override
     public void unsubscribe(final URL url, final INotifyListener listener) {
-        String key = toPathString(url);
+        String key = toPathName(url);
         listenerMap.computeIfPresent(
                 key,
                 (s, listeners) -> {
@@ -306,13 +299,32 @@ public abstract class AbstractRegistry implements Registry, INotifyListener {
      * @return
      */
     protected String toCacheKey(URL url) {
-        return URL.decode(url.getPath());
+        return toPath(url);
     }
 
-    protected String toPathString(URL url) {
+    protected String toPath(URL url) {
+        if (StringUtils.isBlank(url.getPath()) || "/".equals(url.getPath())) {
+            return "/";
+        } else {
+            String path = URL.decode(url.getPath());
+            StringBuilder sb = new StringBuilder();
+            if (path.charAt(0) != '/') {
+                sb.append('/');
+            }
+            int len = path.length();
+            if (path.lastIndexOf('/') == len - 1) {
+                sb.append(path, 0, len - 1);
+            } else {
+                sb.append(path);
+            }
+            return sb.toString();
+        }
+    }
+
+    protected String toPathName(URL url) {
         String nodeName = url.getString(URL.NODE_NAME);
         String append = StringUtils.isBlank(nodeName) ? "" : ("/" + nodeName);
-        return URL.decode(url.getPath()) + append;
+        return toPath(url) + append;
     }
 
     /**

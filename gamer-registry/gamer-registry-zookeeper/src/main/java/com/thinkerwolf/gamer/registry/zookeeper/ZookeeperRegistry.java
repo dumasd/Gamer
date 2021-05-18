@@ -23,12 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.thinkerwolf.gamer.common.URL.RETRY;
-import static com.thinkerwolf.gamer.common.URL.RETRY_MILLIS;
-import static com.thinkerwolf.gamer.common.URL.NODE_EPHEMERAL;
-import static com.thinkerwolf.gamer.common.URL.CONNECTION_TIMEOUT;
-import static com.thinkerwolf.gamer.common.URL.SESSION_TIMEOUT;
-import static com.thinkerwolf.gamer.common.URL.BACKUP;
+import static com.thinkerwolf.gamer.common.URL.*;
 
 /**
  * Zookeeper Registry Center
@@ -36,7 +31,7 @@ import static com.thinkerwolf.gamer.common.URL.BACKUP;
  * @author wukai
  * @since 2020-05-21
  */
-public class ZookeeperRegistry extends AbstractZkRegistry
+public class ZookeeperRegistry extends AbstractRegistry
         implements IZkStateListener, IZkDataListener, IZkChildListener {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(ZookeeperRegistry.class);
@@ -75,7 +70,7 @@ public class ZookeeperRegistry extends AbstractZkRegistry
 
     @Override
     protected void doRegister(URL url) {
-        String path = toZkPathName(url);
+        String path = toPathName(url);
         int retry = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
         long retryMillis = url.getLong(RETRY_MILLIS, DEFAULT_RETRY_MILLIS);
         final boolean ephemeral = url.getBoolean(NODE_EPHEMERAL, true);
@@ -111,27 +106,27 @@ public class ZookeeperRegistry extends AbstractZkRegistry
 
     @Override
     public void doUnRegister(URL url) {
-        String path = toZkPathName(url);
+        String path = toPathName(url);
         zkClient.delete(path);
     }
 
     @Override
     protected void doSubscribe(URL url) {
-        String path = toZkPath(url);
+        String path = toPath(url);
         zkClient.subscribeDataChanges(path, this);
         zkClient.subscribeChildChanges(path, this);
     }
 
     @Override
     protected void doUnSubscribe(URL url) {
-        String path = toZkPath(url);
+        String path = toPath(url);
         zkClient.unsubscribeChildChanges(path, this);
         zkClient.unsubscribeDataChanges(path, this);
     }
 
     @Override
     protected List<URL> doLookup(URL url) {
-        String path = toZkPath(url);
+        String path = toPath(url);
         List<String> childrenPaths = ZkClientUtils.getAllChildren(zkClient, path);
         childrenPaths.add(path);
         List<URL> urls = new LinkedList<>();

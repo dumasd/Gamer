@@ -72,7 +72,7 @@ public class JetcdTests {
         ScheduledExecutorService exe = Executors.newScheduledThreadPool(1);
 
         URL url = URL.parse("jetcd://127.0.0.1:2379/p2");
-        JetcdRegistry registry = new JetcdRegistry(url);
+        EtcdRegistry registry = new EtcdRegistry(url);
 
         Map<String, Object> parameters = new HashMap<>();
         URL u1 = URL.parse("http://127.0.0.1/p2/game");

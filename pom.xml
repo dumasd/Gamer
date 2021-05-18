@@ -51,7 +51,7 @@
         <junit_version>4.13.1</junit_version>
         <spring_boot_version>2.0.3.RELEASE</spring_boot_version>
         <spring_version>5.0.7.RELEASE</spring_version>
-        <netty-all_version>4.1.50.Final</netty-all_version>
+        <netty-all_version>4.1.52.Final</netty-all_version>
         <hessian_version>4.0.38</hessian_version>
         <kryo_version>4.0.0</kryo_version>
         <slf4j_version>1.7.25</slf4j_version>
@@ -65,7 +65,7 @@
         <httpclient_version>4.5.12</httpclient_version>
         <httpcore_version>4.4.13</httpcore_version>
         <httpcorenio_version>4.4.13</httpcorenio_version>
-        <jetcd_version>0.5.3</jetcd_version>
+        <jetcd_version>0.5.7</jetcd_version>
         <zkclient_version>0.11</zkclient_version>
         <classmate_version>1.5.1</classmate_version>
         <commons-lang_version>2.5</commons-lang_version>
@@ -224,26 +224,6 @@
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-core</artifactId>
                 <version>${jetcd_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-core</artifactId>
-                <version>${grpc_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-netty</artifactId>
-                <version>${grpc_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-protobuf</artifactId>
-                <version>${grpc_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-stub</artifactId>
-                <version>${grpc_version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>

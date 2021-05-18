@@ -112,14 +112,14 @@ public class MulticastRegistry extends AbstractRegistry {
     protected void doRegister(URL url) {
         registered.add(url);
         multicast(REGISTER + " " + url.toString());
-        fireDataChange(new DataEvent(toPathString(url), url));
+        fireDataChange(new DataEvent(toPathName(url), url));
     }
 
     @Override
     protected void doUnRegister(URL url) {
         registered.remove(url);
         multicast(UNREGISTER + " " + url.toString());
-        fireDataChange(new DataEvent(toPathString(url), null));
+        fireDataChange(new DataEvent(toPathName(url), null));
     }
 
     @Override
@@ -155,11 +155,11 @@ public class MulticastRegistry extends AbstractRegistry {
         LOG.info("Multicast received {}", msg);
         if (msg.startsWith(REGISTER)) {
             URL url = URL.parse(msg.substring(REGISTER.length() + 1));
-            DataEvent dataEvent = new DataEvent(toPathString(url), url);
+            DataEvent dataEvent = new DataEvent(toPathName(url), url);
             fireDataChange(dataEvent);
         } else if (msg.startsWith(UNREGISTER)) {
             URL url = URL.parse(msg.substring(UNREGISTER.length() + 1));
-            DataEvent dataEvent = new DataEvent(toPathString(url), null);
+            DataEvent dataEvent = new DataEvent(toPathName(url), null);
             fireDataChange(dataEvent);
         }
     }

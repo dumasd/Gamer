@@ -80,6 +80,11 @@
         </dependency>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
+            <artifactId>gamer-registry-etcd3</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>gamer-swagger</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
