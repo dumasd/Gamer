@@ -12,6 +12,7 @@ import com.thinkerwolf.gamer.core.servlet.ServletContext;
 import com.thinkerwolf.gamer.properties.GamerProperties;
 import com.thinkerwolf.gamer.registry.Registry;
 import com.thinkerwolf.gamer.registry.RegistryFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
@@ -90,10 +91,12 @@ public class GamerAutoConfiguration {
         public Registry registry(GamerProperties properties) {
             try {
                 String address = properties.getRegistry().getAddress();
-                if (address.endsWith(SymbolConstants.SLASH)) {
-                    address += properties.getName();
-                } else {
-                    address += (SymbolConstants.SLASH + properties.getName());
+                if (StringUtils.isNotBlank(properties.getName())) {
+                    if (address.endsWith(SymbolConstants.SLASH)) {
+                        address += properties.getName();
+                    } else {
+                        address += (SymbolConstants.SLASH + properties.getName());
+                    }
                 }
                 URL url = URL.parse(address);
                 RegistryFactory factory =
