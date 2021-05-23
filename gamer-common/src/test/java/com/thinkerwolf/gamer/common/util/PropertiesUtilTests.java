@@ -1,6 +1,6 @@
-package com.thinkerwolf.gamer.common;
+package com.thinkerwolf.gamer.common.util;
 
-import com.thinkerwolf.gamer.common.util.PropertiesUtil;
+import com.thinkerwolf.gamer.common.Constants;
 import org.junit.Test;
 
 import java.util.Arrays;

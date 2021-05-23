@@ -4,10 +4,13 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.zip.DeflaterInputStream;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -46,33 +49,71 @@ public final class CompressUtil {
         return bytes;
     }
 
+    public static byte[] decompress(byte[] bytes, String encoding) throws IOException {
+        if (GZIP.equals(encoding)) {
+            return decompressGzip(bytes);
+        } else if (DEFLATE.equals(encoding)) {
+            return decompressDeflate(bytes);
+        }
+        return bytes;
+    }
+
     public static byte[] compressGzip(byte[] bytes) throws IOException {
-        ByteArrayOutputStream out = null;
+        ByteArrayOutputStream out = new ByteArrayOutputStream(512);
         GZIPOutputStream gzip = null;
         try {
-            out = new ByteArrayOutputStream();
             gzip = new GZIPOutputStream(out);
             gzip.write(bytes);
-            return out.toByteArray();
+            gzip.flush();
         } finally {
-            IOUtils.closeQuietly(out);
-            IOUtils.closeQuietly(gzip);
+            IOUtils.closeQuietly(gzip, e -> LOG.error("Close gzip out", e));
         }
+        return out.toByteArray();
     }
 
     public static byte[] compressDeflate(byte[] bytes) throws IOException {
-        ByteArrayOutputStream out = null;
+        ByteArrayOutputStream out = new ByteArrayOutputStream(512);
         DeflaterOutputStream deflater = null;
         try {
-            out = new ByteArrayOutputStream();
             deflater = new DeflaterOutputStream(out);
             deflater.write(bytes);
-            return out.toByteArray();
         } finally {
-            IOUtils.closeQuietly(out);
-            IOUtils.closeQuietly(deflater);
+            IOUtils.closeQuietly(deflater, e -> LOG.error("Close deflate out", e));
         }
+        return out.toByteArray();
     }
 
+    public static byte[] decompressGzip(byte[] bytes) throws IOException {
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        GZIPInputStream gzip = null;
+        byte[] buffer = new byte[1024];
+        try {
+            gzip = new GZIPInputStream(in);
+            int n;
+            while ((n = gzip.read(buffer)) >= 0) {
+                out.write(buffer, 0, n);
+            }
+        } finally {
+            IOUtils.closeQuietly(gzip, e -> LOG.error("Close gzip in", e));
+        }
+        return out.toByteArray();
+    }
 
+    public static byte[] decompressDeflate(byte[] bytes) throws IOException {
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        ByteArrayOutputStream out = new ByteArrayOutputStream(512);
+        DeflaterInputStream deflater = null;
+        byte[] buffer = new byte[1024];
+        try {
+            deflater = new DeflaterInputStream(in);
+            int n;
+            while ((n = deflater.read(buffer)) >= 0) {
+                out.write(buffer, 0, n);
+            }
+        } finally {
+            IOUtils.closeQuietly(deflater, e -> LOG.error("Close deflate in", e));
+        }
+        return out.toByteArray();
+    }
 }
