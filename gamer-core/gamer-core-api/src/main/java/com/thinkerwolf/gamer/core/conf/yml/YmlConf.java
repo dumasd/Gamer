@@ -10,9 +10,11 @@ import com.thinkerwolf.gamer.common.util.ResourceUtils;
 import com.thinkerwolf.gamer.core.conf.AbstractConf;
 import com.thinkerwolf.gamer.core.exception.ConfigurationException;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
-import com.thinkerwolf.gamer.core.servlet.*;
+import com.thinkerwolf.gamer.core.servlet.DefaultServletContext;
+import com.thinkerwolf.gamer.core.servlet.Servlet;
+import com.thinkerwolf.gamer.core.servlet.ServletConfig;
+import com.thinkerwolf.gamer.core.servlet.ServletContext;
 import com.thinkerwolf.gamer.remoting.Protocol;
-import com.thinkerwolf.gamer.remoting.ssl.SslConfig;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -22,7 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.*;
-import java.util.function.BiFunction;
 
 @SuppressWarnings("unchecked")
 public class YmlConf extends AbstractConf<YmlConf> {
@@ -39,9 +40,6 @@ public class YmlConf extends AbstractConf<YmlConf> {
             throw new ConfigurationException("Missing servlet config");
         }
         Object netConf = confMap.get("net");
-        if (netConf == null) {
-            netConf = confMap.get("netty");
-        }
         if (netConf == null) {
             throw new ConfigurationException("Missing netty config");
         }

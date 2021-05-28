@@ -1,6 +1,5 @@
 
 gamer:
-  id: 1001
   servlet-boot: netty
   name: gamer_test
   registry:

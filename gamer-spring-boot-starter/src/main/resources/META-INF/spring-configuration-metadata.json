@@ -7,62 +7,51 @@
       "type": "com.thinkerwolf.gamer.properties.GamerProperties"
     },
     {
-      "sourceType": "com.thinkerwolf.gamer.properties.GamerRegistryProperties",
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
       "name": "gamer.registry",
-      "type": "com.thinkerwolf.gamer.properties.GamerRegistryProperties"
-    },
-    {
-      "sourceType": "com.thinkerwolf.gamer.properties.GamerRegistryProperties",
-      "name": "gamer.registry.client",
-      "sourceMethod": "getClient()",
-      "type": "com.thinkerwolf.gamer.properties.GamerRegistryProperties$Client"
+      "sourceMethod": "getRegistry()",
+      "type": "com.thinkerwolf.gamer.properties.GamerProperties$Registry"
     }
   ],
   "properties": [
     {
       "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
-      "defaultValue": "conf.yml",
+      "name": "gamer.conf",
+      "description": "Conf. If <strong><i>configFile<\/i><\/strong> is not assigned, it will use this to initialize\n the <strong>ServletBootstrap<\/strong>",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>"
+    },
+    {
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
       "name": "gamer.config-file",
       "description": "Servlet config file position",
       "type": "java.lang.String"
     },
     {
       "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
-      "defaultValue": 1,
-      "name": "gamer.id",
-      "description": "Gamer Application id",
+      "name": "gamer.name",
+      "description": "Gamer Application name",
       "type": "java.lang.String"
     },
     {
-      "sourceType": "com.thinkerwolf.gamer.properties.GamerRegistryProperties$Client",
-      "name": "gamer.registry.client.service-url",
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties$Registry",
+      "name": "gamer.registry.address",
       "type": "java.lang.String"
     },
     {
-      "sourceType": "com.thinkerwolf.gamer.properties.GamerRegistryProperties",
-      "defaultValue": false,
+      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties$Registry",
       "name": "gamer.registry.enabled",
-      "description": "注册中心连接是否开启",
       "type": "java.lang.Boolean"
     },
     {
       "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
-      "defaultValue": "netty",
       "name": "gamer.remoting",
       "description": "Remoting name",
       "type": "java.lang.String"
     },
     {
       "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
-      "defaultValue": "netty",
       "name": "gamer.servlet-boot",
       "description": "Servlet bootstrap type",
-      "type": "java.lang.String"
-    },
-    {
-      "sourceType": "com.thinkerwolf.gamer.properties.GamerProperties",
-      "name": "gamer.type",
-      "description": "Gamer Application type",
       "type": "java.lang.String"
     }
   ]

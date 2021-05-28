@@ -2,7 +2,6 @@ package com.thinkerwolf.gamer.core.mvc;
 
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
-import com.thinkerwolf.gamer.core.AbstractInvocation;
 import com.thinkerwolf.gamer.core.exception.MvcException;
 import com.thinkerwolf.gamer.core.mvc.adaptor.DefaultParamAdaptor;
 import com.thinkerwolf.gamer.core.mvc.adaptor.ParamAdaptor;

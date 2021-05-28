@@ -7,7 +7,7 @@ import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.common.serialization.Serializations;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
-import com.thinkerwolf.gamer.core.AbstractInvocation;
+import com.thinkerwolf.gamer.core.mvc.AbstractInvocation;
 import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
 import com.thinkerwolf.gamer.core.mvc.model.ByteModel;
 import com.thinkerwolf.gamer.core.servlet.Request;

@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.core;
+package com.thinkerwolf.gamer.core.mvc;
 
 import com.thinkerwolf.gamer.core.exception.ServletException;
 import com.thinkerwolf.gamer.core.mvc.Invocation;
