@@ -4,7 +4,9 @@ import org.apache.commons.collections.MapUtils;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -18,55 +20,6 @@ import java.util.Optional;
  */
 public class URL implements Serializable {
 
-    public static final String PROTOCOL = "protocol";
-    public static final String HOST = "host";
-    public static final String PORT = "port";
-    public static final String USERNAME = "username";
-    public static final String PASSWORD = "password";
-
-    // ========================= parameter keys start =============================== //
-    public static final String SSL_ENABLED = "sslEnabled";
-    public static final String SSL_KEYSTORE_FILE = "sslKsFile";
-    public static final String SSL_KEYSTORE_PASS = "sslKsPass";
-    public static final String SSL_TRUSTSTORE_FILE = "sslTsFile";
-    public static final String SSL_TRUSTSTORE_PASS = "sslTsPass";
-
-    public static final String BOSS_THREADS = "bossThreads";
-    public static final String WORKER_THREADS = "workerThreads";
-    public static final String CORE_THREADS = "coreThreads";
-    public static final String MAX_THREADS = "maxThreads";
-    public static final String COUNT_PER_CHANNEL = "countPerChannel";
-    public static final String OPTIONS = "options";
-    public static final String CHILD_OPTIONS = "childOptions";
-    public static final String CONNECTION_TIMEOUT = "connectionTimeout";
-    public static final String SESSION_TIMEOUT = "sessionTimeout";
-    public static final String BACKUP = "backup";
-    public static final String NODE_EPHEMERAL = "nodeEphemeral";
-    public static final String NODE_NAME = "nodeName";
-    public static final String REQUEST_TIMEOUT = "requestTimeout";
-    public static final String RPC_CLIENT_NUM = "rpcClientNum";
-    public static final String RETRY = "retry";
-    public static final String RETRY_MILLIS = "retryMillis";
-
-    /** RPC通信时是否使用本地地址 */
-    public static final String RPC_USE_LOCAL = "rpcUseLocal";
-
-    public static final String RPC_HOST = "rpcHost";
-    public static final String CHANNEL_HANDLERS = "channelHandlers";
-    // ========================= parameter keys end  =============================== //
-
-    // ========================= attachment keys start =============================== //
-    public static final String EXEC_GROUP_NAME = "execGroupName";
-    public static final String SERVLET_CONFIG = "servletConfig";
-    // ========================= attachment keys end =============================== //
-
-    public static final int DEFAULT_TCP_PORT = 8777;
-    public static final int DEFAULT_HTTP_PORT = 80;
-
-    public static final int DEFAULT_CORE_THREADS = 10;
-    public static final int DEFAULT_MAX_THREADS = 10;
-    public static final int DEFAULT_COUNT_PERCHANNEL = 10;
-
     private String protocol;
     private String username;
     private String password;
@@ -77,7 +30,7 @@ public class URL implements Serializable {
     private volatile Map<String, Object> parameters;
 
     /** 附加对象，不参与序列化 */
-    private transient Map<String, Object> attachs;
+    private transient volatile Map<String, Object> attachs;
 
     public URL() {}
 
@@ -247,42 +200,41 @@ public class URL implements Serializable {
         return String.format("%s:%d", host, port);
     }
 
-    public String getString(String key, String defaultValue) {
+    public String getStringParameter(String key, String defaultValue) {
         return MapUtils.getString(parameters, key, defaultValue);
     }
 
-    public String getString(String key) {
-        return getString(key, null);
+    public String getStringParameter(String key) {
+        return getStringParameter(key, null);
     }
 
-    public Integer getInteger(String key, Integer defaultValue) {
-
+    public Integer getIntParameter(String key, Integer defaultValue) {
         return MapUtils.getInteger(parameters, key, defaultValue);
     }
 
-    public Integer getInteger(String key) {
-        return getInteger(key, null);
+    public Integer getIntParameter(String key) {
+        return getIntParameter(key, null);
     }
 
-    public Long getLong(String key, Long defaultValue) {
+    public Long getLongParameter(String key, Long defaultValue) {
         return MapUtils.getLong(parameters, key, defaultValue);
     }
 
-    public Long getLong(String key) {
-        return getLong(key, null);
+    public Long getLongParameter(String key) {
+        return getLongParameter(key, null);
     }
 
-    public Boolean getBoolean(String key, Boolean defaultValue) {
+    public Boolean getBooleanParameter(String key, Boolean defaultValue) {
         return MapUtils.getBoolean(parameters, key, defaultValue);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getObject(String key) {
+    public <T> T getParameter(String key) {
         return (T) MapUtils.getObject(parameters, key);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getObject(String key, T defaultValue) {
+    public <T> T getParameter(String key, T defaultValue) {
         return (T) MapUtils.getObject(parameters, key, defaultValue);
     }
 
@@ -315,6 +267,17 @@ public class URL implements Serializable {
             }
             attachs.put(key, value);
         }
+    }
+
+    private Map<String, Object> internalAttach() {
+        if (attachs == null) {
+            synchronized (this) {
+                if (attachs == null) {
+                    attachs = new HashMap<>();
+                }
+            }
+        }
+        return attachs;
     }
 
     public static String encode(String s) {

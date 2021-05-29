@@ -3,53 +3,38 @@ package com.thinkerwolf.gamer.common.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ClassUtils {
 
-    /**
-     * void(V).
-     */
+    /** void(V). */
     public static final char JVM_VOID = 'V';
 
-    /**
-     * boolean(Z).
-     */
+    /** boolean(Z). */
     public static final char JVM_BOOLEAN = 'Z';
 
-    /**
-     * byte(B).
-     */
+    /** byte(B). */
     public static final char JVM_BYTE = 'B';
 
-    /**
-     * char(C).
-     */
+    /** char(C). */
     public static final char JVM_CHAR = 'C';
 
-    /**
-     * double(D).
-     */
+    /** double(D). */
     public static final char JVM_DOUBLE = 'D';
 
-    /**
-     * float(F).
-     */
+    /** float(F). */
     public static final char JVM_FLOAT = 'F';
 
-    /**
-     * int(I).
-     */
+    /** int(I). */
     public static final char JVM_INT = 'I';
 
-    /**
-     * long(J).
-     */
+    /** long(J). */
     public static final char JVM_LONG = 'J';
 
-    /**
-     * short(S).
-     */
+    /** short(S). */
     public static final char JVM_SHORT = 'S';
 
     private static final Map<Class<?>, Object> PRIMITIVE_DEFAULT_VALUE;
@@ -76,7 +61,6 @@ public class ClassUtils {
         PRIMITIVE_WRAPPER.put(Float.TYPE, Float.class);
         PRIMITIVE_WRAPPER.put(Double.TYPE, Double.class);
     }
-
 
     public static ClassLoader getDefaultClassLoader() {
         ClassLoader cl = null;
@@ -109,22 +93,15 @@ public class ClassUtils {
     }
 
     public static <T> T newInstance(Class<T> clazz, Object... args) {
-        if (args.length == 0) {
-            try {
-                return clazz.newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            Class<?>[] parameterTypes = new Class<?>[args.length];
-            for (int i = 0; i < args.length; i++) {
-                parameterTypes[i] = args[i].getClass();
-            }
-            try {
-                return clazz.getConstructor(parameterTypes).newInstance(args);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+
+        Class<?>[] parameterTypes = new Class<?>[args.length];
+        for (int i = 0; i < args.length; i++) {
+            parameterTypes[i] = args[i].getClass();
+        }
+        try {
+            return clazz.getConstructor(parameterTypes).newInstance(args);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -132,7 +109,6 @@ public class ClassUtils {
     public static <T> T newInstance(String name, Object... args) {
         return newInstance((Class<T>) forName(name), args);
     }
-
 
     public static <T> T castTo(String s, Class<T> clazz) {
         if (s == null) {
@@ -193,7 +169,8 @@ public class ClassUtils {
             return castTo((String) obj, toClass);
         }
 
-        if (Number.class.isAssignableFrom(fromClass) && (Number.class.isAssignableFrom(toClass) || toClass.isPrimitive())) {
+        if (Number.class.isAssignableFrom(fromClass)
+                && (Number.class.isAssignableFrom(toClass) || toClass.isPrimitive())) {
             return castTo(obj.toString(), toClass);
         }
 
@@ -269,12 +246,10 @@ public class ClassUtils {
     }
 
     public static String getDesc(final Class<?>[] cs) {
-        if (cs.length == 0)
-            return "";
+        if (cs.length == 0) return "";
 
         StringBuilder sb = new StringBuilder(64);
-        for (Class<?> c : cs)
-            sb.append(getDesc(c));
+        for (Class<?> c : cs) sb.append(getDesc(c));
         return sb.toString();
     }
 
@@ -308,8 +283,7 @@ public class ClassUtils {
     public static String getDesc(final Method m) {
         StringBuilder ret = new StringBuilder(m.getName()).append('(');
         Class<?>[] parameterTypes = m.getParameterTypes();
-        for (int i = 0; i < parameterTypes.length; i++)
-            ret.append(getDesc(parameterTypes[i]));
+        for (int i = 0; i < parameterTypes.length; i++) ret.append(getDesc(parameterTypes[i]));
         ret.append(')').append(getDesc(m.getReturnType()));
         return ret.toString();
     }

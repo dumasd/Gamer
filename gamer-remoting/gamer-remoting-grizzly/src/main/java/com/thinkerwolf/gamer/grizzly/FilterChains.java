@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.grizzly;
 
-
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.grizzly.tcp.PacketFilter;
 import com.thinkerwolf.gamer.grizzly.websocket.DefaultApplication;
@@ -23,11 +22,7 @@ import org.glassfish.grizzly.utils.DelayedExecutor;
 import org.glassfish.grizzly.utils.IdleTimeoutFilter;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 
-import static com.thinkerwolf.gamer.common.URL.SSL_ENABLED;
-import static com.thinkerwolf.gamer.common.URL.SSL_KEYSTORE_FILE;
-import static com.thinkerwolf.gamer.common.URL.SSL_KEYSTORE_PASS;
-import static com.thinkerwolf.gamer.common.URL.SSL_TRUSTSTORE_FILE;
-import static com.thinkerwolf.gamer.common.URL.SSL_TRUSTSTORE_PASS;
+import static com.thinkerwolf.gamer.common.Constants.*;
 
 public final class FilterChains {
 
@@ -37,11 +32,14 @@ public final class FilterChains {
         if (protocol.equals(Protocol.TCP)) {
             builder.addLast(new TransportFilter());
             builder.addLast(new PacketFilter());
-            builder.addLast(server ? new GrizzlyServerFilter(url, handler) : new GrizzlyClientFilter(url, handler));
-        } else if (protocol.equals(Protocol.HTTP)
-                || protocol.equals(Protocol.WEBSOCKET)) {
+            builder.addLast(
+                    server
+                            ? new GrizzlyServerFilter(url, handler)
+                            : new GrizzlyClientFilter(url, handler));
+        } else if (protocol.equals(Protocol.HTTP) || protocol.equals(Protocol.WEBSOCKET)) {
             if (server) {
-                WebSocketEngine.getEngine().register("", "/*", new DefaultApplication(url, handler));
+                WebSocketEngine.getEngine()
+                        .register("", "/*", new DefaultApplication(url, handler));
             }
             builder.addLast(new TransportFilter());
             SSLEngineConfigurator cfg = initializeSSL(url);
@@ -52,41 +50,46 @@ public final class FilterChains {
             if (server || protocol.equals(Protocol.WEBSOCKET)) {
                 builder.addLast(server ? new WebSocketServerFilter() : new WebSocketClientFilter());
             }
-            builder.addLast(server ? new GrizzlyServerFilter(url, handler) : new GrizzlyClientFilter(url, handler));
+            builder.addLast(
+                    server
+                            ? new GrizzlyServerFilter(url, handler)
+                            : new GrizzlyClientFilter(url, handler));
         }
         return builder.build();
     }
 
-    /**
-     * Initialize server side SSL configuration.
-     */
+    /** Initialize server side SSL configuration. */
     private static SSLEngineConfigurator initializeSSL(URL url) {
         SSLContextConfigurator sslContextConfig = new SSLContextConfigurator();
-        if (!url.getBoolean(SSL_ENABLED, false)) {
+        if (!url.getBooleanParameter(SSL_ENABLED, false)) {
             return null;
         }
-        String ksFile = url.getString(SSL_KEYSTORE_FILE);
-        String ksPass = url.getString(SSL_KEYSTORE_PASS);
+        String ksFile = url.getStringParameter(SSL_KEYSTORE_FILE);
+        String ksPass = url.getStringParameter(SSL_KEYSTORE_PASS);
         if (StringUtils.isNotBlank(ksFile)) {
             sslContextConfig.setKeyStoreFile(ksFile);
             sslContextConfig.setKeyStorePass(ksPass);
         }
 
-        String tsFile = url.getString(SSL_TRUSTSTORE_FILE);
-        String tsPass = url.getString(SSL_TRUSTSTORE_PASS);
+        String tsFile = url.getStringParameter(SSL_TRUSTSTORE_FILE);
+        String tsPass = url.getStringParameter(SSL_TRUSTSTORE_PASS);
         if (StringUtils.isNotBlank(tsFile)) {
             sslContextConfig.setTrustStoreFile(tsFile);
             sslContextConfig.setTrustStorePass(tsPass);
         }
-        return new SSLEngineConfigurator(sslContextConfig.createSSLContext(false), false, false, false);
+        return new SSLEngineConfigurator(
+                sslContextConfig.createSSLContext(false), false, false, false);
     }
 
     private static HttpServerFilter newHttpServerFilter(URL url) {
-        final DelayedExecutor delayedExecutor = IdleTimeoutFilter.createDefaultIdleDelayedExecutor();
+        final DelayedExecutor delayedExecutor =
+                IdleTimeoutFilter.createDefaultIdleDelayedExecutor();
         delayedExecutor.start();
         KeepAlive keepAlive = new KeepAlive();
-        return new HttpServerFilter(true, HttpCodecFilter.DEFAULT_MAX_HTTP_PACKET_HEADER_SIZE, keepAlive, delayedExecutor);
+        return new HttpServerFilter(
+                true,
+                HttpCodecFilter.DEFAULT_MAX_HTTP_PACKET_HEADER_SIZE,
+                keepAlive,
+                delayedExecutor);
     }
-
-
 }

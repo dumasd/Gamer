@@ -15,14 +15,17 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketAddress;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import static com.thinkerwolf.gamer.common.URL.*;
+import static com.thinkerwolf.gamer.common.Constants.CONNECTION_TIMEOUT;
+import static com.thinkerwolf.gamer.common.Constants.RETRY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class MulticastRegistry extends AbstractRegistry {
@@ -90,8 +93,8 @@ public class MulticastRegistry extends AbstractRegistry {
 
     private MulticastSocket prepareClient(URL url) {
         final int connectionTimeout =
-                url.getInteger(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
-        int retry = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
+                url.getIntParameter(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
+        int retry = url.getIntParameter(RETRY, DEFAULT_RETRY_TIMES);
         try {
             this.multicastAddress = InetAddress.getByName(url.getHost());
             this.multicastPort = url.getPort() <= 0 ? DEFAULT_PORT : url.getPort();

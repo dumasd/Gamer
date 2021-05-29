@@ -66,8 +66,12 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
     }
 
     private void init() {
-        YmlConf ymlConf = new YmlConf().setServletConfig(servletConfig).setUrls(urls)
-                .setConfFile(configFile).load();
+        YmlConf ymlConf =
+                new YmlConf()
+                        .setServletConfig(servletConfig)
+                        .setUrls(urls)
+                        .setConfFile(configFile)
+                        .load();
         this.servletConfig = ymlConf.getServletConfig();
         this.urls = ymlConf.getUrls();
     }
@@ -79,13 +83,14 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
 
     @Override
     protected void doClose() {
-        runningServers.forEach((url, server) -> {
-            try {
-                server.close();
-            } catch (Exception e) {
-                LOG.warn("Close", e);
-            }
-        });
+        runningServers.forEach(
+                (url, server) -> {
+                    try {
+                        server.close();
+                    } catch (Exception e) {
+                        LOG.warn("Close", e);
+                    }
+                });
         runningServers.clear();
         servletConfig.getServletContext().destroy();
     }
@@ -101,7 +106,7 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
         servlet.init(servletConfig);
         notifyServletContextListener();
         for (URL url : urls) {
-            url.setAttach(URL.SERVLET_CONFIG, servletConfig);
+            url.setAttach(Constants.SERVLET_CONFIG, servletConfig);
             ChannelHandler[] handlers = createHandlers(url);
             NettyServer server = new NettyServer(url, handlers[0]);
             runningServers.put(url, server);
@@ -111,7 +116,7 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
 
     private ChannelHandler[] createHandlers(URL url) {
         List<ChannelHandler> handlers = new ArrayList<>();
-        String handlerClasses = url.getObject(URL.CHANNEL_HANDLERS);
+        String handlerClasses = url.getParameter(Constants.CHANNEL_HANDLERS);
         if (StringUtils.isNotEmpty(handlerClasses)) {
             for (String cl : Constants.SEMICOLON_SPLIT_PATTERN.split(handlerClasses)) {
                 Class<?> clazz = ClassUtils.forName(cl);
@@ -119,7 +124,9 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
                     throw new ConfigurationException(cl + " is not a ServletChannelHandler");
                 }
                 try {
-                    ServletChannelHandler handler = (ServletChannelHandler) clazz.getDeclaredConstructors()[0].newInstance();
+                    ServletChannelHandler handler =
+                            (ServletChannelHandler)
+                                    clazz.getDeclaredConstructors()[0].newInstance();
                     handler.init(url);
                     handlers.add(handler);
                 } catch (Exception e) {
@@ -133,6 +140,4 @@ public class NettyServletBootstrap extends AbstractServletBootstrap {
         }
         return handlers.toArray(new ChannelHandler[0]);
     }
-
-
 }

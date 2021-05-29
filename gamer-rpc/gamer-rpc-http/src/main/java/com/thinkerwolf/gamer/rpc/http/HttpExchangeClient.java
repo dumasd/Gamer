@@ -36,7 +36,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.thinkerwolf.gamer.common.URL.RPC_CLIENT_NUM;
+import static com.thinkerwolf.gamer.common.Constants.REQUEST_TIMEOUT;
+import static com.thinkerwolf.gamer.common.Constants.RPC_CLIENT_NUM;
 
 public class HttpExchangeClient implements ExchangeClient<RpcResponse> {
     private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 10;
@@ -52,7 +53,7 @@ public class HttpExchangeClient implements ExchangeClient<RpcResponse> {
 
     public HttpExchangeClient(URL url) {
         this.url = url;
-        this.timeout = url.getInteger(URL.REQUEST_TIMEOUT, 2000);
+        this.timeout = url.getIntParameter(REQUEST_TIMEOUT, 2000);
         this.requestConfig =
                 RequestConfig.custom().setSocketTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS).build();
         initHttpClient();
@@ -77,7 +78,7 @@ public class HttpExchangeClient implements ExchangeClient<RpcResponse> {
                             connManager.setDefaultConnectionConfig(ConnectionConfig.DEFAULT);
                             connManager.setDefaultSocketConfig(
                                     SocketConfig.custom().setTcpNoDelay(true).build());
-                            Integer maxConn = url.getInteger(RPC_CLIENT_NUM);
+                            Integer maxConn = url.getIntParameter(RPC_CLIENT_NUM);
                             if (maxConn == null) {
                                 maxConn =
                                         url.getAttach(

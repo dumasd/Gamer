@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.thinkerwolf.gamer.common.URL.*;
+import static com.thinkerwolf.gamer.common.Constants.*;
 
 /**
  * Zookeeper Registry Center
@@ -47,10 +47,10 @@ public class ZookeeperRegistry extends AbstractRegistry
 
     private ZkClient prepareClient() {
         final int connectionTimeout =
-                url.getInteger(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
-        final int sessionTimeout = url.getInteger(SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT);
+                url.getIntParameter(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
+        final int sessionTimeout = url.getIntParameter(SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT);
 
-        String backup = url.getString(BACKUP);
+        String backup = url.getStringParameter(BACKUP);
         StringBuilder zkServersBuilder = new StringBuilder(url.toHostPort());
         if (StringUtils.isNotBlank(backup)) {
             zkServersBuilder.append(SymbolConstants.SEMICOLON).append(backup);
@@ -58,7 +58,7 @@ public class ZookeeperRegistry extends AbstractRegistry
 
         String zkServers = zkServersBuilder.toString();
         final ZkSerializer serializer = new AdaptiveZkSerializer();
-        int retry = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
+        int retry = url.getIntParameter(RETRY, DEFAULT_RETRY_TIMES);
         try {
             return RetryLoops.invokeWithRetry(
                     () -> new ZkClient(zkServers, sessionTimeout, connectionTimeout, serializer),
@@ -71,9 +71,9 @@ public class ZookeeperRegistry extends AbstractRegistry
     @Override
     protected void doRegister(URL url) {
         String path = toPathName(url);
-        int retry = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
-        long retryMillis = url.getLong(RETRY_MILLIS, DEFAULT_RETRY_MILLIS);
-        final boolean ephemeral = url.getBoolean(NODE_EPHEMERAL, true);
+        int retry = url.getIntParameter(RETRY, DEFAULT_RETRY_TIMES);
+        long retryMillis = url.getLongParameter(RETRY_MILLIS, DEFAULT_RETRY_MILLIS);
+        final boolean ephemeral = url.getBooleanParameter(NODE_EPHEMERAL, true);
         final List<ACL> acl = ZkClientUtils.createACLs(url);
         try {
             RetryLoops.invokeWithRetry(

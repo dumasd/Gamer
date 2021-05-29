@@ -1,6 +1,5 @@
 package com.thinkerwolf.gamer.core.conf.yml;
 
-import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
@@ -24,6 +23,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.*;
+
+import static com.thinkerwolf.gamer.common.Constants.*;
 
 @SuppressWarnings("unchecked")
 public class YmlConf extends AbstractConf<YmlConf> {
@@ -89,18 +90,16 @@ public class YmlConf extends AbstractConf<YmlConf> {
         try {
             Yaml yaml = new Yaml();
             String file =
-                    StringUtils.isBlank(getConfFile())
-                            ? Constants.DEFAULT_CONFIG_FILE_YML
-                            : getConfFile();
+                    StringUtils.isBlank(getConfFile()) ? DEFAULT_CONFIG_FILE_YML : getConfFile();
             is = ResourceUtils.findInputStream("", file);
             if (is == null) {
                 LOG.info("Can't load config from [" + file + "]");
             }
             if (is == null) {
-                is = ResourceUtils.findInputStream("", Constants.DEFAULT_CONFIG_FILE_YML);
+                is = ResourceUtils.findInputStream("", DEFAULT_CONFIG_FILE_YML);
             }
             if (is == null) {
-                is = ResourceUtils.findInputStream("", Constants.DEFAULT_CONFIG_FILE_YAML);
+                is = ResourceUtils.findInputStream("", DEFAULT_CONFIG_FILE_YAML);
             }
             if (is == null) {
                 throw new FileNotFoundException("No config file!!");
@@ -121,54 +120,50 @@ public class YmlConf extends AbstractConf<YmlConf> {
         final List<URL> urls = new ArrayList<>();
         for (Map<String, Object> netConf : netConfs) {
             URL url = new URL();
-            if (!netConf.containsKey(URL.PROTOCOL)) {
+            if (!netConf.containsKey(PROTOCOL)) {
                 throw new ConfigurationException("Netty config missing protocol");
             }
-            url.setProtocol(MapUtils.getString(netConf, URL.PROTOCOL).toLowerCase());
-            if (netConf.containsKey(URL.PORT)) {
-                url.setPort(MapUtils.getInteger(netConf, URL.PORT));
+            url.setProtocol(MapUtils.getString(netConf, PROTOCOL).toLowerCase());
+            if (netConf.containsKey(PORT)) {
+                url.setPort(MapUtils.getInteger(netConf, PORT));
             } else {
                 Protocol p = Protocol.parseOf(url.getProtocol());
                 if (p == Protocol.TCP) {
-                    url.setPort(URL.DEFAULT_TCP_PORT);
+                    url.setPort(DEFAULT_TCP_PORT);
                 } else {
-                    url.setPort(URL.DEFAULT_HTTP_PORT);
+                    url.setPort(DEFAULT_HTTP_PORT);
                 }
             }
             final InetAddress localAddress = NetUtils.getLocalAddress();
             String host;
-            if (netConf.containsKey(URL.HOST)) {
-                host = MapUtils.getString(netConf, URL.HOST);
+            if (netConf.containsKey(HOST)) {
+                host = MapUtils.getString(netConf, HOST);
             } else {
                 host = localAddress.getHostAddress();
             }
 
             url.setHost(host);
-            url.setUsername(MapUtils.getString(netConf, URL.USERNAME));
-            url.setPassword(MapUtils.getString(netConf, URL.PASSWORD));
+            url.setUsername(MapUtils.getString(netConf, USERNAME));
+            url.setPassword(MapUtils.getString(netConf, PASSWORD));
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put(URL.BOSS_THREADS, MapUtils.getInteger(netConf, URL.BOSS_THREADS, 1));
-            parameters.put(URL.WORKER_THREADS, MapUtils.getInteger(netConf, URL.WORKER_THREADS, 3));
-            parameters.put(URL.CORE_THREADS, MapUtils.getInteger(netConf, URL.CORE_THREADS, 5));
-            parameters.put(URL.MAX_THREADS, MapUtils.getInteger(netConf, URL.MAX_THREADS, 8));
-            parameters.put(
-                    URL.COUNT_PER_CHANNEL, MapUtils.getInteger(netConf, URL.COUNT_PER_CHANNEL, 50));
-            parameters.put(
-                    URL.CHANNEL_HANDLERS, MapUtils.getString(netConf, URL.CHANNEL_HANDLERS, ""));
 
+            url.setAttach(OPTIONS, MapUtils.getMap(netConf, OPTIONS, Collections.emptyMap()));
             url.setAttach(
-                    URL.OPTIONS, MapUtils.getMap(netConf, URL.OPTIONS, Collections.EMPTY_MAP));
-            url.setAttach(
-                    URL.CHILD_OPTIONS,
-                    MapUtils.getMap(netConf, URL.CHILD_OPTIONS, Collections.EMPTY_MAP));
+                    CHILD_OPTIONS, MapUtils.getMap(netConf, CHILD_OPTIONS, Collections.emptyMap()));
+            url.setAttach(BOSS_THREADS, MapUtils.getInteger(netConf, BOSS_THREADS, 1));
+            url.setAttach(WORKER_THREADS, MapUtils.getInteger(netConf, WORKER_THREADS, 1));
+            url.setAttach(CORE_THREADS, MapUtils.getInteger(netConf, CORE_THREADS, 1));
+            url.setAttach(MAX_THREADS, MapUtils.getInteger(netConf, MAX_THREADS, 1));
+            url.setAttach(COUNT_PER_CHANNEL, MapUtils.getInteger(netConf, COUNT_PER_CHANNEL, 1));
+            url.setAttach(CHANNEL_HANDLERS, MapUtils.getInteger(netConf, CHANNEL_HANDLERS, 1));
 
-            if (MapUtils.getBoolean(netConf, URL.RPC_USE_LOCAL, false)) {
-                parameters.put(URL.RPC_HOST, localAddress.getHostAddress());
+            if (MapUtils.getBoolean(netConf, RPC_USE_LOCAL, false)) {
+                parameters.put(RPC_HOST, localAddress.getHostAddress());
             } else {
-                String rpcHost = MapUtils.getString(netConf, URL.RPC_HOST);
+                String rpcHost = MapUtils.getString(netConf, RPC_HOST);
                 if (StringUtils.isNotBlank(rpcHost)) {
-                    parameters.put(URL.RPC_HOST, rpcHost);
+                    parameters.put(RPC_HOST, rpcHost);
                 }
             }
 
@@ -182,23 +177,23 @@ public class YmlConf extends AbstractConf<YmlConf> {
     private void initSslConfig(URL url, Map<String, Object> sslConf) {
         boolean enabled = MapUtils.getBoolean(sslConf, "enabled", Boolean.FALSE);
         if (enabled) {
-            url.getParameters().put(URL.SSL_ENABLED, true);
+            url.getParameters().put(SSL_ENABLED, true);
             url.getParameters()
                     .compute(
-                            URL.SSL_KEYSTORE_FILE,
-                            (s, o) -> MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_FILE));
+                            SSL_KEYSTORE_FILE,
+                            (s, o) -> MapUtils.getString(sslConf, SSL_KEYSTORE_FILE));
             url.getParameters()
                     .compute(
-                            URL.SSL_KEYSTORE_PASS,
-                            (s, o) -> MapUtils.getString(sslConf, Constants.SSL_KEYSTORE_PASS));
+                            SSL_KEYSTORE_PASS,
+                            (s, o) -> MapUtils.getString(sslConf, SSL_KEYSTORE_PASS));
             url.getParameters()
                     .compute(
-                            URL.SSL_TRUSTSTORE_FILE,
-                            (s, o) -> MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_FILE));
+                            SSL_TRUSTSTORE_FILE,
+                            (s, o) -> MapUtils.getString(sslConf, SSL_TRUSTSTORE_FILE));
             url.getParameters()
                     .compute(
-                            URL.SSL_TRUSTSTORE_PASS,
-                            (s, o) -> MapUtils.getString(sslConf, Constants.SSL_TRUSTSTORE_PASS));
+                            SSL_TRUSTSTORE_PASS,
+                            (s, o) -> MapUtils.getString(sslConf, SSL_TRUSTSTORE_PASS));
         }
     }
 

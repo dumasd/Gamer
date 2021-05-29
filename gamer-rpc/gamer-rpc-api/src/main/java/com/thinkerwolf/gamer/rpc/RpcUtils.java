@@ -7,9 +7,10 @@ import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.rpc.exception.RpcException;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+
+import static com.thinkerwolf.gamer.common.Constants.RPC_HOST;
 
 /**
  * RPC工具集合
@@ -47,11 +48,11 @@ public final class RpcUtils {
     }
 
     public static URL getConnectUrl(URL url) {
-        String rpcHost = url.getString(URL.RPC_HOST);
+        String rpcHost = url.getStringParameter(RPC_HOST);
         if (rpcHost != null) {
             URL newUrl = URL.parse(url.toString());
             newUrl.setHost(rpcHost);
-            newUrl.getParameters().remove(URL.RPC_HOST);
+            newUrl.getParameters().remove(RPC_HOST);
             return newUrl;
         }
         return url;

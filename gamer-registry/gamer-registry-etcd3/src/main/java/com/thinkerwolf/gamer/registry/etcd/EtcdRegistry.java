@@ -27,14 +27,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import static com.thinkerwolf.gamer.common.Constants.*;
 import static com.thinkerwolf.gamer.registry.etcd.JetcdUtil.*;
-
-import static com.thinkerwolf.gamer.common.URL.RETRY;
-import static com.thinkerwolf.gamer.common.URL.RETRY_MILLIS;
-import static com.thinkerwolf.gamer.common.URL.SESSION_TIMEOUT;
 
 /**
  * Etcd3注册中心
@@ -62,9 +61,9 @@ public class EtcdRegistry extends AbstractRegistry implements Watch.Listener {
     }
 
     private void init(URL url) {
-        this.requestRetryTimes = url.getInteger(RETRY, DEFAULT_RETRY_TIMES);
-        this.requestTimeout = url.getLong(RETRY_MILLIS, DEFAULT_RETRY_MILLIS);
-        this.sessionTimeout = url.getLong(SESSION_TIMEOUT, DEFAULT_KEEP_ALIVE_DELAY);
+        this.requestRetryTimes = url.getIntParameter(RETRY, DEFAULT_RETRY_TIMES);
+        this.requestTimeout = url.getLongParameter(RETRY_MILLIS, DEFAULT_RETRY_MILLIS);
+        this.sessionTimeout = url.getLongParameter(SESSION_TIMEOUT, DEFAULT_KEEP_ALIVE_DELAY);
         this.ttl = TimeUnit.MILLISECONDS.toSeconds(sessionTimeout + 1000);
         this.retryPolicy =
                 new RetryNTimes(requestRetryTimes, requestTimeout, TimeUnit.MILLISECONDS);
@@ -76,7 +75,7 @@ public class EtcdRegistry extends AbstractRegistry implements Watch.Listener {
     private Client prepareClient(URL url) {
         StringBuilder builder = new StringBuilder();
         builder.append("http://").append(url.toHostPort());
-        String backup = url.getString(URL.BACKUP);
+        String backup = url.getStringParameter(Constants.BACKUP);
         if (StringUtils.isNotBlank(backup)) {
             for (String bk : Constants.SEMICOLON_SPLIT_PATTERN.split(backup)) {
                 if (StringUtils.isNotBlank(bk)) {
@@ -97,7 +96,7 @@ public class EtcdRegistry extends AbstractRegistry implements Watch.Listener {
         try {
             RetryLoops.invokeWithRetry(
                     () -> {
-                        final boolean eph = url.getBoolean(URL.NODE_EPHEMERAL, true);
+                        final boolean eph = url.getBooleanParameter(NODE_EPHEMERAL, true);
                         long leaseId = globalLeaseId;
                         PutOption.Builder builder = PutOption.newBuilder();
                         if (eph) {

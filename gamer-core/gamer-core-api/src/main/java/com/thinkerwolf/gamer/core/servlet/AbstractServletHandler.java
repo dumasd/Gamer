@@ -1,5 +1,6 @@
 package com.thinkerwolf.gamer.core.servlet;
 
+import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
@@ -17,7 +18,8 @@ import java.util.concurrent.ExecutorService;
  * @author wukai
  * @since 2020-06-11
  */
-public abstract class AbstractServletHandler extends ChannelHandlerAdapter implements ServletChannelHandler {
+public abstract class AbstractServletHandler extends ChannelHandlerAdapter
+        implements ServletChannelHandler {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(AbstractServletHandler.class);
 
@@ -29,12 +31,16 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter imple
     @Override
     public void init(URL url) {
         this.url = url;
-        Object o = url.getAttach(URL.EXEC_GROUP_NAME);
+        Object o = url.getAttach(Constants.EXEC_GROUP_NAME);
         String name = o == null ? url.getProtocol() : o.toString();
         this.executor = ConcurrentUtil.newExecutor(url, name + "-user");
-        this.servletConfig = url.getAttach(URL.SERVLET_CONFIG);
+        this.servletConfig = url.getAttach(Constants.SERVLET_CONFIG);
         if (servletConfig != null) {
-            this.servlet = (Servlet) servletConfig.getServletContext().getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
+            this.servlet =
+                    (Servlet)
+                            servletConfig
+                                    .getServletContext()
+                                    .getAttribute(ServletContext.ROOT_SERVLET_ATTRIBUTE);
         }
     }
 
@@ -55,9 +61,11 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter imple
     @Override
     public void disconnected(Channel channel) throws RemotingException {
         super.disconnected(channel);
-        LOG.debug("Channel disconnected. channel:" + channel.id()
-                + ", isOpen:" + (!channel.isClosed())
-        );
+        LOG.debug(
+                "Channel disconnected. channel:"
+                        + channel.id()
+                        + ", isOpen:"
+                        + (!channel.isClosed()));
         if (executor instanceof CountAwareThreadPoolExecutor) {
             ((CountAwareThreadPoolExecutor) executor).check(channel);
         }
@@ -65,8 +73,8 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter imple
 
     @Override
     public void caught(Channel channel, Throwable e) throws RemotingException {
-        LOG.info("Channel caught. channel:" + channel.id()
-                + ", isOpen:" + (!channel.isClosed()), e);
+        LOG.info(
+                "Channel caught. channel:" + channel.id() + ", isOpen:" + (!channel.isClosed()), e);
         if (e instanceof IOException) {
             channel.close();
         }
@@ -77,18 +85,20 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter imple
 
     protected void service(Request request, Response response, Channel channel, Object message) {
         if (executor != null) {
-            executor.execute(new ChannelRunnable(channel, message) {
-                @Override
-                public void run() {
-                    service(servlet, request, response, channel);
-                }
-            });
+            executor.execute(
+                    new ChannelRunnable(channel, message) {
+                        @Override
+                        public void run() {
+                            service(servlet, request, response, channel);
+                        }
+                    });
         } else {
             service(servlet, request, response, channel);
         }
     }
 
-    private static void service(Servlet servlet, Request request, Response response, Channel channel) {
+    private static void service(
+            Servlet servlet, Request request, Response response, Channel channel) {
         try {
             servlet.service(request, response);
         } catch (Exception e) {
@@ -97,5 +107,4 @@ public abstract class AbstractServletHandler extends ChannelHandlerAdapter imple
             channel.close();
         }
     }
-
 }

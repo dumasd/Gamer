@@ -20,6 +20,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.thinkerwolf.gamer.common.Constants.NODE_NAME;
+
 public class JetcdTests {
 
     public static void main(String[] args) {
@@ -36,7 +38,7 @@ public class JetcdTests {
         URL url = URL.parse("jetcd://127.0.0.1:2379");
         StringBuilder builder = new StringBuilder();
         builder.append("http://").append(url.toHostPort());
-        String backup = url.getString(URL.BACKUP);
+        String backup = url.getStringParameter(Constants.BACKUP);
         if (StringUtils.isNotBlank(backup)) {
             for (String bk : Constants.SEMICOLON_SPLIT_PATTERN.split(backup)) {
                 if (StringUtils.isNotBlank(bk)) {
@@ -45,27 +47,32 @@ public class JetcdTests {
                 }
             }
         }
-        Client client = Client.builder().endpoints(Constants.SEMICOLON_SPLIT_PATTERN.split(builder.toString())).build();
+        Client client =
+                Client.builder()
+                        .endpoints(Constants.SEMICOLON_SPLIT_PATTERN.split(builder.toString()))
+                        .build();
         KV kv = client.getKVClient();
 
         ByteSequence bs = JetcdUtil.toByteSeq("p1");
         WatchOption wop = WatchOption.newBuilder().withPrefix(bs).build();
-        client.getWatchClient().watch(bs, wop, new Watch.Listener() {
-            @Override
-            public void onNext(WatchResponse response) {
-                System.err.println("onNext : " + response);
-            }
+        client.getWatchClient()
+                .watch(
+                        bs,
+                        wop,
+                        new Watch.Listener() {
+                            @Override
+                            public void onNext(WatchResponse response) {
+                                System.err.println("onNext : " + response);
+                            }
 
-            @Override
-            public void onError(Throwable throwable) {
+                            @Override
+                            public void onError(Throwable throwable) {}
 
-            }
-
-            @Override
-            public void onCompleted() {
-                System.err.println("onCompleted");
-            }
-        });
+                            @Override
+                            public void onCompleted() {
+                                System.err.println("onCompleted");
+                            }
+                        });
     }
 
     public static void testRegistry() {
@@ -78,28 +85,30 @@ public class JetcdTests {
         URL u1 = URL.parse("http://127.0.0.1/p2/game");
         u1.setParameters(parameters);
 
-        parameters.putIfAbsent(URL.NODE_NAME, "game_1001");
+        parameters.putIfAbsent(NODE_NAME, "game_1001");
         registry.register(u1);
-        registry.subscribe(u1, new INotifyListener() {
-            @Override
-            public void notifyDataChange(DataEvent event) throws Exception {
-                System.out.println(event);
-            }
+        registry.subscribe(
+                u1,
+                new INotifyListener() {
+                    @Override
+                    public void notifyDataChange(DataEvent event) throws Exception {
+                        System.out.println(event);
+                    }
 
-            @Override
-            public void notifyChildChange(ChildEvent event) throws Exception {
-
-            }
-        });
+                    @Override
+                    public void notifyChildChange(ChildEvent event) throws Exception {}
+                });
 
         URL u2 = URL.parse("http://127.0.0.1/p2/game");
-        exe.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("lookup:" + registry.lookup(u2));
-            }
-        }, 3000, 3000, TimeUnit.MILLISECONDS);
+        exe.scheduleWithFixedDelay(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("lookup:" + registry.lookup(u2));
+                    }
+                },
+                3000,
+                3000,
+                TimeUnit.MILLISECONDS);
     }
-
-
 }

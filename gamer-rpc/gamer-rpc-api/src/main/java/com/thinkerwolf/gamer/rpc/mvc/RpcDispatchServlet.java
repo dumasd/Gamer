@@ -27,6 +27,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static com.thinkerwolf.gamer.common.Constants.NODE_NAME;
+
 /** RPC Server servlet */
 public class RpcDispatchServlet implements MvcServlet {
 
@@ -146,7 +148,7 @@ public class RpcDispatchServlet implements MvcServlet {
                 regURL.setParameters(new HashMap<>());
                 regURL.getParameters()
                         .put(
-                                URL.NODE_NAME,
+                                NODE_NAME,
                                 UUID.nameUUIDFromBytes(urlStr.getBytes(StandardCharsets.UTF_8))
                                         .toString());
                 registry.register(regURL);

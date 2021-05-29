@@ -6,7 +6,7 @@ import com.thinkerwolf.gamer.remoting.ExchangeClient;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static com.thinkerwolf.gamer.common.URL.RPC_CLIENT_NUM;
+import static com.thinkerwolf.gamer.common.Constants.RPC_CLIENT_NUM;
 
 public abstract class AbstractClientProtocol extends AbstractProtocol {
     /** 共享的client */
@@ -17,7 +17,7 @@ public abstract class AbstractClientProtocol extends AbstractProtocol {
     }
 
     protected ExchangeClient[] getClients(URL url) {
-        Integer num = url.getInteger(RPC_CLIENT_NUM);
+        Integer num = url.getIntParameter(RPC_CLIENT_NUM);
         if (num == null) {
             num = url.getAttach(RPC_CLIENT_NUM, 5);
         }

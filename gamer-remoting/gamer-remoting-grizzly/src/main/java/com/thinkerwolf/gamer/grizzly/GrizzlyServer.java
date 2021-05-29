@@ -18,6 +18,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.thinkerwolf.gamer.common.Constants.OPTIONS;
+import static com.thinkerwolf.gamer.common.Constants.WORKER_THREADS;
+
 public class GrizzlyServer implements Server {
 
     private static final Logger LOG = InternalLoggerFactory.getLogger(GrizzlyServer.class);
@@ -45,8 +48,8 @@ public class GrizzlyServer implements Server {
             return;
         }
         started.set(true);
-        int workerThreads = url.getInteger(URL.WORKER_THREADS, DEFAULT_WORKER_THREADS);
-        Map<String, Object> options = url.getAttach(URL.OPTIONS, Collections.emptyMap());
+        int workerThreads = url.getAttach(WORKER_THREADS, DEFAULT_WORKER_THREADS);
+        Map<String, Object> options = url.getAttach(OPTIONS, Collections.emptyMap());
         TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
         for (Map.Entry<String, Object> op : options.entrySet()) {
             if (ChannelOptions.TCP_NODELAY.equalsIgnoreCase(op.getKey())) {
@@ -57,14 +60,16 @@ public class GrizzlyServer implements Server {
         }
 
         ThreadPoolConfig config = ThreadPoolConfig.defaultConfig();
-        config.setCorePoolSize(workerThreads).setMaxPoolSize(workerThreads)
+        config.setCorePoolSize(workerThreads)
+                .setMaxPoolSize(workerThreads)
                 .setThreadFactory(new DefaultThreadFactory("GrizzlyWorker_" + url.getProtocol()));
 
-        this.transport = builder
-                .setKeepAlive(true)
-                .setReuseAddress(false)
-                .setIOStrategy(SameThreadIOStrategy.getInstance())
-                .setWorkerThreadPoolConfig(config).build();
+        this.transport =
+                builder.setKeepAlive(true)
+                        .setReuseAddress(false)
+                        .setIOStrategy(SameThreadIOStrategy.getInstance())
+                        .setWorkerThreadPoolConfig(config)
+                        .build();
         this.transport.configureBlocking(false);
         this.transport.setProcessor(FilterChains.createProcessor(true, url, handler));
         this.connection = transport.bind(url.getPort());

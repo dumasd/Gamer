@@ -22,7 +22,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GrizzlyServletBootstrap extends AbstractServletBootstrap {
-    private static final Logger LOG = InternalLoggerFactory.getLogger(GrizzlyServletBootstrap.class);
+    private static final Logger LOG =
+            InternalLoggerFactory.getLogger(GrizzlyServletBootstrap.class);
     private final Map<URL, Server> runningServers = new ConcurrentHashMap<>(2, 1.0F);
     private String configFile;
     private List<URL> urls;
@@ -40,8 +41,12 @@ public class GrizzlyServletBootstrap extends AbstractServletBootstrap {
     }
 
     private void init() {
-        YmlConf ymlConf = new YmlConf().setServletConfig(servletConfig).setUrls(urls)
-                .setConfFile(configFile).load();
+        YmlConf ymlConf =
+                new YmlConf()
+                        .setServletConfig(servletConfig)
+                        .setUrls(urls)
+                        .setConfFile(configFile)
+                        .load();
         this.servletConfig = ymlConf.getServletConfig();
         this.urls = ymlConf.getUrls();
     }
@@ -52,7 +57,7 @@ public class GrizzlyServletBootstrap extends AbstractServletBootstrap {
         servlet.init(servletConfig);
         notifyServletContextListener();
         for (URL url : urls) {
-            url.setAttach(URL.SERVLET_CONFIG, servletConfig);
+            url.setAttach(Constants.SERVLET_CONFIG, servletConfig);
             ChannelHandler[] handlers = createHandlers(url);
             GrizzlyServer server = new GrizzlyServer(url, handlers[0]);
             runningServers.put(url, server);
@@ -62,7 +67,7 @@ public class GrizzlyServletBootstrap extends AbstractServletBootstrap {
 
     private ChannelHandler[] createHandlers(URL url) {
         List<ChannelHandler> handlers = new ArrayList<>();
-        String handlerClasses = url.getObject(URL.CHANNEL_HANDLERS);
+        String handlerClasses = url.getParameter(Constants.CHANNEL_HANDLERS);
         if (StringUtils.isNotEmpty(handlerClasses)) {
             String[] cls = Constants.SEMICOLON_SPLIT_PATTERN.split(handlerClasses);
             for (String cl : cls) {
@@ -71,7 +76,8 @@ public class GrizzlyServletBootstrap extends AbstractServletBootstrap {
                     throw new ConfigurationException(cl + " is not a ChannelHandler");
                 }
                 try {
-                    ServletChannelHandler handler = (ServletChannelHandler) clazz.getConstructors()[0].newInstance();
+                    ServletChannelHandler handler =
+                            (ServletChannelHandler) clazz.getConstructors()[0].newInstance();
                     handler.init(url);
                     handlers.add(handler);
                 } catch (Exception e) {
@@ -88,13 +94,14 @@ public class GrizzlyServletBootstrap extends AbstractServletBootstrap {
 
     @Override
     protected void doClose() {
-        runningServers.forEach((url, server) -> {
-            try {
-                server.close();
-            } catch (Exception e) {
-                LOG.warn("Close", e);
-            }
-        });
+        runningServers.forEach(
+                (url, server) -> {
+                    try {
+                        server.close();
+                    } catch (Exception e) {
+                        LOG.warn("Close", e);
+                    }
+                });
         runningServers.clear();
         servletConfig.getServletContext().destroy();
     }
@@ -108,5 +115,4 @@ public class GrizzlyServletBootstrap extends AbstractServletBootstrap {
     public ServletConfig getServletConfig() {
         return servletConfig;
     }
-
 }

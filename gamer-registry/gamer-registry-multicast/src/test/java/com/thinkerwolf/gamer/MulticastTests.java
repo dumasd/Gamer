@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.thinkerwolf.gamer.common.Constants.NODE_NAME;
+
 public class MulticastTests {
 
     public static void main(String[] args) {
@@ -15,7 +17,7 @@ public class MulticastTests {
 
         URL u = URL.parse("http://127.0.0.1:80/eliminate/game");
         Map<String, Object> params = new HashMap<>();
-        params.put(URL.NODE_NAME, "name");
+        params.put(NODE_NAME, "name");
         u.setParameters(params);
 
         registry1.register(u);
@@ -32,5 +34,4 @@ public class MulticastTests {
 
         }
     }
-
 }

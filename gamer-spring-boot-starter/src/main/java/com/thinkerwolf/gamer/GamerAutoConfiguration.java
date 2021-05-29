@@ -6,8 +6,8 @@ import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
 import com.thinkerwolf.gamer.common.log.Logger;
 import com.thinkerwolf.gamer.core.conf.yml.YmlConf;
+import com.thinkerwolf.gamer.core.servlet.DefaultServletBootstrap;
 import com.thinkerwolf.gamer.core.servlet.ServletBootstrap;
-import com.thinkerwolf.gamer.core.servlet.ServletBootstrapFactory;
 import com.thinkerwolf.gamer.core.servlet.ServletContext;
 import com.thinkerwolf.gamer.properties.GamerProperties;
 import com.thinkerwolf.gamer.registry.Registry;
@@ -40,19 +40,17 @@ public class GamerAutoConfiguration {
         public ServletBootstrap servletBootstrap(
                 GamerProperties properties, @Autowired(required = false) Registry registry) {
             try {
-                ServletBootstrapFactory factory =
-                        ServiceLoader.getService(
-                                properties.getServletBoot(), ServletBootstrapFactory.class);
                 ServletBootstrap bootstrap;
                 if (properties.getConfigFile() != null && !properties.getConfigFile().isEmpty()) {
-                    bootstrap = factory.create(properties.getConfigFile());
+                    bootstrap = new DefaultServletBootstrap(properties.getConfigFile());
                 } else if (properties.getConf() != null) {
                     YmlConf conf = new YmlConf().load(properties.getConf());
-                    //                    conf.setName(properties.getName());
-                    bootstrap = factory.create(conf.getUrls(), conf.getServletConfig());
+                    bootstrap =
+                            new DefaultServletBootstrap(conf.getUrls(), conf.getServletConfig());
                 } else {
-                    bootstrap = factory.create(null);
+                    bootstrap = new DefaultServletBootstrap();
                 }
+
                 bootstrap
                         .getServletConfig()
                         .getServletContext()

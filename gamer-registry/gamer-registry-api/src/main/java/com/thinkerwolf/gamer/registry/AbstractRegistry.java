@@ -15,6 +15,8 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.thinkerwolf.gamer.common.Constants.NODE_NAME;
+
 /** @author wukai */
 public abstract class AbstractRegistry implements Registry, INotifyListener {
     /** logger */
@@ -106,7 +108,7 @@ public abstract class AbstractRegistry implements Registry, INotifyListener {
     }
 
     private static void checkRegisterUrl(URL url) {
-        if (url.getString(URL.NODE_NAME) == null) {
+        if (url.getStringParameter(NODE_NAME) == null) {
             throw new IllegalArgumentException("Node name is blank");
         }
     }
@@ -259,12 +261,12 @@ public abstract class AbstractRegistry implements Registry, INotifyListener {
                             addNotifyListener(key, url, AbstractRegistry.this);
                             return urls == null ? new ArrayList<>() : urls;
                         });
-        String nodeName = url.getString(URL.NODE_NAME);
+        String nodeName = url.getStringParameter(NODE_NAME);
         if (nodeName == null) {
             return new ArrayList<>(findURLs);
         } else {
             return findURLs.stream()
-                    .filter(f -> nodeName.equals(f.getString(URL.NODE_NAME)))
+                    .filter(f -> nodeName.equals(f.getStringParameter(NODE_NAME)))
                     .collect(Collectors.toList());
         }
     }
@@ -322,7 +324,7 @@ public abstract class AbstractRegistry implements Registry, INotifyListener {
     }
 
     protected String toPathName(URL url) {
-        String nodeName = url.getString(URL.NODE_NAME);
+        String nodeName = url.getStringParameter(NODE_NAME);
         String append = StringUtils.isBlank(nodeName) ? "" : ("/" + nodeName);
         return toPath(url) + append;
     }

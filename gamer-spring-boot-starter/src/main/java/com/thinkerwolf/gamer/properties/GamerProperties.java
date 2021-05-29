@@ -14,8 +14,6 @@ public class GamerProperties {
     private String configFile;
     /** Remoting name */
     private String remoting = "netty";
-    /** Servlet bootstrap type */
-    private String servletBoot = "netty";
     /** Gamer registry info */
     private Registry registry;
     /**
@@ -46,14 +44,6 @@ public class GamerProperties {
 
     public String getRemoting() {
         return remoting;
-    }
-
-    public String getServletBoot() {
-        return servletBoot;
-    }
-
-    public void setServletBoot(String servletBoot) {
-        this.servletBoot = servletBoot;
     }
 
     public Map<String, Object> getConf() {
