@@ -1,6 +1,4 @@
 gamer:
-  id: 1001
-  type: game
   name: game
   conf:
     servlet:
@@ -20,24 +18,24 @@ gamer:
 
     # Net配置列表
     net:
-      - workerThreads: 5     # worker线程数
+      - protocol: tcp        # 协议
+        port: 9080           # 端口
+        workerThreads: 5     # worker线程数
         coreThreads: 10      # Servlet业务核心线程
         maxThreads: 11       # Servlet业务最大线程
         countPerChannel: 100 # 每个Channel最大并发数量
-        protocol: tcp        # 协议
-        port: 9080           # 端口
         options: # Options
           so_keepalive: true
         childOptions: # ChildOptions
           tcp_nodelay: true
-      - workerThreads: 5
+      - protocol: http
+        port: 8070
+        workerThreads: 5
         coreThreads: 10
         maxThreads: 11
         countPerChannel: 100 # 客户端最大并发数量
-        protocol: http
         ssl: # ssl配置
           enabled: true
-        port: 8070
         options:
           so_keepalive: true
         childOptions:
