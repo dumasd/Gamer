@@ -7,9 +7,9 @@ import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
 import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
+import com.thinkerwolf.gamer.remoting.Protocol;
 import com.thinkerwolf.gamer.test.listener.LocalSessionAttributeListener;
 import com.thinkerwolf.gamer.test.listener.LocalSessionListener;
-import com.thinkerwolf.gamer.remoting.Protocol;
 
 import java.util.*;
 
@@ -23,7 +23,8 @@ public class NettyServerTests {
     }
 
     private static void startFromConfig(String[] args) throws Exception {
-        NettyServletBootstrap bootstrap = new NettyServletBootstrap(args.length > 0 ? args[0] : null);
+        NettyServletBootstrap bootstrap =
+                new NettyServletBootstrap(args.length > 0 ? args[0] : null);
         bootstrap.startup();
     }
 
@@ -51,20 +52,16 @@ public class NettyServerTests {
         initParams.put("sessionTimeout", "3600");
         initParams.put(ServletConfig.SESSION_TICK_TIME, "5");
 
-
         // 定义listeners
         List<Object> listeners = new LinkedList<>();
-        listeners.add(new ServletContextListener() {
-            @Override
-            public void contextInitialized(ServletContextEvent sce) {
+        listeners.add(
+                new ServletContextListener() {
+                    @Override
+                    public void contextInitialized(ServletContextEvent sce) {}
 
-            }
-
-            @Override
-            public void contextDestroy(ServletContextEvent sce) {
-
-            }
-        });
+                    @Override
+                    public void contextDestroy(ServletContextEvent sce) {}
+                });
 
         listeners.add(new LocalSessionListener());
         listeners.add(new LocalSessionAttributeListener());
@@ -72,35 +69,35 @@ public class NettyServerTests {
         final ServletContext servletContext = new DefaultServletContext();
         servletContext.setListeners(listeners);
 
-        ServletConfig servletConfig = new ServletConfig() {
-            @Override
-            public String getServletName() {
-                return "gamerServlet";
-            }
+        ServletConfig servletConfig =
+                new ServletConfig() {
+                    @Override
+                    public String getServletName() {
+                        return "gamerServlet";
+                    }
 
-            @Override
-            public Class<? extends Servlet> servletClass() {
-                return DispatcherServlet.class;
-            }
+                    @Override
+                    public Class<? extends Servlet> servletClass() {
+                        return DispatcherServlet.class;
+                    }
 
-            @Override
-            public String getInitParam(String key) {
-                return initParams.get(key);
-            }
+                    @Override
+                    public String getInitParam(String key) {
+                        return initParams.get(key);
+                    }
 
-            @Override
-            public Collection<String> getInitParamNames() {
-                return initParams.keySet();
-            }
+                    @Override
+                    public Collection<String> getInitParamNames() {
+                        return initParams.keySet();
+                    }
 
-            @Override
-            public ServletContext getServletContext() {
-                return servletContext;
-            }
-        };
+                    @Override
+                    public ServletContext getServletContext() {
+                        return servletContext;
+                    }
+                };
         Servlet servlet = ClassUtils.newInstance(servletConfig.servletClass());
         servlet.init(servletConfig);
         return servletConfig;
     }
-
 }

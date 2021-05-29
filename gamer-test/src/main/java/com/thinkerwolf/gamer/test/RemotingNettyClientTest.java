@@ -7,12 +7,12 @@ import com.thinkerwolf.gamer.common.serialization.ObjectOutput;
 import com.thinkerwolf.gamer.common.serialization.Serializer;
 import com.thinkerwolf.gamer.netty.NettyClient;
 import com.thinkerwolf.gamer.netty.NettyConfigurator;
-import com.thinkerwolf.gamer.remoting.tcp.Packet;
 import com.thinkerwolf.gamer.netty.tcp.PacketDecoder;
 import com.thinkerwolf.gamer.netty.tcp.PacketEncoder;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.ChannelHandlerAdapter;
 import com.thinkerwolf.gamer.remoting.RemotingException;
+import com.thinkerwolf.gamer.remoting.tcp.Packet;
 import com.thinkerwolf.gamer.rpc.RpcRequest;
 import com.thinkerwolf.gamer.rpc.RpcResponse;
 import com.thinkerwolf.gamer.rpc.RpcUtils;
@@ -33,7 +33,6 @@ public class RemotingNettyClientTest {
             client.send(getSendMsgGamer());
         } catch (RemotingException e) {
         }
-
     }
 
     private static Object getSendMsgGamer() {
@@ -49,7 +48,7 @@ public class RemotingNettyClientTest {
             ObjectOutput oo = serializer.serialize(baos);
 
             RpcRequest rpcRequest = new RpcRequest();
-            rpcRequest.setArgs(new Object[]{"wukai"});
+            rpcRequest.setArgs(new Object[] {"wukai"});
 
             oo.writeObject(rpcRequest);
             packet.setContent(baos.toByteArray());
@@ -63,7 +62,8 @@ public class RemotingNettyClientTest {
         return new ChannelHandlerAdapter() {
 
             @Override
-            public void received(com.thinkerwolf.gamer.remoting.Channel channel, Object message) throws RemotingException {
+            public void received(com.thinkerwolf.gamer.remoting.Channel channel, Object message)
+                    throws RemotingException {
                 try {
                     Packet packet = (Packet) message;
                     Serializer serializer = ServiceLoader.getDefaultService(Serializer.class);
@@ -77,41 +77,41 @@ public class RemotingNettyClientTest {
             }
 
             @Override
-            public Object sent(com.thinkerwolf.gamer.remoting.Channel channel, Object msg) throws RemotingException {
+            public Object sent(com.thinkerwolf.gamer.remoting.Channel channel, Object msg)
+                    throws RemotingException {
                 return msg;
             }
-        } ;
-
+        };
     }
 
     private static NettyConfigurator getInitializerGamer(URL url, ChannelHandler handler) {
-        NettyConfigurator conf = new NettyConfigurator(url, handler) {
+        NettyConfigurator conf =
+                new NettyConfigurator(url, handler) {
 
-            /*@Override
-            protected void initChannel(Channel ch) throws Exception {
-                ch.pipeline().addLast("encoder", new PacketEncoder());
-                ch.pipeline().addLast("decoder", new PacketDecoder());
-                ch.pipeline().addLast("handler", new SimpleChannelInboundHandler<Object>() {
+                    /*@Override
+                    protected void initChannel(Channel ch) throws Exception {
+                        ch.pipeline().addLast("encoder", new PacketEncoder());
+                        ch.pipeline().addLast("decoder", new PacketDecoder());
+                        ch.pipeline().addLast("handler", new SimpleChannelInboundHandler<Object>() {
+                            @Override
+                            protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+                                Packet packet = (Packet) msg;
+                                Method method = IRpcAction.class.getMethod("sayHello", String.class);
+                                Serializer serializer = ServiceLoader.getDefaultService(Serializer.class);
+                                ByteArrayInputStream bais = new ByteArrayInputStream(packet.getContent());
+                                ObjectInput oi = serializer.deserialize(bais);
+
+                                System.err.println(oi.readObject(method.getReturnType()));
+                            }
+                        });
+                    }*/
+
                     @Override
-                    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-                        Packet packet = (Packet) msg;
-                        Method method = IRpcAction.class.getMethod("sayHello", String.class);
-                        Serializer serializer = ServiceLoader.getDefaultService(Serializer.class);
-                        ByteArrayInputStream bais = new ByteArrayInputStream(packet.getContent());
-                        ObjectInput oi = serializer.deserialize(bais);
-
-                        System.err.println(oi.readObject(method.getReturnType()));
+                    protected void doInitChannel(Channel ch) throws Exception {
+                        ch.pipeline().addLast("encoder", new PacketEncoder());
+                        ch.pipeline().addLast("decoder", new PacketDecoder());
                     }
-                });
-            }*/
-
-            @Override
-            protected void doInitChannel(Channel ch) throws Exception {
-                ch.pipeline().addLast("encoder", new PacketEncoder());
-                ch.pipeline().addLast("decoder", new PacketDecoder());
-            }
-        };
+                };
         return conf;
     }
-
 }

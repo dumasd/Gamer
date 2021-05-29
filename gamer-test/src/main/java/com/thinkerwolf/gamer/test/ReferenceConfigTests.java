@@ -1,9 +1,6 @@
 package com.thinkerwolf.gamer.test;
 
 import com.thinkerwolf.gamer.rpc.ReferenceConfig;
-import com.thinkerwolf.gamer.rpc.RpcCallback;
-import com.thinkerwolf.gamer.rpc.RpcContext;
-import com.thinkerwolf.gamer.rpc.exception.RpcException;
 import com.thinkerwolf.gamer.test.action.IRpcAction;
 import org.apache.commons.lang.RandomStringUtils;
 
@@ -78,23 +75,23 @@ public class ReferenceConfigTests {
                                                     "wukai-"
                                                             + RandomStringUtils.randomAlphanumeric(
                                                                     5));
-                                   /* RpcContext.getContext()
-                                            .addListener(
-                                                    new RpcCallback<String>() {
-                                                        @Override
-                                                        protected void onSuccess(String result)
-                                                                throws Exception {
-                                                            System.out.println(result);
-                                                        }
+                                    /* RpcContext.getContext()
+                                    .addListener(
+                                            new RpcCallback<String>() {
+                                                @Override
+                                                protected void onSuccess(String result)
+                                                        throws Exception {
+                                                    System.out.println(result);
+                                                }
 
-                                                        @Override
-                                                        protected void onBusinessError(Throwable t)
-                                                                throws Exception {}
+                                                @Override
+                                                protected void onBusinessError(Throwable t)
+                                                        throws Exception {}
 
-                                                        @Override
-                                                        protected void onRpcError(RpcException ex)
-                                                                throws Exception {}
-                                                    });*/
+                                                @Override
+                                                protected void onRpcError(RpcException ex)
+                                                        throws Exception {}
+                                            });*/
 
                                     long endTime = System.nanoTime();
                                     double spend = (double) (endTime - startTime) / 1000000;
