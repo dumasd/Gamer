@@ -19,6 +19,7 @@ import io.etcd.jetcd.lease.LeaseKeepAliveResponse;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
+import io.etcd.jetcd.options.WatchOption;
 import io.etcd.jetcd.watch.WatchEvent;
 import io.etcd.jetcd.watch.WatchResponse;
 import org.apache.commons.lang.StringUtils;
@@ -54,6 +55,7 @@ public class EtcdRegistry extends AbstractRegistry implements Watch.Listener {
     private long requestTimeout;
     private long sessionTimeout;
     private long ttl;
+    private Set<ByteSequence> watchedPaths = new CopyOnWriteArraySet<>();
 
     public EtcdRegistry(URL url) {
         super(url);
@@ -137,10 +139,20 @@ public class EtcdRegistry extends AbstractRegistry implements Watch.Listener {
     }
 
     @Override
-    protected void doSubscribe(URL url) {}
+    protected void doSubscribe(URL url) {
+        ByteSequence pathBs = JetcdUtil.toByteSeq(toPath(url));
+        if (watchedPaths.contains(pathBs)) {
+            return;
+        }
+        watchedPaths.add(pathBs);
+        doWatch(pathBs);
+    }
 
     @Override
-    protected void doUnSubscribe(URL url) {}
+    protected void doUnSubscribe(URL url) {
+        ByteSequence pathBs = JetcdUtil.toByteSeq(toPath(url));
+        watchedPaths.remove(pathBs);
+    }
 
     @Override
     protected List<URL> doLookup(URL url) {
@@ -255,7 +267,16 @@ public class EtcdRegistry extends AbstractRegistry implements Watch.Listener {
                 default:
                     break;
             }
+            if (watchedPaths.contains(keyValue.getKey())) {
+                doWatch(keyValue.getKey());
+            }
         }
+    }
+
+    private void doWatch(ByteSequence key) {
+        Watch watch = this.client.getWatchClient();
+        WatchOption wo = WatchOption.newBuilder().build();
+        watch.watch(key, wo, this);
     }
 
     @Override
