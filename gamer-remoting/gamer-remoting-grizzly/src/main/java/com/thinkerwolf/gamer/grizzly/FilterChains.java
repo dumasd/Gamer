@@ -61,7 +61,7 @@ public final class FilterChains {
     /** Initialize server side SSL configuration. */
     private static SSLEngineConfigurator initializeSSL(URL url) {
         SSLContextConfigurator sslContextConfig = new SSLContextConfigurator();
-        if (!url.getAttach(SSL_ENABLED, Boolean.FALSE)) {
+        if (!url.getAttach(ENABLED, Boolean.FALSE)) {
             return null;
         }
         String ksFile = url.getAttach(SSL_KEYSTORE_FILE);

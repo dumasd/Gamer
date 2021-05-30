@@ -45,7 +45,7 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
         this.url = url;
         SslConfig sslCfg =
                 SslConfig.builder()
-                        .setEnabled(url.getAttach(SSL_ENABLED, Boolean.FALSE))
+                        .setEnabled(url.getAttach(ENABLED, Boolean.FALSE))
                         .setKeystoreFile(url.getAttach(SSL_KEYSTORE_FILE))
                         .setKeystorePass(url.getAttach(SSL_KEYSTORE_PASS))
                         .setTruststoreFile(url.getAttach(SSL_TRUSTSTORE_FILE))

@@ -68,9 +68,6 @@ public final class Constants {
             "gamer.network.interface.preferred";
     /** KeepAlive time */
     public static final String EXECUTOR_KEEP_ALIVE_TIME = "executor.keepAlive.time";
-
-    /** Enabled */
-    public static final String SSL_ENABLED = "enabled";
     /** KeyStore 文件位置 */
     public static final String SSL_KEYSTORE_FILE = "keystoreFile";
     /** KeyStore 密码 */

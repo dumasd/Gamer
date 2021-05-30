@@ -13,7 +13,7 @@ import io.netty.handler.codec.http2.HttpConversionUtil;
 import java.io.IOException;
 import java.util.HashMap;
 
-import static com.thinkerwolf.gamer.common.Constants.SSL_ENABLED;
+import static com.thinkerwolf.gamer.common.Constants.ENABLED;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ExampleTcpClient {
@@ -60,7 +60,7 @@ public class ExampleTcpClient {
     private static void httpRequest() {
         URL url = URL.parse("http://127.0.0.1:8070");
         url.setParameters(new HashMap<>());
-        url.getParameters().put(SSL_ENABLED, true);
+        url.getParameters().put(ENABLED, true);
         NettyClient nettyClient =
                 new NettyClient(
                         url,

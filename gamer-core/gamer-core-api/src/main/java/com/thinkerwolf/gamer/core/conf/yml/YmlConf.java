@@ -182,7 +182,7 @@ public class YmlConf extends AbstractConf<YmlConf> {
 
     private void initSslConfig(URL url, Map<String, Object> sslConf) {
         boolean enabled = MapUtils.getBoolean(sslConf, ENABLED, Boolean.FALSE);
-        url.setAttach(SSL_ENABLED, enabled);
+        url.setAttach(ENABLED, enabled);
         url.setAttach(SSL_KEYSTORE_FILE, MapUtils.getString(sslConf, SSL_KEYSTORE_FILE));
         url.setAttach(SSL_KEYSTORE_PASS, MapUtils.getString(sslConf, SSL_KEYSTORE_PASS));
         url.setAttach(SSL_TRUSTSTORE_FILE, MapUtils.getString(sslConf, SSL_TRUSTSTORE_FILE));
