@@ -61,18 +61,18 @@ public final class FilterChains {
     /** Initialize server side SSL configuration. */
     private static SSLEngineConfigurator initializeSSL(URL url) {
         SSLContextConfigurator sslContextConfig = new SSLContextConfigurator();
-        if (!url.getBooleanParameter(SSL_ENABLED, false)) {
+        if (!url.getAttach(SSL_ENABLED, Boolean.FALSE)) {
             return null;
         }
-        String ksFile = url.getStringParameter(SSL_KEYSTORE_FILE);
-        String ksPass = url.getStringParameter(SSL_KEYSTORE_PASS);
+        String ksFile = url.getAttach(SSL_KEYSTORE_FILE);
+        String ksPass = url.getAttach(SSL_KEYSTORE_PASS);
         if (StringUtils.isNotBlank(ksFile)) {
             sslContextConfig.setKeyStoreFile(ksFile);
             sslContextConfig.setKeyStorePass(ksPass);
         }
 
-        String tsFile = url.getStringParameter(SSL_TRUSTSTORE_FILE);
-        String tsPass = url.getStringParameter(SSL_TRUSTSTORE_PASS);
+        String tsFile = url.getAttach(SSL_TRUSTSTORE_FILE);
+        String tsPass = url.getAttach(SSL_TRUSTSTORE_PASS);
         if (StringUtils.isNotBlank(tsFile)) {
             sslContextConfig.setTrustStoreFile(tsFile);
             sslContextConfig.setTrustStorePass(tsPass);

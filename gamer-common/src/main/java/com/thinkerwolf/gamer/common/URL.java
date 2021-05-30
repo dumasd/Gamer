@@ -28,9 +28,8 @@ public class URL implements Serializable {
     private String path;
     /** 传输参数。Value值必须为String */
     private volatile Map<String, Object> parameters;
-
     /** 附加对象，不参与序列化 */
-    private transient volatile Map<String, Object> attachs;
+    private transient volatile Map<String, Object> attachments;
 
     public URL() {}
 
@@ -241,14 +240,14 @@ public class URL implements Serializable {
     @SuppressWarnings("unchecked")
     public <T> T getAttach(String key) {
         synchronized (this) {
-            return (T) MapUtils.getObject(attachs, key);
+            return (T) MapUtils.getObject(attachments, key);
         }
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getAttach(String key, T dv) {
         synchronized (this) {
-            return (T) MapUtils.getObject(attachs, key, dv);
+            return (T) MapUtils.getObject(attachments, key, dv);
         }
     }
 
@@ -261,23 +260,26 @@ public class URL implements Serializable {
     }
 
     public void setAttach(String key, Object value) {
+        if (key == null || value == null) {
+            return;
+        }
         synchronized (this) {
-            if (attachs == null) {
-                attachs = new HashMap<>();
+            if (attachments == null) {
+                attachments = new HashMap<>();
             }
-            attachs.put(key, value);
+            attachments.put(key, value);
         }
     }
 
     private Map<String, Object> internalAttach() {
-        if (attachs == null) {
+        if (attachments == null) {
             synchronized (this) {
-                if (attachs == null) {
-                    attachs = new HashMap<>();
+                if (attachments == null) {
+                    attachments = new HashMap<>();
                 }
             }
         }
-        return attachs;
+        return attachments;
     }
 
     public static String encode(String s) {

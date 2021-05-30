@@ -98,6 +98,14 @@ public final class Constants {
     public static final String PASSWORD = "password";
     public static final String PARAMETERS = "parameters";
 
+    public static final String NET = "net";
+    public static final String LISTENERS = "listeners";
+    public static final String ENABLED = "enabled";
+    public static final String INIT_PARAMS = "initParams";
+    public static final String SERVLET = "servlet";
+    public static final String SERVLET_NAME = "servletName";
+    public static final String SERVLET_CLASS = "servletClass";
+
     public static final String RPC_USE_LOCAL = "rpcUseLocal";
     public static final String RPC_HOST = "rpcHost";
     public static final String SERVER = "server";

@@ -45,11 +45,11 @@ public class HttpChannelHandlerConfiger extends ChannelHandlerConfiger<Channel> 
         this.url = url;
         SslConfig sslCfg =
                 SslConfig.builder()
-                        .setEnabled(url.getBooleanParameter(SSL_ENABLED, false))
-                        .setKeystoreFile(url.getStringParameter(SSL_KEYSTORE_FILE))
-                        .setKeystorePass(url.getStringParameter(SSL_KEYSTORE_PASS))
-                        .setTruststoreFile(url.getStringParameter(SSL_TRUSTSTORE_FILE))
-                        .setTruststorePass(url.getStringParameter(SSL_TRUSTSTORE_PASS))
+                        .setEnabled(url.getAttach(SSL_ENABLED, Boolean.FALSE))
+                        .setKeystoreFile(url.getAttach(SSL_KEYSTORE_FILE))
+                        .setKeystorePass(url.getAttach(SSL_KEYSTORE_PASS))
+                        .setTruststoreFile(url.getAttach(SSL_TRUSTSTORE_FILE))
+                        .setTruststorePass(url.getAttach(SSL_TRUSTSTORE_PASS))
                         .build();
         if (sslCfg != null && sslCfg.isEnabled()) {
             SslProvider provider =

@@ -23,9 +23,15 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.thinkerwolf.gamer.common.Constants.*;
-
+/**
+ * Yml config
+ *
+ * @author wukai
+ * @since 2021-05-30
+ */
 @SuppressWarnings("unchecked")
 public class YmlConf extends AbstractConf<YmlConf> {
 
@@ -36,11 +42,11 @@ public class YmlConf extends AbstractConf<YmlConf> {
         if (getServletConfig() != null && getUrls() != null) {
             return this;
         }
-        Map<String, Object> servletConf = (Map<String, Object>) confMap.get("servlet");
+        Map<String, Object> servletConf = (Map<String, Object>) confMap.get(SERVLET);
         if (servletConf == null) {
             throw new ConfigurationException("Missing servlet config");
         }
-        Object netConf = confMap.get("net");
+        Object netConf = confMap.get(NET);
         if (netConf == null) {
             throw new ConfigurationException("Missing netty config");
         }
@@ -66,7 +72,7 @@ public class YmlConf extends AbstractConf<YmlConf> {
             }
         }
 
-        Object listenersObj = confMap.get("listeners");
+        Object listenersObj = confMap.get(LISTENERS);
         List<String> listenersConf;
         if (listenersObj instanceof List) {
             listenersConf = (List<String>) listenersObj;
@@ -141,13 +147,23 @@ public class YmlConf extends AbstractConf<YmlConf> {
             } else {
                 host = localAddress.getHostAddress();
             }
-
             url.setHost(host);
             url.setUsername(MapUtils.getString(nc, USERNAME));
             url.setPassword(MapUtils.getString(nc, PASSWORD));
 
-            Map<String, Object> parameters = new HashMap<>();
+            // Init url parameters
+            Map<String, Object> parameters = new ConcurrentHashMap<>();
+            if (MapUtils.getBoolean(nc, RPC_USE_LOCAL, false)) {
+                parameters.put(RPC_HOST, localAddress.getHostAddress());
+            } else {
+                String rpcHost = MapUtils.getString(nc, RPC_HOST);
+                if (StringUtils.isNotBlank(rpcHost)) {
+                    parameters.put(RPC_HOST, rpcHost);
+                }
+            }
+            url.setParameters(parameters);
 
+            // Init attachments
             url.setAttach(OPTIONS, MapUtils.getMap(nc, OPTIONS, Collections.emptyMap()));
             url.setAttach(
                     CHILD_OPTIONS, MapUtils.getMap(nc, CHILD_OPTIONS, Collections.emptyMap()));
@@ -158,16 +174,6 @@ public class YmlConf extends AbstractConf<YmlConf> {
             url.setAttach(COUNT_PER_CHANNEL, MapUtils.getInteger(nc, COUNT_PER_CHANNEL, 1));
             url.setAttach(CHANNEL_HANDLERS, MapUtils.getInteger(nc, CHANNEL_HANDLERS, 1));
 
-            if (MapUtils.getBoolean(nc, RPC_USE_LOCAL, false)) {
-                parameters.put(RPC_HOST, localAddress.getHostAddress());
-            } else {
-                String rpcHost = MapUtils.getString(nc, RPC_HOST);
-                if (StringUtils.isNotBlank(rpcHost)) {
-                    parameters.put(RPC_HOST, rpcHost);
-                }
-            }
-
-            url.setParameters(parameters);
             initSslConfig(url, MapUtils.getMap(nc, "ssl", null));
             urls.add(url);
         }
@@ -175,45 +181,31 @@ public class YmlConf extends AbstractConf<YmlConf> {
     }
 
     private void initSslConfig(URL url, Map<String, Object> sslConf) {
-        boolean enabled = MapUtils.getBoolean(sslConf, "enabled", Boolean.FALSE);
-        if (enabled) {
-            url.getParameters().put(SSL_ENABLED, true);
-            url.getParameters()
-                    .compute(
-                            SSL_KEYSTORE_FILE,
-                            (s, o) -> MapUtils.getString(sslConf, SSL_KEYSTORE_FILE));
-            url.getParameters()
-                    .compute(
-                            SSL_KEYSTORE_PASS,
-                            (s, o) -> MapUtils.getString(sslConf, SSL_KEYSTORE_PASS));
-            url.getParameters()
-                    .compute(
-                            SSL_TRUSTSTORE_FILE,
-                            (s, o) -> MapUtils.getString(sslConf, SSL_TRUSTSTORE_FILE));
-            url.getParameters()
-                    .compute(
-                            SSL_TRUSTSTORE_PASS,
-                            (s, o) -> MapUtils.getString(sslConf, SSL_TRUSTSTORE_PASS));
-        }
+        boolean enabled = MapUtils.getBoolean(sslConf, ENABLED, Boolean.FALSE);
+        url.setAttach(SSL_ENABLED, enabled);
+        url.setAttach(SSL_KEYSTORE_FILE, MapUtils.getString(sslConf, SSL_KEYSTORE_FILE));
+        url.setAttach(SSL_KEYSTORE_PASS, MapUtils.getString(sslConf, SSL_KEYSTORE_PASS));
+        url.setAttach(SSL_TRUSTSTORE_FILE, MapUtils.getString(sslConf, SSL_TRUSTSTORE_FILE));
+        url.setAttach(SSL_TRUSTSTORE_PASS, MapUtils.getString(sslConf, SSL_TRUSTSTORE_PASS));
     }
 
     private void loadServletConfig(Map<String, Object> servletConf, List<String> listenersConf)
             throws Exception {
         Class<?> servletClass;
-        if (servletConf.get("servletClass") == null) {
+        if (servletConf.get(SERVLET_CLASS) == null) {
             servletClass = DispatcherServlet.class;
         } else {
-            String servletClassName = String.valueOf(servletConf.get("servletClass")).trim();
+            String servletClassName = String.valueOf(servletConf.get(SERVLET_CLASS)).trim();
             servletClass = ClassUtils.forName(servletClassName);
             if (!Servlet.class.isAssignableFrom(servletClass)) {
                 throw new ConfigurationException(servletClassName + "is not a Servlet class");
             }
         }
         Map<String, Object> initParams;
-        if (!servletConf.containsKey("initParams")) {
+        if (!servletConf.containsKey(INIT_PARAMS)) {
             initParams = new HashMap<>();
         } else {
-            initParams = (Map<String, Object>) servletConf.get("initParams");
+            initParams = (Map<String, Object>) servletConf.get(INIT_PARAMS);
         }
 
         ServletContext servletContext = new DefaultServletContext();
@@ -222,7 +214,7 @@ public class YmlConf extends AbstractConf<YmlConf> {
                 new ServletConfig() {
                     @Override
                     public String getServletName() {
-                        Object name = servletConf.get("servletName");
+                        Object name = servletConf.get(SERVLET_NAME);
                         return name == null ? null : String.valueOf(name).trim();
                     }
 
