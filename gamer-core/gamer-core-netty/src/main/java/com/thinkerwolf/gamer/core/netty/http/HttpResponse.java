@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty.http;
+package com.thinkerwolf.gamer.core.netty.http;
 
 import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;

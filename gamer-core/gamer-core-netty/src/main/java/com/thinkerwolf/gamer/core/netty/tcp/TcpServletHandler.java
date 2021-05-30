@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty.tcp;
+package com.thinkerwolf.gamer.core.netty.tcp;
 
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.ServletContext;

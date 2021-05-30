@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty;
+package com.thinkerwolf.gamer.core.netty;
 
 import com.thinkerwolf.gamer.common.URL;
 import com.thinkerwolf.gamer.core.servlet.ServletBootstrap;

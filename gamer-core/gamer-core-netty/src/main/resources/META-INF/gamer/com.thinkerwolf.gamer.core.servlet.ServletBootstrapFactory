@@ -1,1 +1,1 @@
-netty=com.thinkerwolf.gamer.netty.NettyServletBootstrapFactory
+netty=com.thinkerwolf.gamer.core.netty.NettyServletBootstrapFactory

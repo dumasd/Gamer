@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty.http;
+package com.thinkerwolf.gamer.core.netty.http;
 
 import com.thinkerwolf.gamer.common.util.CompressUtil;
 import com.thinkerwolf.gamer.core.servlet.*;

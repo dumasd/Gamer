@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty;
+package com.thinkerwolf.gamer.core.netty;
 
 import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;
@@ -11,6 +11,7 @@ import com.thinkerwolf.gamer.core.servlet.AbstractServletBootstrap;
 import com.thinkerwolf.gamer.core.servlet.Servlet;
 import com.thinkerwolf.gamer.core.servlet.ServletChannelHandler;
 import com.thinkerwolf.gamer.core.servlet.ServletConfig;
+import com.thinkerwolf.gamer.netty.NettyServer;
 import com.thinkerwolf.gamer.remoting.ChannelHandler;
 import com.thinkerwolf.gamer.remoting.Server;
 import org.apache.commons.lang.StringUtils;

@@ -6,7 +6,7 @@ import com.thinkerwolf.gamer.common.log.slf4j.Slf4jLoggerFactory;
 import com.thinkerwolf.gamer.common.util.ClassUtils;
 import com.thinkerwolf.gamer.core.mvc.DispatcherServlet;
 import com.thinkerwolf.gamer.core.servlet.*;
-import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
+import com.thinkerwolf.gamer.core.netty.NettyServletBootstrap;
 import com.thinkerwolf.gamer.remoting.Protocol;
 import com.thinkerwolf.gamer.test.listener.LocalSessionAttributeListener;
 import com.thinkerwolf.gamer.test.listener.LocalSessionListener;

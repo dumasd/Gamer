@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty.websocket;
+package com.thinkerwolf.gamer.core.netty.websocket;
 
 import com.thinkerwolf.gamer.common.concurrent.Promise;
 import com.thinkerwolf.gamer.core.servlet.AbstractChResponse;

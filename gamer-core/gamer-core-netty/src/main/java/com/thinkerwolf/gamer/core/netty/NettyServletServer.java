@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty;
+package com.thinkerwolf.gamer.core.netty;
 
 import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.common.URL;

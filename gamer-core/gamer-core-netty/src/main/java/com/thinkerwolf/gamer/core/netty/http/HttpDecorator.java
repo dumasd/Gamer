@@ -1,19 +1,14 @@
-package com.thinkerwolf.gamer.netty.http;
+package com.thinkerwolf.gamer.core.netty.http;
 
 import com.thinkerwolf.gamer.common.Constants;
 import com.thinkerwolf.gamer.core.mvc.decorator.Decorator;
 import com.thinkerwolf.gamer.core.mvc.model.Model;
+import com.thinkerwolf.gamer.core.netty.NettyCoreUtil;
 import com.thinkerwolf.gamer.core.servlet.Request;
 import com.thinkerwolf.gamer.core.servlet.Response;
-import com.thinkerwolf.gamer.netty.NettyCoreUtil;
+import com.thinkerwolf.gamer.netty.http.Http2HeadersAndDataFrames;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
-
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http2.*;
 import org.apache.commons.lang.time.DateFormatUtils;
 
@@ -27,15 +22,22 @@ public class HttpDecorator implements Decorator {
         if (response instanceof HttpResponse) {
             HttpRequest servletHttpRequest = (HttpRequest) request;
             HttpResponse servletHttpResponse = (HttpResponse) response;
-            HttpResponseStatus status = servletHttpResponse.getStatus() != null ?
-                    HttpResponseStatus.valueOf(servletHttpResponse.getStatus()) : HttpResponseStatus.OK;
-            FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status);
+            HttpResponseStatus status =
+                    servletHttpResponse.getStatus() != null
+                            ? HttpResponseStatus.valueOf(servletHttpResponse.getStatus())
+                            : HttpResponseStatus.OK;
+            FullHttpResponse httpResponse =
+                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status);
             NettyCoreUtil.addHeadersAndCookies(httpResponse, response);
             httpResponse.headers().add(HttpHeaderNames.CONTENT_LENGTH, bytes.length);
             if (model.compress()) {
                 httpResponse.headers().add(HttpHeaderNames.CONTENT_ENCODING, model.encoding());
             }
-            httpResponse.headers().add(HttpHeaderNames.DATE, DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+            httpResponse
+                    .headers()
+                    .add(
+                            HttpHeaderNames.DATE,
+                            DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
             httpResponse.headers().add(HttpHeaderNames.SERVER, Constants.FRAMEWORK_NAME_VERSION);
             httpResponse.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
             if (servletHttpRequest.isKeepAlive()) {
@@ -50,13 +52,17 @@ public class HttpDecorator implements Decorator {
             Http2Response servletHttp2Response = (Http2Response) response;
             Http2Headers http2Headers = new DefaultHttp2Headers();
             NettyCoreUtil.addHeaders(http2Headers, servletHttp2Response);
-            HttpResponseStatus status = servletHttp2Response.getStatus() != null ?
-                    HttpResponseStatus.valueOf((Integer) servletHttp2Response.getStatus()) : HttpResponseStatus.OK;
+            HttpResponseStatus status =
+                    servletHttp2Response.getStatus() != null
+                            ? HttpResponseStatus.valueOf((Integer) servletHttp2Response.getStatus())
+                            : HttpResponseStatus.OK;
             http2Headers.status(status.codeAsText());
             if (model.compress()) {
                 http2Headers.add(HttpHeaderNames.CONTENT_ENCODING, model.encoding());
             }
-            http2Headers.add(HttpHeaderNames.DATE, DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+            http2Headers.add(
+                    HttpHeaderNames.DATE,
+                    DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
             http2Headers.add(HttpHeaderNames.SERVER, Constants.FRAMEWORK_NAME_VERSION);
             http2Headers.add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
             if (servletHttp2Request.isKeepAlive()) {
@@ -65,10 +71,12 @@ public class HttpDecorator implements Decorator {
                 http2Headers.add(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
             }
             Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(http2Headers, false);
-            Http2DataFrame dataFrame = new DefaultHttp2DataFrame(Unpooled.buffer(bytes.length).writeBytes(bytes), true);
-            return new Http2HeadersAndDataFrames(headersFrame, dataFrame).stream(servletHttp2Request.getStream());
+            Http2DataFrame dataFrame =
+                    new DefaultHttp2DataFrame(
+                            Unpooled.buffer(bytes.length).writeBytes(bytes), true);
+            return new Http2HeadersAndDataFrames(headersFrame, dataFrame)
+                    .stream(servletHttp2Request.getStream());
         }
         throw new UnsupportedOperationException("Http response type " + response.getClass());
     }
-
 }

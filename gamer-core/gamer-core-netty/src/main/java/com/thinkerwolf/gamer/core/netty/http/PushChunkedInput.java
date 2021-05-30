@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty.http;
+package com.thinkerwolf.gamer.core.netty.http;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;

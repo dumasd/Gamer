@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty.http;
+package com.thinkerwolf.gamer.core.netty.http;
 
 import com.thinkerwolf.gamer.core.servlet.AbstractChPush;
 import com.thinkerwolf.gamer.remoting.Channel;

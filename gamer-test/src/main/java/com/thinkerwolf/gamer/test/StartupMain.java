@@ -1,6 +1,6 @@
 package com.thinkerwolf.gamer.test;
 
-import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
+import com.thinkerwolf.gamer.core.netty.NettyServletBootstrap;
 
 /**
  * 服务器启动Main
@@ -20,7 +20,8 @@ public class StartupMain {
     }
 
     private static void startFromConfig(String[] args) throws Exception {
-        NettyServletBootstrap bootstrap = new NettyServletBootstrap(args.length > 0 ? args[0] : null);
+        NettyServletBootstrap bootstrap =
+                new NettyServletBootstrap(args.length > 0 ? args[0] : null);
         bootstrap.startup();
     }
 }

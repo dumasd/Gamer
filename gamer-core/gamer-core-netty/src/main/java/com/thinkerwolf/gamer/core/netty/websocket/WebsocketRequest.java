@@ -1,4 +1,4 @@
-package com.thinkerwolf.gamer.netty.websocket;
+package com.thinkerwolf.gamer.core.netty.websocket;
 
 import com.thinkerwolf.gamer.core.servlet.Session;
 import com.thinkerwolf.gamer.core.servlet.AbstractChRequest;
