@@ -1,5 +1,8 @@
 package com.thinkerwolf.gamer.common.util;
 
+import com.thinkerwolf.gamer.common.log.InternalLoggerFactory;
+import com.thinkerwolf.gamer.common.log.Logger;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -7,8 +10,13 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+/**
+ * @author wukai
+ * @since 2021-11-02
+ */
+public final class ClassUtils {
 
-public class ClassUtils {
+    private static final Logger LOG = InternalLoggerFactory.getLogger(ClassUtils.class);
 
     /** void(V). */
     public static final char JVM_VOID = 'V';
@@ -240,6 +248,12 @@ public class ClassUtils {
         Set<Class> result = new LinkedHashSet<>();
         for (String s : set) {
             String classname = s.replaceAll("/", ".").replaceAll(".class", "");
+            if (classname.startsWith(".")) {
+                classname = classname.substring(1);
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("loadClass : {}", classname);
+            }
             result.add(forName(classname));
         }
         return result;
