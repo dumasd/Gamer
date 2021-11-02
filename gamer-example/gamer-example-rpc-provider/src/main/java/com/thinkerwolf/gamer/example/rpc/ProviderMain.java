@@ -1,6 +1,7 @@
 package com.thinkerwolf.gamer.example.rpc;
 
-import com.thinkerwolf.gamer.netty.NettyServletBootstrap;
+
+import com.thinkerwolf.gamer.core.netty.NettyServletBootstrap;
 
 public class ProviderMain {
     public static void main(String[] args) {
