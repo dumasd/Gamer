@@ -61,7 +61,7 @@
         <swagger_version>1.5.24</swagger_version>
         <guava_version>29.0-jre</guava_version>
         <jedis_version>3.1.0</jedis_version>
-        <jackson.version>2.11.0</jackson.version>
+        <jackson.version>2.13.4.1</jackson.version>
         <httpclient_version>4.5.13</httpclient_version>
         <httpcore_version>4.4.13</httpcore_version>
         <httpcorenio_version>4.4.13</httpcorenio_version>
