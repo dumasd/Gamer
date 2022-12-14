@@ -72,7 +72,7 @@
         <commons-io_version>2.7</commons-io_version>
         <commons-collections_version>3.2.2</commons-collections_version>
         <commons-logging_version>1.2</commons-logging_version>
-        <snakeyaml_version>1.25</snakeyaml_version>
+        <snakeyaml_version>1.32</snakeyaml_version>
         <grpc_version>1.28.1</grpc_version>
         <grizzly_version>2.4.4</grizzly_version>
         <eureka_version>1.9.3</eureka_version>
