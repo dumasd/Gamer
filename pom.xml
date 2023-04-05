@@ -49,7 +49,7 @@
         <maven_enforce_version>3.0.0-M2</maven_enforce_version>
 
         <junit_version>4.13.1</junit_version>
-        <spring_boot_version>2.3.0.RELEASE</spring_boot_version>
+        <spring_boot_version>2.6.14</spring_boot_version>
         <spring_version>5.2.8.RELEASE</spring_version>
         <netty-all_version>4.1.52.Final</netty-all_version>
         <hessian_version>4.0.38</hessian_version>
@@ -61,25 +61,24 @@
         <swagger_version>1.5.24</swagger_version>
         <guava_version>29.0-jre</guava_version>
         <jedis_version>3.1.0</jedis_version>
-        <jackson.version>2.12.7.1</jackson.version>
+        <jackson.version>2.14.2</jackson.version>
         <httpclient_version>4.5.13</httpclient_version>
         <httpcore_version>4.4.13</httpcore_version>
         <httpcorenio_version>4.4.13</httpcorenio_version>
         <jetcd_version>0.5.7</jetcd_version>
         <zkclient_version>0.11</zkclient_version>
         <classmate_version>1.5.1</classmate_version>
-        <commons-lang_version>2.5</commons-lang_version>
-        <commons-io_version>2.7</commons-io_version>
+        <commons-lang_version>2.6</commons-lang_version>
+        <commons-io_version>2.11.0</commons-io_version>
         <commons-collections_version>3.2.2</commons-collections_version>
         <commons-logging_version>1.2</commons-logging_version>
-        <snakeyaml_version>1.25</snakeyaml_version>
         <grpc_version>1.28.1</grpc_version>
         <grizzly_version>2.4.4</grizzly_version>
         <eureka_version>1.9.3</eureka_version>
 
-        <jaxb-api_version>2.3.1</jaxb-api_version>
-        <jaxb-impl_version>3.0.1</jaxb-impl_version>
-        <jaxb-runtime_version>3.0.1</jaxb-runtime_version>
+        <jaxb-api_version>2.4.0-b180830.0359</jaxb-api_version>
+        <jaxb-impl_version>4.0.2</jaxb-impl_version>
+        <jaxb-runtime_version>4.0.2</jaxb-runtime_version>
         <javax.servlet-api_version>4.0.1</javax.servlet-api_version>
     </properties>
 
@@ -87,7 +86,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring_version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -163,11 +161,6 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml_version}</version>
             </dependency>
             <dependency>
                 <groupId>org.freemarker</groupId>
@@ -273,20 +266,10 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure</artifactId>
+                <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring_boot_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-configuration-processor</artifactId>
-                <version>${spring_boot_version}</version>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-devtools</artifactId>
-                <version>${spring_boot_version}</version>
-                <scope>runtime</scope>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.grizzly</groupId>

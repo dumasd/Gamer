@@ -11,9 +11,7 @@
 
     <artifactId>gamer-spring-boot-starter</artifactId>
     <name>Gamer/SpringBootStarter</name>
-    <properties>
-        <spring_boot_version>2.0.3.RELEASE</spring_boot_version>
-    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -3,7 +3,10 @@ package com.thinkerwolf.gamer.registry;
 import com.thinkerwolf.gamer.common.URL;
 
 import java.util.EventObject;
-
+/**
+ * @author Bruce Wu
+ * @since 2022-12-13
+ */
 public class DataEvent extends EventObject {
 
     private URL url;
