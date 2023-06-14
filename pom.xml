@@ -59,7 +59,7 @@
         <logback_version>1.2.3</logback_version>
         <freemarker_version>2.3.28</freemarker_version>
         <swagger_version>1.5.24</swagger_version>
-        <guava_version>29.0-jre</guava_version>
+        <guava_version>32.0.0-jre</guava_version>
         <jedis_version>3.1.0</jedis_version>
         <jackson.version>2.14.2</jackson.version>
         <httpclient_version>4.5.13</httpclient_version>
